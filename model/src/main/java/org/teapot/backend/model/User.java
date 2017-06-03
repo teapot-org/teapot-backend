@@ -11,16 +11,14 @@ public class User {
 
     @Id
     @GeneratedValue
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "username", nullable = false)
+    @Column(nullable = false)
     private String username;
 
-    @Column(name = "password", nullable = false, length = 16)
+    @Column(nullable = false, length = 16)
     private String password;
 
-    @Column(name = "available")
     private Boolean available = false;
 
     @Column(name = "first_name", length = 32)
@@ -32,10 +30,8 @@ public class User {
     @Column(name = "registration_date")
     private LocalDateTime registrationDate;
 
-    @Column(name = "birthday")
     private LocalDate birthday;
 
-    @Column(name = "description")
     private String description;
 
     private User() {
