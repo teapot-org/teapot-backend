@@ -1,47 +1,44 @@
 package org.teapot.backend.model;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@Entity
+@Table(name = "user")
 public class User {
 
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "username", nullable = false)
     private String username;
 
+    @Column(name = "password", nullable = false, length = 16)
     private String password;
 
-    private Boolean available;
+    @Column(name = "available")
+    private Boolean available = false;
 
+    @Column(name = "first_name", length = 32)
     private String firstName;
 
+    @Column(name = "last_name", length = 32)
     private String lastName;
 
+    @Column(name = "registration_date")
     private LocalDateTime registrationDate;
 
+    @Column(name = "birthday")
     private LocalDate birthday;
 
+    @Column(name = "description")
+    private String description;
+
     private User() {
-    }
-
-    public User(Long id,
-                String username,
-                String password,
-                Boolean available,
-                String firstName,
-                String lastName,
-                LocalDateTime registrationDate,
-                LocalDate birthday) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-
-        this.available = available;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.registrationDate = registrationDate;
-        this.birthday = birthday;
     }
 
     public Long getId() {
@@ -106,5 +103,13 @@ public class User {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
