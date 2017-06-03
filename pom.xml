@@ -24,7 +24,7 @@
     <jdk.version>1.8</jdk.version>
 
     <!--JPA-->
-    <javax.persistence.version>1.0.2</javax.persistence.version>
+    <javax.persistence.version>2.1.1</javax.persistence.version>
   </properties>
 
   <build>
@@ -44,8 +44,8 @@
   <dependencies>
     <!--JPA-->
     <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>persistence-api</artifactId>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
       <version>${javax.persistence.version}</version>
     </dependency>
   </dependencies>
