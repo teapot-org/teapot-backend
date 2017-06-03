@@ -19,7 +19,8 @@ public class User {
     @Column(nullable = false, length = 16)
     private String password;
 
-    private Boolean available = false;
+    @Column(name = "is_available")
+    private Boolean isAvailable = false;
 
     @Column(name = "first_name", length = 32)
     private String firstName;
@@ -61,12 +62,12 @@ public class User {
         this.password = password;
     }
 
-    public Boolean getAvailable() {
-        return available;
+    public Boolean isAvailable() {
+        return isAvailable;
     }
 
     public void setAvailable(Boolean available) {
-        this.available = available;
+        isAvailable = available;
     }
 
     public String getFirstName() {
