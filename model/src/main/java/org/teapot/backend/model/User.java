@@ -21,7 +21,7 @@ public class User implements Serializable {
     private String password;
 
     @Column(name = "is_available")
-    private Boolean isAvailable = false;
+    private Boolean isAvailable = true;
 
     @Column(name = "first_name", length = 32)
     private String firstName;
@@ -36,7 +36,7 @@ public class User implements Serializable {
 
     private String description;
 
-    private User() {
+    public User() {
     }
 
     public Long getId() {
@@ -109,5 +109,92 @@ public class User implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if ((o == null) || (getClass() != o.getClass())) {
+            return false;
+        }
+
+        User user = (User) o;
+
+        if ((id != null) ? !id.equals(user.id) : (user.id != null)) {
+            return false;
+        }
+
+        if (!username.equals(user.username)) {
+            return false;
+        }
+
+        if (!password.equals(user.password)) {
+            return false;
+        }
+
+        if ((isAvailable != null) ? !isAvailable.equals(user.isAvailable) :
+                (user.isAvailable != null)) {
+
+            return false;
+        }
+
+        if ((firstName != null) ? !firstName.equals(user.firstName) :
+                (user.firstName != null)) {
+
+            return false;
+        }
+
+        if ((lastName != null) ? !lastName.equals(user.lastName) :
+                (user.lastName != null)) {
+
+            return false;
+        }
+
+        if ((registrationDate != null) ?
+                !registrationDate.equals(user.registrationDate) :
+                (user.registrationDate != null)) {
+
+            return false;
+        }
+
+        if ((birthday != null) ? !birthday.equals(user.birthday) :
+                (user.birthday != null)) {
+
+            return false;
+        }
+
+        return (description != null) ? description.equals(user.description) :
+                (user.description == null);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (id != null) ? id.hashCode() : 0;
+
+        result = 31 * result + username.hashCode();
+        result = 31 * result + password.hashCode();
+
+        result = 31 * result + ((isAvailable != null) ?
+                isAvailable.hashCode() : 0);
+
+        result = 31 * result + ((firstName != null) ?
+                firstName.hashCode() : 0);
+
+        result = 31 * result + ((lastName != null) ?
+                lastName.hashCode() : 0);
+
+        result = 31 * result + ((registrationDate != null) ?
+                registrationDate.hashCode() : 0);
+
+        result = 31 * result + ((birthday != null) ?
+                birthday.hashCode() : 0);
+
+        result = 31 * result + ((description != null) ?
+                description.hashCode() : 0);
+
+        return result;
     }
 }
