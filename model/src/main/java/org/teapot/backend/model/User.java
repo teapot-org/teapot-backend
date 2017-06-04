@@ -1,19 +1,20 @@
 package org.teapot.backend.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String username;
 
     @Column(nullable = false, length = 16)
