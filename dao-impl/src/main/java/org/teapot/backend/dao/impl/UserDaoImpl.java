@@ -10,8 +10,8 @@ import javax.persistence.NoResultException;
 @Transactional
 public class UserDaoImpl extends AbstractDaoImpl<User> implements UserDao {
 
-    public UserDaoImpl(Class<User> clazz) {
-        super(clazz);
+    public UserDaoImpl() {
+        super(User.class);
     }
 
     @Override
