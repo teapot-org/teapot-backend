@@ -13,4 +13,12 @@
   </parent>
 
   <artifactId>dao-abstract</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.teapot</groupId>
+      <artifactId>model</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
 </project>
