@@ -1,11 +1,13 @@
 package org.teapot.backend.dao.impl;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.teapot.backend.dao.abstr.UserDao;
 import org.teapot.backend.model.User;
 
 import javax.persistence.NoResultException;
 
 
+@Transactional
 public class UserDaoImpl extends AbstractDaoImpl<User> implements UserDao {
 
     public UserDaoImpl(Class<User> clazz) {
