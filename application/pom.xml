@@ -4,20 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <artifactId>teapot-backend</artifactId>
     <groupId>org.teapot</groupId>
     <version>1.0</version>
   </parent>
 
-  <artifactId>controller</artifactId>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>application</artifactId>
 
   <dependencies>
     <dependency>
       <groupId>org.teapot</groupId>
-      <artifactId>model</artifactId>
+      <artifactId>controller</artifactId>
       <version>1.0</version>
     </dependency>
 
