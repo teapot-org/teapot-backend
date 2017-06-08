@@ -29,8 +29,13 @@ public class UserServiceImplIT extends AbstractIT {
 
     private List<User> disabledUsers = new ArrayList<>();
     private List<User> enabledUsers = new ArrayList<>();
+
     private UserRole adminRole;
     private UserRole moderatorRole;
+
+    private User user1;
+    private User user2;
+    private User user3;
 
     private User createUser(String username, boolean available) {
         User user = new User();
@@ -66,6 +71,18 @@ public class UserServiceImplIT extends AbstractIT {
 
         User user = createUser("roled_user", true);
         userService.register(user);
+
+        user1 = createUser("all-by-role-1", true);
+        user1.getRoles().add(moderatorRole);
+        userService.register(user1);
+
+        user2 = createUser("all-by-role-2", true);
+        user2.getRoles().add(adminRole);
+        userService.register(user2);
+
+        user3 = createUser("all-by-role-3", true);
+        user3.getRoles().add(moderatorRole);
+        userService.register(user3);
     }
 
     @Test
@@ -96,18 +113,6 @@ public class UserServiceImplIT extends AbstractIT {
 
     @Test
     public void getAllByUserRoleTest() {
-        User user1 = createUser("all-by-role-1", true);
-        user1.setRoles(Sets.newSet(moderatorRole));
-        userService.register(user1);
-
-        User user2 = createUser("all-by-role-2", true);
-        user2.setRoles(Sets.newSet(adminRole));
-        userService.register(user2);
-
-        User user3 = createUser("all-by-role-3", true);
-        user3.setRoles(Sets.newSet(moderatorRole));
-        userService.register(user3);
-
         Assert.assertEquals(Lists.newArrayList(user1, user3),
                 userService.getAllByUserRole(moderatorRole));
 

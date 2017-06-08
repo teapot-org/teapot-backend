@@ -71,15 +71,12 @@ public class UserServiceImpl implements UserService {
         }
 
         roles.add(role);
-        user.setRoles(roles);
         userDao.update(user);
     }
 
     @Override
     public void removeUserRole(User user, UserRole role) {
-        Set<UserRole> roles = user.getRoles();
-        roles.remove(role);
-        user.setRoles(roles);
+        user.getRoles().remove(role);
         userDao.update(user);
     }
 
