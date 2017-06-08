@@ -4,6 +4,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 
 @Entity
@@ -28,6 +31,9 @@ public class User implements Serializable {
 
     @Column(name = "last_name", length = 32)
     private String lastName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<UserRole> roles = new LinkedHashSet<>();
 
     @Column(name = "registration_date")
     private LocalDateTime registrationDate;
@@ -87,6 +93,14 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
+    public Set<UserRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UserRole> roles) {
+        this.roles = roles;
+    }
+
     public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
@@ -112,89 +126,39 @@ public class User implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if ((o == null) || (getClass() != o.getClass())) {
-            return false;
-        }
-
-        User user = (User) o;
-
-        if ((id != null) ? !id.equals(user.id) : (user.id != null)) {
-            return false;
-        }
-
-        if (!username.equals(user.username)) {
-            return false;
-        }
-
-        if (!password.equals(user.password)) {
-            return false;
-        }
-
-        if ((isAvailable != null) ? !isAvailable.equals(user.isAvailable) :
-                (user.isAvailable != null)) {
-
-            return false;
-        }
-
-        if ((firstName != null) ? !firstName.equals(user.firstName) :
-                (user.firstName != null)) {
-
-            return false;
-        }
-
-        if ((lastName != null) ? !lastName.equals(user.lastName) :
-                (user.lastName != null)) {
-
-            return false;
-        }
-
-        if ((registrationDate != null) ?
-                !registrationDate.equals(user.registrationDate) :
-                (user.registrationDate != null)) {
-
-            return false;
-        }
-
-        if ((birthday != null) ? !birthday.equals(user.birthday) :
-                (user.birthday != null)) {
-
-            return false;
-        }
-
-        return (description != null) ? description.equals(user.description) :
-                (user.description == null);
+    public int hashCode() {
+        return Objects.hash(
+                id,
+                username,
+                password,
+                isAvailable,
+                firstName,
+                lastName,
+                roles,
+                registrationDate,
+                birthday,
+                description
+        );
     }
 
     @Override
-    public int hashCode() {
-        int result = (id != null) ? id.hashCode() : 0;
-
-        result = 31 * result + username.hashCode();
-        result = 31 * result + password.hashCode();
-
-        result = 31 * result + ((isAvailable != null) ?
-                isAvailable.hashCode() : 0);
-
-        result = 31 * result + ((firstName != null) ?
-                firstName.hashCode() : 0);
-
-        result = 31 * result + ((lastName != null) ?
-                lastName.hashCode() : 0);
-
-        result = 31 * result + ((registrationDate != null) ?
-                registrationDate.hashCode() : 0);
-
-        result = 31 * result + ((birthday != null) ?
-                birthday.hashCode() : 0);
-
-        result = 31 * result + ((description != null) ?
-                description.hashCode() : 0);
-
-        return result;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final User other = (User) obj;
+        return Objects.equals(this.id, other.id)
+                && Objects.equals(this.username, other.username)
+                && Objects.equals(this.password, other.password)
+                && Objects.equals(this.isAvailable, other.isAvailable)
+                && Objects.equals(this.firstName, other.firstName)
+                && Objects.equals(this.lastName, other.lastName)
+                && Objects.equals(this.roles, other.roles)
+                && Objects.equals(this.registrationDate, other.registrationDate)
+                && Objects.equals(this.birthday, other.birthday)
+                && Objects.equals(this.description, other.description);
     }
 }
