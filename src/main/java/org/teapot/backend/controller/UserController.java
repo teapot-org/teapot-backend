@@ -41,17 +41,6 @@ public class UserController {
         return user;
     }
 
-    @GetMapping("/{username}")
-    public User getUser(@PathVariable String username,
-                        HttpServletResponse response) {
-        User user = userService.getByUsername(username);
-        if (user == null) {
-            throw new ResourceNotFoundException();
-        }
-        response.setHeader("Location", "/api/users/" + username);
-        return user;
-    }
-
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void putUser(@PathVariable Long id,
