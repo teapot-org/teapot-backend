@@ -64,13 +64,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void assignUserRole(User user, UserRole role) {
-        Set<UserRole> roles = user.getRoles();
-
         if (userRoleDao.getByUserRoleName(role.getName()) == null) {
             userRoleDao.insert(role);
         }
 
-        roles.add(role);
+        user.getRoles().add(role);
         userDao.update(user);
     }
 
@@ -84,5 +82,25 @@ public class UserServiceImpl implements UserService {
     public boolean hasUserRole(User user, UserRole role) {
         return user.getRoles() != null
                 && user.getRoles().contains(role);
+    }
+
+    @Override
+    public void delete(Long id) {
+        userDao.deleteById(id);
+    }
+
+    @Override
+    public void delete(User user) {
+        userDao.delete(user);
+    }
+
+    @Override
+    public List<User> getList() {
+        return userDao.getList();
+    }
+
+    @Override
+    public List<User> getList(Integer offset, Integer count) {
+        return userDao.getList(offset, count);
     }
 }
