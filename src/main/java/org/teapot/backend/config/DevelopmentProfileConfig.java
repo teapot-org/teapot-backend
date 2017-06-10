@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.teapot.backend.dao.abstr.UserRoleDao;
 import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserRole;
+import org.teapot.backend.service.abstr.UserRoleService;
 import org.teapot.backend.service.abstr.UserService;
 
 import java.time.LocalDate;
@@ -24,6 +25,9 @@ public class DevelopmentProfileConfig {
 
     @Autowired
     private UserRoleDao userRoleDao;
+
+    @Autowired
+    private UserRoleService userRoleService;
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -50,54 +54,103 @@ public class DevelopmentProfileConfig {
             userRoleDao.insert(leaderRole);
             userRoleDao.insert(adminRole);
 
-            User user1 = new User();
-            User user2 = new User();
-            User user3 = new User();
-            User user4 = new User();
+            User admin = new User();
 
-            user1.setUsername("dale_cooper@twin.peaks");
-            user1.setPassword("1234");
-            user1.setFirstName("Dale");
-            user1.setLastName("Cooper");
-            user1.setRegistrationDate(LocalDateTime.now());
-            user1.setBirthday(LocalDate.now());
-            user1.setDescription("a special FBI agent");
+            admin.setUsername("admin@teapot.org");
+            admin.setPassword("1234");
+            admin.setFirstName("Cake");
+            admin.setLastName("Lover");
+            admin.setRegistrationDate(LocalDateTime.now());
+            admin.setBirthday(LocalDate.now());
+            admin.setDescription("i manage everything");
+            admin.getRoles().add(userRole);
+            admin.getRoles().add(adminRole);
 
-            user2.setUsername("lora_palmer@twin.peaks");
-            user2.setPassword("1234");
-            user2.setFirstName("Lora");
-            user2.setLastName("Palmer");
-            user2.setRegistrationDate(LocalDateTime.now());
-            user2.setBirthday(LocalDate.now());
-            user2.setDescription("a dead girl");
+            userService.register(admin);
 
-            user3.setUsername("sherlock_holmes@baker.st");
-            user3.setPassword("1234");
-            user3.setFirstName("Sherlock");
-            user3.setLastName("Holmes");
-            user3.setRegistrationDate(LocalDateTime.now());
-            user3.setBirthday(LocalDate.now());
-            user3.setDescription("private detective");
+            registerDaleCooper();
+            registerLoraPalmer();
+            registerSherlockHolmes();
+            registerDoctorWatson();
 
-            user4.setUsername("dr_watson@baker.st");
-            user4.setPassword("1234");
-            user4.setFirstName("John");
-            user4.setLastName("Watson");
-            user4.setRegistrationDate(LocalDateTime.now());
-            user4.setBirthday(LocalDate.now());
-            user4.setDescription("Sherlock Holmes' mate");
-
-            userService.register(user1);
-            userService.register(user2);
-            userService.register(user3);
-            userService.register(user4);
-
-            userService.assignUserRole(user1, userRole);
-            userService.assignUserRole(user2, userRole);
-            userService.assignUserRole(user3, userRole);
-            userService.assignUserRole(user4, userRole);
-//            userService.assignUserRole(user3, leaderRole);
-//            userService.assignUserRole(user4, adminRole);
+            assignLeaderRoleToDaleCooper();
+            assignLeaderRoleToSherlockHolmes();
         };
+    }
+
+    private void registerDaleCooper() {
+        User user = new User();
+        UserRole userRole = userRoleService.getByName("user");
+
+        user.setUsername("dale_cooper@twin.peaks");
+        user.setPassword("1234");
+        user.setFirstName("Dale");
+        user.setLastName("Cooper");
+        user.setRegistrationDate(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
+        user.setDescription("a special FBI agent");
+        user.getRoles().add(userRole);
+
+        userService.register(user);
+    }
+
+    private void registerLoraPalmer() {
+        User user = new User();
+        UserRole userRole = userRoleService.getByName("user");
+
+        user.setUsername("lora_palmer@twin.peaks");
+        user.setPassword("1234");
+        user.setFirstName("Lora");
+        user.setLastName("Palmer");
+        user.setRegistrationDate(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
+        user.setDescription("a dead girl");
+        user.getRoles().add(userRole);
+
+        userService.register(user);
+    }
+
+    private void registerSherlockHolmes() {
+        User user = new User();
+        UserRole userRole = userRoleService.getByName("user");
+
+        user.setUsername("sherlock_holmes@baker.st");
+        user.setPassword("1234");
+        user.setFirstName("Sherlock");
+        user.setLastName("Holmes");
+        user.setRegistrationDate(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
+        user.setDescription("private detective");
+        user.getRoles().add(userRole);
+
+        userService.register(user);
+    }
+
+    private void registerDoctorWatson() {
+        User user = new User();
+        UserRole userRole = userRoleService.getByName("user");
+
+        user.setUsername("dr_watson@baker.st");
+        user.setPassword("1234");
+        user.setFirstName("John");
+        user.setLastName("Watson");
+        user.setRegistrationDate(LocalDateTime.now());
+        user.setBirthday(LocalDate.now());
+        user.setDescription("Sherlock Holmes' mate");
+        user.getRoles().add(userRole);
+
+        userService.register(user);
+    }
+
+    private void assignLeaderRoleToDaleCooper() {
+        User user = userService.getById(2);
+        UserRole leaderRole = userRoleService.getByName("leader");
+        userService.assignUserRole(user, leaderRole);
+    }
+
+    private void assignLeaderRoleToSherlockHolmes() {
+        User user = userService.getById(4);
+        UserRole leaderRole = userRoleService.getByName("leader");
+        userService.assignUserRole(user, leaderRole);
     }
 }
