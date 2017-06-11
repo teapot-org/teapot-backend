@@ -8,8 +8,8 @@ import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserRole;
 import org.teapot.backend.service.abstr.UserService;
 
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -46,6 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void register(User user) {
+        user.setRegistrationDate(LocalDateTime.now());
         userDao.insert(user);
     }
 

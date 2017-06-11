@@ -4,8 +4,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
@@ -15,5 +17,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<Object> handleError404() {
         return new ResponseEntity<>(NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> handleError400() {
+        return new ResponseEntity<>(BAD_REQUEST);
     }
 }
