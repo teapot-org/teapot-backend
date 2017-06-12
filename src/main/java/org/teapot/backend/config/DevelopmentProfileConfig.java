@@ -7,11 +7,10 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.teapot.backend.dao.abstr.UserRoleDao;
 import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserRole;
-import org.teapot.backend.service.abstr.UserRoleService;
-import org.teapot.backend.service.abstr.UserService;
+import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.repository.UserRoleRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,13 +20,10 @@ import java.time.LocalDateTime;
 public class DevelopmentProfileConfig {
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Autowired
-    private UserRoleDao userRoleDao;
-
-    @Autowired
-    private UserRoleService userRoleService;
+    private UserRoleRepository userRoleRepository;
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -50,9 +46,9 @@ public class DevelopmentProfileConfig {
             leaderRole.setName("leader");
             adminRole.setName("admin");
 
-            userRoleDao.insert(userRole);
-            userRoleDao.insert(leaderRole);
-            userRoleDao.insert(adminRole);
+            userRoleRepository.save(userRole);
+            userRoleRepository.save(leaderRole);
+            userRoleRepository.save(adminRole);
 
             User admin = new User();
 
@@ -66,7 +62,7 @@ public class DevelopmentProfileConfig {
             admin.getRoles().add(userRole);
             admin.getRoles().add(adminRole);
 
-            userService.register(admin);
+            userRepository.save(admin);
 
             registerDaleCooper();
             registerLoraPalmer();
@@ -80,7 +76,7 @@ public class DevelopmentProfileConfig {
 
     private void registerDaleCooper() {
         User user = new User();
-        UserRole userRole = userRoleService.getByName("user");
+        UserRole userRole = userRoleRepository.getByName("user");
 
         user.setUsername("dale_cooper@twin.peaks");
         user.setPassword("1234");
@@ -91,12 +87,12 @@ public class DevelopmentProfileConfig {
         user.setDescription("a special FBI agent");
         user.getRoles().add(userRole);
 
-        userService.register(user);
+        userRepository.save(user);
     }
 
     private void registerLoraPalmer() {
         User user = new User();
-        UserRole userRole = userRoleService.getByName("user");
+        UserRole userRole = userRoleRepository.getByName("user");
 
         user.setUsername("lora_palmer@twin.peaks");
         user.setPassword("1234");
@@ -107,12 +103,12 @@ public class DevelopmentProfileConfig {
         user.setDescription("a dead girl");
         user.getRoles().add(userRole);
 
-        userService.register(user);
+        userRepository.save(user);
     }
 
     private void registerSherlockHolmes() {
         User user = new User();
-        UserRole userRole = userRoleService.getByName("user");
+        UserRole userRole = userRoleRepository.getByName("user");
 
         user.setUsername("sherlock_holmes@baker.st");
         user.setPassword("1234");
@@ -123,12 +119,12 @@ public class DevelopmentProfileConfig {
         user.setDescription("private detective");
         user.getRoles().add(userRole);
 
-        userService.register(user);
+        userRepository.save(user);
     }
 
     private void registerDoctorWatson() {
         User user = new User();
-        UserRole userRole = userRoleService.getByName("user");
+        UserRole userRole = userRoleRepository.getByName("user");
 
         user.setUsername("dr_watson@baker.st");
         user.setPassword("1234");
@@ -139,18 +135,18 @@ public class DevelopmentProfileConfig {
         user.setDescription("Sherlock Holmes' mate");
         user.getRoles().add(userRole);
 
-        userService.register(user);
+        userRepository.save(user);
     }
 
     private void assignLeaderRoleToDaleCooper() {
-        User user = userService.getById(2);
-        UserRole leaderRole = userRoleService.getByName("leader");
-        userService.assignUserRole(user, leaderRole);
+        User user = userRepository.findOne(2L);
+        UserRole leaderRole = userRoleRepository.getByName("leader");
+        user.getRoles().add(leaderRole);
     }
 
     private void assignLeaderRoleToSherlockHolmes() {
-        User user = userService.getById(4);
-        UserRole leaderRole = userRoleService.getByName("leader");
-        userService.assignUserRole(user, leaderRole);
+        User user = userRepository.findOne(4L);
+        UserRole leaderRole = userRoleRepository.getByName("leader");
+        user.getRoles().add(leaderRole);
     }
 }
