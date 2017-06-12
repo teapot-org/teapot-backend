@@ -1,7 +1,6 @@
 package org.teapot.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +21,8 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public List<User> getUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).getContent();
     }
 
     @GetMapping("/{id}")
