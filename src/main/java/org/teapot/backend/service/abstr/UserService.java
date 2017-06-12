@@ -25,4 +25,12 @@ public interface UserService extends AbstractService<User> {
     void removeUserRole(User user, UserRole role);
 
     boolean hasUserRole(User user, UserRole role);
+
+    void delete(Long id);
+
+    void delete(User user);
+
+    List<User> getList();
+
+    List<User> getList(Integer offset, Integer count);
 }
