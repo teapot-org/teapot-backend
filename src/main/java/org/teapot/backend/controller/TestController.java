@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.teapot.backend.dao.abstr.UserDao;
+import org.teapot.backend.repository.UserRepository;
 import org.teapot.backend.model.User;
 
 @RestController
@@ -13,10 +13,10 @@ import org.teapot.backend.model.User;
 public class TestController {
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @GetMapping("/user/{id}")
     public User getTestUser(@PathVariable Long id) {
-        return userDao.getById(id);
+        return userRepository.findOne(id);
     }
 }
