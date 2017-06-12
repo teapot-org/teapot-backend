@@ -114,7 +114,7 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void updateNotExistsUserTest() throws Exception {
-        mockMvc.perform(put("/api/users/" + -1)
+        mockMvc.perform(put("/api/users/-1")
                 .content(json(updateUser))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());

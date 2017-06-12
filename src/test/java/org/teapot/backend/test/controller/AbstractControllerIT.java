@@ -22,9 +22,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
-@Transactional
 public abstract class AbstractControllerIT extends AbstractIT {
 
     protected MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
