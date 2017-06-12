@@ -58,11 +58,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public User registerUser(@RequestBody User user,
                              HttpServletResponse response) {
-        try {
-            user = userRepository.save(user);
-        } catch (Exception e) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new BadRequestException();
         }
+
+        user = userRepository.save(user);
         response.setHeader("Location", "/api/users/" + user.getId());
         return user;
     }
