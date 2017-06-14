@@ -7,8 +7,10 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.teapot.backend.model.TeapotProperty;
 import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserRole;
+import org.teapot.backend.repository.TeapotPropertyRepository;
 import org.teapot.backend.repository.UserRepository;
 import org.teapot.backend.repository.UserRoleRepository;
 
@@ -24,6 +26,9 @@ public class DevelopmentProfileConfig {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private TeapotPropertyRepository propertyRepository;
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -71,6 +76,8 @@ public class DevelopmentProfileConfig {
 
             assignLeaderRoleToDaleCooper();
             assignLeaderRoleToSherlockHolmes();
+
+            addProperties();
         };
     }
 
@@ -148,5 +155,19 @@ public class DevelopmentProfileConfig {
         User user = userRepository.findOne(4L);
         UserRole leaderRole = userRoleRepository.getByName("leader");
         user.getRoles().add(leaderRole);
+    }
+
+    private void addProperties() {
+        TeapotProperty property1 = new TeapotProperty();
+        TeapotProperty property2 = new TeapotProperty();
+
+        property1.setName("verification-token-expire-days");
+        property1.setValue("1");
+
+        property2.setName("site-uri");
+        property2.setValue("localhost:8080");
+
+        propertyRepository.save(property1);
+        propertyRepository.save(property2);
     }
 }
