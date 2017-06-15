@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
@@ -63,7 +63,7 @@ public class UserController {
         }
 
         user = userRepository.save(user);
-        response.setHeader("Location", "/api/users/" + user.getId());
+        response.setHeader("Location", "/users/" + user.getId());
         return user;
     }
 }

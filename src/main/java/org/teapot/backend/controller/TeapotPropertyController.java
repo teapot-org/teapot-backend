@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/props")
+@RequestMapping("/props")
 public class TeapotPropertyController {
 
     @Autowired
@@ -31,7 +31,7 @@ public class TeapotPropertyController {
         }
 
         property = propertyRepository.save(property);
-        response.setHeader("Location", "/api/props/" + property.getId());
+        response.setHeader("Location", "/props/" + property.getId());
 
         return property;
     }
