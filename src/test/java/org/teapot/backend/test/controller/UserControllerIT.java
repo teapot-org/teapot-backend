@@ -16,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class UserControllerIT extends AbstractControllerIT {
 
+    private static final String API_URL = "/users";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -57,7 +59,7 @@ public class UserControllerIT extends AbstractControllerIT {
     @Test
     public void getUsersTest() throws Exception {
         List<User> all = userRepository.findAll();
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get(API_URL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(all.size())))
@@ -71,7 +73,7 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void getSingleUserTest() throws Exception {
-        mockMvc.perform(get("/api/users/" + getUserOne.getId()))
+        mockMvc.perform(get(String.format("%s/%d", API_URL, getUserOne.getId())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
@@ -81,22 +83,22 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void getNotExistsUserTest() throws Exception {
-        mockMvc.perform(get("/api/users/-1"))
+        mockMvc.perform(get(String.format("%s/-1", API_URL)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void registerUserTest() throws Exception {
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post(API_URL)
                 .content(json(postUser))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString("/api/users/")));
+                .andExpect(header().string("Location", containsString(API_URL)));
     }
 
     @Test
     public void repeatRegisterUserTest() throws Exception {
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post(API_URL)
                 .content(json(repeatedPostUser))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
@@ -106,7 +108,7 @@ public class UserControllerIT extends AbstractControllerIT {
     @Test
     public void updateUserTest() throws Exception {
         updateUser.setBirthday(LocalDate.now());
-        mockMvc.perform(put("/api/users/" + updateUser.getId())
+        mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
                 .content(json(updateUser))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
@@ -114,7 +116,7 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void updateNotExistsUserTest() throws Exception {
-        mockMvc.perform(put("/api/users/-1")
+        mockMvc.perform(put(String.format("%s/-1", API_URL))
                 .content(json(updateUser))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());
@@ -122,13 +124,13 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void deleteUserTest() throws Exception {
-        mockMvc.perform(delete("/api/users/" + deleteUser.getId()))
+        mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId())))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void deleteNotExistsUserTest() throws Exception {
-        mockMvc.perform(delete("/api/users/-1"))
+        mockMvc.perform(delete(String.format("%s/-1", API_URL)))
                 .andExpect(status().isNotFound());
     }
 }

@@ -18,7 +18,7 @@ public class TeapotPropertyControllerIT extends AbstractControllerIT {
     @Autowired
     private TeapotPropertyRepository propertyRepository;
 
-    private static final String API_URL = "/api/props";
+    private static final String API_URL = "/props";
 
     private List<TeapotProperty> properties;
 
