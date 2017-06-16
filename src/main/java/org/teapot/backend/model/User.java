@@ -1,7 +1,9 @@
 package org.teapot.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -11,7 +13,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "user")
-public class User implements Serializable {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue
@@ -20,7 +22,7 @@ public class User implements Serializable {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false, length = 16)
+    @Column(nullable = false)
     private String password;
 
     @Column(name = "is_available")
@@ -33,7 +35,7 @@ public class User implements Serializable {
     private String lastName;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserRole> roles = new LinkedHashSet<>();
+    private Set<UserAuthority> authorities = new LinkedHashSet<>();
 
     @Column(name = "registration_date")
     private LocalDateTime registrationDate;
@@ -53,14 +55,36 @@ public class User implements Serializable {
         this.id = id;
     }
 
+    @Override
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void setUsername(String username) {
         this.username = username;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -69,7 +93,7 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public Boolean isAvailable() {
+    public Boolean getAvailable() {
         return isAvailable;
     }
 
@@ -93,12 +117,13 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
-    public Set<UserRole> getRoles() {
-        return roles;
+    @Override
+    public Set<UserAuthority> getAuthorities() {
+        return authorities;
     }
 
-    public void setRoles(Set<UserRole> roles) {
-        this.roles = roles;
+    public void setAuthorities(Set<UserAuthority> authorities) {
+        this.authorities = authorities;
     }
 
     public LocalDateTime getRegistrationDate() {
@@ -134,7 +159,7 @@ public class User implements Serializable {
                 isAvailable,
                 firstName,
                 lastName,
-                roles,
+                authorities,
                 registrationDate,
                 birthday,
                 description
@@ -156,7 +181,7 @@ public class User implements Serializable {
                 && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
-                && Objects.equals(this.roles, other.roles)
+                && Objects.equals(this.authorities, other.authorities)
                 && Objects.equals(this.registrationDate, other.registrationDate)
                 && Objects.equals(this.birthday, other.birthday)
                 && Objects.equals(this.description, other.description);

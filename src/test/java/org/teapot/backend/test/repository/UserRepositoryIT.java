@@ -4,15 +4,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserRole;
+import org.teapot.backend.model.UserAuthority;
 import org.teapot.backend.repository.UserRepository;
-import org.teapot.backend.repository.UserRoleRepository;
+import org.teapot.backend.repository.UserAuthorityRepository;
 import org.teapot.backend.test.AbstractIT;
-
-import java.util.List;
 
 
 public class UserRepositoryIT extends AbstractIT {
@@ -21,30 +18,33 @@ public class UserRepositoryIT extends AbstractIT {
     private UserRepository userRepository;
 
     @Autowired
-    private UserRoleRepository userRoleRepository;
+    private UserAuthorityRepository userAuthorityRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private User findByUsernameTestUser = new User();
     private User deleteByUsernameTestUser = new User();
 
     @Before
     public void init() {
-        UserRole testRole1 = new UserRole();
-        testRole1.setName("testRole1");
-        userRoleRepository.save(testRole1);
+        UserAuthority testRole1 = new UserAuthority();
+        testRole1.setAuthority("testRole1");
+        userAuthorityRepository.save(testRole1);
 
-        UserRole testRole2 = new UserRole();
-        testRole2.setName("testRole2");
-        userRoleRepository.save(testRole2);
+        UserAuthority testRole2 = new UserAuthority();
+        testRole2.setAuthority("testRole2");
+        userAuthorityRepository.save(testRole2);
 
         findByUsernameTestUser.setUsername("findByUsername");
-        findByUsernameTestUser.setPassword("pass");
-        findByUsernameTestUser.getRoles().add(testRole1);
-        findByUsernameTestUser.getRoles().add(testRole2);
+        findByUsernameTestUser.setPassword(passwordEncoder.encode("pass"));
+        findByUsernameTestUser.getAuthorities().add(testRole1);
+        findByUsernameTestUser.getAuthorities().add(testRole2);
         userRepository.save(findByUsernameTestUser);
 
         deleteByUsernameTestUser.setUsername("deleteByUsername");
-        deleteByUsernameTestUser.setPassword("pass");
-        deleteByUsernameTestUser.getRoles().add(testRole2);
+        deleteByUsernameTestUser.setPassword(passwordEncoder.encode("pass"));
+        deleteByUsernameTestUser.getAuthorities().add(testRole2);
         userRepository.save(deleteByUsernameTestUser);
     }
 

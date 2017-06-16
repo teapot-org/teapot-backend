@@ -3,6 +3,7 @@ package org.teapot.backend.test.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.User;
 import org.teapot.backend.repository.UserRepository;
 
@@ -21,6 +22,9 @@ public class UserControllerIT extends AbstractControllerIT {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private User getUserOne = new User();
     private User getUserTwo = new User();
     private User postUser = new User();
@@ -33,26 +37,26 @@ public class UserControllerIT extends AbstractControllerIT {
         userRepository.deleteAllInBatch();
 
         getUserOne.setUsername("getUserOne");
-        getUserOne.setPassword("pass");
+        getUserOne.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserOne);
 
         getUserTwo.setUsername("getUserTwo");
-        getUserTwo.setPassword("pass");
+        getUserTwo.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserTwo);
 
         postUser.setUsername("postUser");
-        postUser.setPassword("pass");
+        postUser.setPassword(passwordEncoder.encode("pass"));
 
         repeatedPostUser.setUsername("repeatedPostUser");
-        repeatedPostUser.setPassword("pass");
+        repeatedPostUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(repeatedPostUser);
 
         updateUser.setUsername("updateUser");
-        updateUser.setPassword("pass");
+        updateUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(updateUser);
 
         deleteUser.setUsername("deleteUser");
-        deleteUser.setPassword("pass");
+        deleteUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(deleteUser);
     }
 
