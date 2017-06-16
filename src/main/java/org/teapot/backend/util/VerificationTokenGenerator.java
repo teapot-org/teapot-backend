@@ -35,7 +35,7 @@ public final class VerificationTokenGenerator {
         while (true) {
             String tokenString = sequenceGenerator.generateSequence(32);
 
-            if (tokenRepository.findOne(tokenRepository.findByToken(tokenString).getId()) != null) {
+            if (tokenRepository.findByToken(tokenString) == null) {
                 token.setExpireDateTime(LocalDateTime.now().plusDays(verificationTokenExpireDays));
                 token.setToken(tokenString);
 

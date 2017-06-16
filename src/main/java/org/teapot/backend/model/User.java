@@ -1,5 +1,7 @@
 package org.teapot.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -45,6 +47,7 @@ public class User implements Serializable {
 
     private String description;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private VerificationToken verificationToken;
 

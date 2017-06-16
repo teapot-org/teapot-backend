@@ -30,7 +30,7 @@ public final class RandomSequenceGenerator {
         StringBuilder stringBuilder = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {
-            String c = String.valueOf(CHARACTER_STRING.charAt(random.nextInt(length)));
+            String c = String.valueOf(CHARACTER_STRING.charAt(random.nextInt(notation)));
 
             if (caseSensitive) {
                 c = random.nextBoolean() ? c.toUpperCase() : c;
