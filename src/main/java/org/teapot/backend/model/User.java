@@ -1,14 +1,15 @@
 package org.teapot.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
 
 
 @Entity
@@ -34,8 +35,8 @@ public class User implements UserDetails {
     @Column(name = "last_name", length = 32)
     private String lastName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserAuthority> authorities = new LinkedHashSet<>();
+    @Enumerated
+    private UserAuthority authority = UserAuthority.USER;
 
     @Column(name = "registration_date")
     private LocalDateTime registrationDate;
@@ -117,13 +118,12 @@ public class User implements UserDetails {
         this.lastName = lastName;
     }
 
-    @Override
-    public Set<UserAuthority> getAuthorities() {
-        return authorities;
+    public UserAuthority getAuthority() {
+        return authority;
     }
 
-    public void setAuthorities(Set<UserAuthority> authorities) {
-        this.authorities = authorities;
+    public void setAuthority(UserAuthority authority) {
+        this.authority = authority;
     }
 
     public LocalDateTime getRegistrationDate() {
@@ -151,6 +151,12 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(authority);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(
                 id,
@@ -159,7 +165,7 @@ public class User implements UserDetails {
                 isAvailable,
                 firstName,
                 lastName,
-                authorities,
+                authority,
                 registrationDate,
                 birthday,
                 description
@@ -181,7 +187,7 @@ public class User implements UserDetails {
                 && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
-                && Objects.equals(this.authorities, other.authorities)
+                && Objects.equals(this.authority, other.authority)
                 && Objects.equals(this.registrationDate, other.registrationDate)
                 && Objects.equals(this.birthday, other.birthday)
                 && Objects.equals(this.description, other.description);
