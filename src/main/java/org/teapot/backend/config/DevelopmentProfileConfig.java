@@ -36,6 +36,11 @@ public class DevelopmentProfileConfig {
     private PasswordEncoder passwordEncoder;
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
         ServletRegistrationBean registrationBean =
                 new ServletRegistrationBean(new WebServlet());
