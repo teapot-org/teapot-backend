@@ -1,7 +1,6 @@
 package org.teapot.backend.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,16 +15,13 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 
 @Configuration
 @EnableAuthorizationServer
-public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Value("${gigy.oauth.tokenTimeout:3600}")
-    int expiration;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,19 +30,15 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer configurer) throws Exception {
-        configurer
-                .authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);
+        configurer.authenticationManager(authenticationManager);
+        configurer.userDetailsService(userDetailsService);
     }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory()
-                // регистрация клиента REST-сервиса
-                .withClient("clientid")
+        clients.inMemory().withClient("client")
                 .secret("secret")
-//                .accessTokenValiditySeconds(120)
-//                .refreshTokenValiditySeconds(36000)
+//                .accessTokenValiditySeconds(expiration)
                 .scopes("read", "write")
                 .authorizedGrantTypes("password", "refresh_token")
                 .resourceIds("resource");
