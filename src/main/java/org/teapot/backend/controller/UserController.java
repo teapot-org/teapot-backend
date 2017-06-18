@@ -1,15 +1,23 @@
 package org.teapot.backend.controller;
 
+import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.exception.BadRequestException;
+import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
 import org.teapot.backend.model.User;
+import org.teapot.backend.model.UserAuthority;
 import org.teapot.backend.repository.UserRepository;
 
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -19,6 +27,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Метод доступен всем пользователям, в том числе и неавторизованным.
@@ -38,17 +49,26 @@ public class UserController {
 
     /**
      * Метод доступен всем пользователям, в том числе и неавторизованным.
-     * Ищет в базе данных пользователя с указанным id. Если пользователь
-     * найден, возвращает этого пользователя и устаналивает код состояния
-     * 200 OK; если пользователь не найден - устаналивает код состояния
-     * 404 Not Found, выбрасывая исключение {@link ResourceNotFoundException}
+     * Ищет в базе данных пользователя с указанным id или username. Если
+     * пользователь найден, возвращает этого пользователя и устаналивает код
+     * состояния 200 OK; если пользователь не найден - устаналивает код
+     * состояния 404 Not Found, выбрасывая исключение
+     * {@link ResourceNotFoundException}
      *
-     * @param id идентификатор возвращаемого пользователя
+     * @param idOrUsername id или username пользователя
      * @return найденный пользователь
      */
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        User user = userRepository.findOne(id);
+    @GetMapping("/{idOrUsername:.+}")
+    public User getUser(@PathVariable String idOrUsername) {
+        User user;
+
+        Long id = Longs.tryParse(idOrUsername);
+        if (id != null) {
+            user = userRepository.findOne(id);
+        } else {
+            user = userRepository.findByUsername(idOrUsername);
+        }
+
         if (user == null) {
             throw new ResourceNotFoundException();
         }
@@ -56,29 +76,35 @@ public class UserController {
     }
 
     /**
-     * Метод доступен только авторизованным пользователям.
+     * Метод доступен только пользователям с ролью ADMIN.
      * Изменяет данные пользователя с указанным id. Принимает на вход в теле
      * запроса объект пользователя с новыми данными. Если пользователь с
      * указанным id не найден в базе данных - устанавливает код состояния
      * 404 Not Found, выбрасывая исключение {@link ResourceNotFoundException}.
      * Если пользователь с таким id найден, то его данные изменяются на новые
-     * данные, но с некоторыми ограничениями: пользователь с ролью USER может
-     * только свои данные и только определенные поля (имя, фамилия, дата
-     * рождения). Пользователь с ролью ADMIN может изменить любые данные
-     * любого пользователя (кроме даты регистрации). Если никаких ошибок не
+     * данные (кроме даты регистрации). Если никаких ошибок не
      * произошло - устаналивается код состояния 204 No Content.
      *
      * @param id   идентификатор изменяемого пользователя
      * @param user объект, содержащий новые данные пользователя
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUser(@PathVariable Long id,
                            @RequestBody User user) {
-        if (!userRepository.exists(id)) {
+        User existingUser = userRepository.findOne(id);
+        if (existingUser == null) {
             throw new ResourceNotFoundException();
         }
+
         user.setId(id);
+        user.setRegistrationDate(existingUser.getRegistrationDate());
+        // если пароль изменился
+        if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         userRepository.save(user);
     }
 
@@ -91,6 +117,7 @@ public class UserController {
      *
      * @param id идентификатор удаляемого пользователя
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
@@ -112,7 +139,7 @@ public class UserController {
      * авторизации пользователя, который вызывает метод. Если пользователь
      * авторизован как ADMIN, то новому пользователю устаналивается текущая
      * дата в качестве даты регистрации, и пользователь добавляется в базу.
-     * Если пользователь неавторизован, то происходит регистрация: новому
+     * Если пользователь не авторизован, то происходит регистрация: новому
      * пользователю также устаналивается текущая дата регистрации,
      * устаналиваются права USER, isAvailable устаналивается в false,
      * пользователь добавляется в базу, генерируется VerificationToken,
@@ -128,16 +155,98 @@ public class UserController {
      * @param response объект, содержащий заголовки ответа
      * @return добавленный пользователь
      */
+    @PreAuthorize("isAnonymous() || hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User registerUser(@RequestBody User user,
-                             HttpServletResponse response) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+                             HttpServletResponse response,
+                             Authentication auth) {
+        if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new BadRequestException();
         }
 
-        user = userRepository.save(user);
+        user.setRegistrationDate(LocalDateTime.now());
+        if (auth == null) {
+            user.setAuthority(UserAuthority.USER);
+            user.setAvailable(false);
+            userRepository.save(user);
+            // TODO: генерация VerificationToken и передача в почтовый сервис
+        } else if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
+            userRepository.save(user);
+        }
+
         response.setHeader("Location", "/users/" + user.getId());
         return user;
+    }
+
+    /**
+     * Метод доступен пользователям с ролью ADMIN и пользователям, чей
+     * идентификатор равен идентификатору в маппинге '/{id}'.
+     * Метод выполняет изменение данных пользователя с идентификатором
+     * id на новые данные, указанные в параметрах, если они указаны,
+     * неуказанные в параметрах данные не изменяются. Пользователь с
+     * ролью ADMIN может изменить любыые данные, кроме даты регистрации.
+     * Пользователь, идентификатор которого равен идентификатору в
+     * маппинге '/{id}', может изменить только username, firstName или
+     * lastName. В случае успеха устаналивает код состояния 204 No Content.
+     * В случае, если ресурс с указанным id не найден - код состояния
+     * 404 Not Found. Если доступ пользователю к ресурсу запрещен -
+     * код состояния 403 Forbidden.
+     *
+     * @param id          идентификатор пользователя, данные которого нужно
+     *                    изменить
+     * @param username    новое имя пользователя
+     * @param email       новый e-mail
+     * @param password    новый пароль
+     * @param available   новое состояние available
+     * @param firstName   новое имя
+     * @param lastName    новая фамилия
+     * @param authority   новая роль
+     * @param birthday    новая дата рождения
+     * @param description новое описание
+     * @param auth        объект, содержащий данные об аутентификации
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void patchUser(@PathVariable Long id,
+                          @RequestParam(required = false) String username,
+                          @RequestParam(required = false) String email,
+                          @RequestParam(required = false) String password,
+                          @RequestParam(required = false) Boolean available,
+                          @RequestParam(required = false) String firstName,
+                          @RequestParam(required = false) String lastName,
+                          @RequestParam(required = false) UserAuthority authority,
+                          @RequestParam(required = false) LocalDate birthday,
+                          @RequestParam(required = false) String description,
+                          Authentication auth) {
+        User user = userRepository.findOne(id);
+        if (user == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
+
+            if (username != null) user.setUsername(username);
+            if (email != null) user.setEmail(email);
+            if (password != null) user.setPassword(passwordEncoder.encode(password));
+            if (available != null) user.setAvailable(available);
+            if (firstName != null) user.setFirstName(firstName);
+            if (lastName != null) user.setLastName(lastName);
+            if (authority != null) user.setAuthority(authority);
+            if (birthday != null) user.setBirthday(birthday);
+            if (description != null) user.setDescription(description);
+
+        } else if (auth.getName().equals(user.getEmail())) {
+
+            if (username != null) user.setUsername(firstName);
+            if (firstName != null) user.setFirstName(firstName);
+            if (lastName != null) user.setLastName(lastName);
+            if (birthday != null) user.setBirthday(birthday);
+        } else {
+            throw new ForbiddenException();
+        }
+
+        userRepository.save(user);
     }
 }

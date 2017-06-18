@@ -63,7 +63,8 @@ public class DevelopmentProfileConfig {
     private void registerAdmin() {
         User admin = new User();
 
-        admin.setUsername("admin@teapot.org");
+        admin.setUsername("admin");
+        admin.setEmail("admin@teapot.org");
         admin.setPassword(passwordEncoder.encode("1234"));
         admin.setFirstName("Cake");
         admin.setLastName("Lover");
@@ -77,7 +78,9 @@ public class DevelopmentProfileConfig {
 
     private void registerDaleCooper() {
         User user = new User();
-        user.setUsername("dale_cooper@twin.peaks");
+
+        user.setUsername("dale_cooper");
+        user.setEmail("dale_cooper@twin.peaks");
         user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("Dale");
         user.setLastName("Cooper");
@@ -92,7 +95,8 @@ public class DevelopmentProfileConfig {
     private void registerLoraPalmer() {
         User user = new User();
 
-        user.setUsername("lora_palmer@twin.peaks");
+        user.setUsername("lora_palmer");
+        user.setEmail("lora_palmer@twin.peaks");
         user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("Lora");
         user.setLastName("Palmer");
@@ -107,7 +111,8 @@ public class DevelopmentProfileConfig {
     private void registerSherlockHolmes() {
         User user = new User();
 
-        user.setUsername("sherlock_holmes@baker.st");
+        user.setUsername("sherlock_holmes");
+        user.setEmail("sherlock_holmes@baker.st");
         user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("Sherlock");
         user.setLastName("Holmes");
@@ -122,7 +127,8 @@ public class DevelopmentProfileConfig {
     private void registerDoctorWatson() {
         User user = new User();
 
-        user.setUsername("dr_watson@baker.st");
+        user.setUsername("dr_watson");
+        user.setEmail("dr_watson@baker.st");
         user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("John");
         user.setLastName("Watson");

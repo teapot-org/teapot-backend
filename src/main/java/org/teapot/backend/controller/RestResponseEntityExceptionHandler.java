@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.teapot.backend.controller.exception.BadRequestException;
+import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
@@ -22,5 +24,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> handleError400() {
         return new ResponseEntity<>(BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleError403() {
+        return new ResponseEntity<>(FORBIDDEN);
     }
 }

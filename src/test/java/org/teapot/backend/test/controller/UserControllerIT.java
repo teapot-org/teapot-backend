@@ -37,25 +37,31 @@ public class UserControllerIT extends AbstractControllerIT {
         userRepository.deleteAllInBatch();
 
         getUserOne.setUsername("getUserOne");
+        getUserOne.setEmail("getUserOne@mail.com");
         getUserOne.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserOne);
 
         getUserTwo.setUsername("getUserTwo");
+        getUserTwo.setEmail("getUserTwo@mail.com");
         getUserTwo.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserTwo);
 
         postUser.setUsername("postUser");
+        postUser.setEmail("postUser@mail.com");
         postUser.setPassword(passwordEncoder.encode("pass"));
 
         repeatedPostUser.setUsername("repeatedPostUser");
+        repeatedPostUser.setEmail("repeatedPostUser@mail.com");
         repeatedPostUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(repeatedPostUser);
 
         updateUser.setUsername("updateUser");
+        updateUser.setEmail("updateUser@mail.com");
         updateUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(updateUser);
 
         deleteUser.setUsername("deleteUser");
+        deleteUser.setEmail("deleteUser@mail.com");
         deleteUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(deleteUser);
     }
@@ -69,19 +75,22 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(jsonPath("$", hasSize(all.size())))
                 .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
                 .andExpect(jsonPath("$[0].username", is(all.get(0).getUsername())))
+                .andExpect(jsonPath("$[0].email", is(all.get(0).getEmail())))
                 .andExpect(jsonPath("$[0].password", is(all.get(0).getPassword())))
                 .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())))
                 .andExpect(jsonPath("$[1].username", is(all.get(1).getUsername())))
+                .andExpect(jsonPath("$[1].email", is(all.get(1).getEmail())))
                 .andExpect(jsonPath("$[1].password", is(all.get(1).getPassword())));
     }
 
     @Test
-    public void getSingleUserTest() throws Exception {
+    public void getSingleUserByIdTest() throws Exception {
         mockMvc.perform(get(String.format("%s/%d", API_URL, getUserOne.getId())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
                 .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
+                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())))
                 .andExpect(jsonPath("$.password", is(getUserOne.getPassword())));
     }
 

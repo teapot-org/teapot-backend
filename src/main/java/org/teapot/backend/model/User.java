@@ -1,27 +1,24 @@
 package org.teapot.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 
 @Entity
 @Table(name = "user")
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 32)
     private String username;
+
+    @Column(unique = true, nullable = false)
+    private String email;
 
     @Column(nullable = false)
     private String password;
@@ -56,36 +53,22 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    @Override
     public String getUsername() {
         return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 
     public void setUsername(String username) {
         this.username = username;
     }
 
-    @Override
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -94,7 +77,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public Boolean getAvailable() {
+    public Boolean isAvailable() {
         return isAvailable;
     }
 
@@ -151,16 +134,11 @@ public class User implements UserDetails {
     }
 
     @Override
-    @JsonIgnore
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(authority);
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hash(
                 id,
                 username,
+                email,
                 password,
                 isAvailable,
                 firstName,
@@ -183,6 +161,7 @@ public class User implements UserDetails {
         final User other = (User) obj;
         return Objects.equals(this.id, other.id)
                 && Objects.equals(this.username, other.username)
+                && Objects.equals(this.email, other.email)
                 && Objects.equals(this.password, other.password)
                 && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.firstName, other.firstName)

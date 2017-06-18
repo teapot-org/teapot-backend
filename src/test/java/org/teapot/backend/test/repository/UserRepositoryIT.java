@@ -20,20 +20,21 @@ public class UserRepositoryIT extends AbstractIT {
     private PasswordEncoder passwordEncoder;
 
     private User findByUsernameTestUser = new User();
-    private User deleteByUsernameTestUser = new User();
+    private User findByEmailTestUser = new User();
 
     @Before
     public void init() {
         findByUsernameTestUser.setUsername("findByUsername");
+        findByUsernameTestUser.setEmail("findByUsername@mail.com");
         findByUsernameTestUser.setPassword(passwordEncoder.encode("pass"));
-        findByUsernameTestUser.setAuthority(UserAuthority.USER);
         findByUsernameTestUser.setAuthority(UserAuthority.ADMIN);
         userRepository.save(findByUsernameTestUser);
 
-        deleteByUsernameTestUser.setUsername("deleteByUsername");
-        deleteByUsernameTestUser.setPassword(passwordEncoder.encode("pass"));
-        deleteByUsernameTestUser.setAuthority(UserAuthority.USER);
-        userRepository.save(deleteByUsernameTestUser);
+        findByEmailTestUser.setUsername("findByEmail");
+        findByEmailTestUser.setEmail("findByEmail@mail.com");
+        findByEmailTestUser.setPassword(passwordEncoder.encode("pass"));
+        findByEmailTestUser.setAuthority(UserAuthority.USER);
+        userRepository.save(findByEmailTestUser);
     }
 
     @Test
@@ -44,9 +45,9 @@ public class UserRepositoryIT extends AbstractIT {
     }
 
     @Test
-    public void deleteByUsernameTest() {
-        userRepository.deleteByUsername("deleteByUsername");
-        Assert.assertNull(userRepository.findOne(deleteByUsernameTestUser.getId()));
-        System.out.println();
+    public void findByEmailTest() {
+        User foundUser = userRepository.findByEmail("findByEmail@mail.com");
+        Assert.assertNotNull(foundUser);
+        Assert.assertEquals(findByEmailTestUser, foundUser);
     }
 }

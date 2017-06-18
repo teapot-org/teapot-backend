@@ -6,9 +6,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.teapot.backend.model.User;
 import org.teapot.backend.repository.UserRepository;
 
-import java.util.Optional;
+import java.util.Collections;
 
 
 @Service
@@ -21,9 +22,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
-        return Optional
-                .ofNullable(userRepository.findByUsername(username))
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        String.format("User '%s' not found", username)));
+        User user = userRepository.findByEmail(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(
+                    String.format("User '%s' not found", username));
+        }
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                user.isAvailable(),
+                true,
+                true,
+                true,
+                Collections.singletonList(user.getAuthority())
+        );
     }
 }
