@@ -13,7 +13,10 @@ import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
 import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserAuthority;
+import org.teapot.backend.model.VerificationToken;
 import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.repository.VerificationTokenRepository;
+import org.teapot.backend.util.VerificationTokenGenerator;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
@@ -30,6 +33,12 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private VerificationTokenGenerator tokenGenerator;
+
+    @Autowired
+    private VerificationTokenRepository tokenRepository;
 
     /**
      * Метод доступен всем пользователям, в том числе и неавторизованным.
@@ -171,6 +180,21 @@ public class UserController {
             user.setAvailable(false);
             userRepository.save(user);
             // TODO: генерация VerificationToken и передача в почтовый сервис
+
+            user.setAvailable(true);
+            user.setActivated(false);
+            user.setRegistrationDate(LocalDateTime.now());
+
+            user = userRepository.save(user);
+            VerificationToken verificationToken = tokenGenerator.generateToken();
+
+            verificationToken.setUser(user);
+            tokenRepository.save(verificationToken);
+
+            // todo: sending email with token
+
+
+
         } else if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
             userRepository.save(user);
         }
