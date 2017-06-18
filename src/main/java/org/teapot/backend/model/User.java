@@ -1,26 +1,26 @@
 package org.teapot.backend.model;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 
 
 @Entity
 @Table(name = "user")
-public class User implements Serializable {
+public class User {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 32)
     private String username;
 
-    @Column(nullable = false, length = 16)
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
     private String password;
 
     @Column(name = "is_available")
@@ -32,8 +32,8 @@ public class User implements Serializable {
     @Column(name = "last_name", length = 32)
     private String lastName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserRole> roles = new LinkedHashSet<>();
+    @Enumerated
+    private UserAuthority authority = UserAuthority.USER;
 
     @Column(name = "registration_date")
     private LocalDateTime registrationDate;
@@ -59,6 +59,14 @@ public class User implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -93,12 +101,12 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
-    public Set<UserRole> getRoles() {
-        return roles;
+    public UserAuthority getAuthority() {
+        return authority;
     }
 
-    public void setRoles(Set<UserRole> roles) {
-        this.roles = roles;
+    public void setAuthority(UserAuthority authority) {
+        this.authority = authority;
     }
 
     public LocalDateTime getRegistrationDate() {
@@ -130,11 +138,12 @@ public class User implements Serializable {
         return Objects.hash(
                 id,
                 username,
+                email,
                 password,
                 isAvailable,
                 firstName,
                 lastName,
-                roles,
+                authority,
                 registrationDate,
                 birthday,
                 description
@@ -152,11 +161,12 @@ public class User implements Serializable {
         final User other = (User) obj;
         return Objects.equals(this.id, other.id)
                 && Objects.equals(this.username, other.username)
+                && Objects.equals(this.email, other.email)
                 && Objects.equals(this.password, other.password)
                 && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
-                && Objects.equals(this.roles, other.roles)
+                && Objects.equals(this.authority, other.authority)
                 && Objects.equals(this.registrationDate, other.registrationDate)
                 && Objects.equals(this.birthday, other.birthday)
                 && Objects.equals(this.description, other.description);

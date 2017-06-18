@@ -1,3 +1,6 @@
 spring:
   profiles:
-    active: development
+    active: development,security
+logging:
+  level:
+    org.springframework.security: DEBUG

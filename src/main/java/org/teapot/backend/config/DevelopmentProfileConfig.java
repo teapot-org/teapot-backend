@@ -7,15 +7,17 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.TeapotProperty;
 import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserRole;
+import org.teapot.backend.model.UserAuthority;
 import org.teapot.backend.repository.TeapotPropertyRepository;
 import org.teapot.backend.repository.UserRepository;
-import org.teapot.backend.repository.UserRoleRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 @Configuration
 @Profile("development")
@@ -25,10 +27,15 @@ public class DevelopmentProfileConfig {
     private UserRepository userRepository;
 
     @Autowired
-    private UserRoleRepository userRoleRepository;
+    private TeapotPropertyRepository propertyRepository;
 
     @Autowired
-    private TeapotPropertyRepository propertyRepository;
+    private PasswordEncoder passwordEncoder;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -43,118 +50,94 @@ public class DevelopmentProfileConfig {
     @Bean
     public CommandLineRunner loadData() {
         return args -> {
-            UserRole userRole = new UserRole();
-            UserRole leaderRole = new UserRole();
-            UserRole adminRole = new UserRole();
-
-            userRole.setName("user");
-            leaderRole.setName("leader");
-            adminRole.setName("admin");
-
-            userRoleRepository.save(userRole);
-            userRoleRepository.save(leaderRole);
-            userRoleRepository.save(adminRole);
-
-            User admin = new User();
-
-            admin.setUsername("admin@teapot.org");
-            admin.setPassword("1234");
-            admin.setFirstName("Cake");
-            admin.setLastName("Lover");
-            admin.setRegistrationDate(LocalDateTime.now());
-            admin.setBirthday(LocalDate.now());
-            admin.setDescription("i manage everything");
-            admin.getRoles().add(userRole);
-            admin.getRoles().add(adminRole);
-
-            userRepository.save(admin);
-
+            registerAdmin();
             registerDaleCooper();
             registerLoraPalmer();
             registerSherlockHolmes();
             registerDoctorWatson();
 
-            assignLeaderRoleToDaleCooper();
-            assignLeaderRoleToSherlockHolmes();
-
             addProperties();
         };
     }
 
+    private void registerAdmin() {
+        User admin = new User();
+
+        admin.setUsername("admin");
+        admin.setEmail("admin@teapot.org");
+        admin.setPassword(passwordEncoder.encode("1234"));
+        admin.setFirstName("Cake");
+        admin.setLastName("Lover");
+        admin.setRegistrationDate(LocalDateTime.now());
+        admin.setBirthday(LocalDate.now());
+        admin.setDescription("i manage everything");
+        admin.setAuthority(UserAuthority.ADMIN);
+
+        userRepository.save(admin);
+    }
+
     private void registerDaleCooper() {
         User user = new User();
-        UserRole userRole = userRoleRepository.getByName("user");
 
-        user.setUsername("dale_cooper@twin.peaks");
-        user.setPassword("1234");
+        user.setUsername("dale_cooper");
+        user.setEmail("dale_cooper@twin.peaks");
+        user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("Dale");
         user.setLastName("Cooper");
         user.setRegistrationDate(LocalDateTime.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("a special FBI agent");
-        user.getRoles().add(userRole);
+        user.setAuthority(UserAuthority.USER);
 
         userRepository.save(user);
     }
 
     private void registerLoraPalmer() {
         User user = new User();
-        UserRole userRole = userRoleRepository.getByName("user");
 
-        user.setUsername("lora_palmer@twin.peaks");
-        user.setPassword("1234");
+        user.setUsername("lora_palmer");
+        user.setEmail("lora_palmer@twin.peaks");
+        user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("Lora");
         user.setLastName("Palmer");
         user.setRegistrationDate(LocalDateTime.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("a dead girl");
-        user.getRoles().add(userRole);
+        user.setAuthority(UserAuthority.USER);
 
         userRepository.save(user);
     }
 
     private void registerSherlockHolmes() {
         User user = new User();
-        UserRole userRole = userRoleRepository.getByName("user");
 
-        user.setUsername("sherlock_holmes@baker.st");
-        user.setPassword("1234");
+        user.setUsername("sherlock_holmes");
+        user.setEmail("sherlock_holmes@baker.st");
+        user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("Sherlock");
         user.setLastName("Holmes");
         user.setRegistrationDate(LocalDateTime.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("private detective");
-        user.getRoles().add(userRole);
+        user.setAuthority(UserAuthority.USER);
 
         userRepository.save(user);
     }
 
     private void registerDoctorWatson() {
         User user = new User();
-        UserRole userRole = userRoleRepository.getByName("user");
 
-        user.setUsername("dr_watson@baker.st");
-        user.setPassword("1234");
+        user.setUsername("dr_watson");
+        user.setEmail("dr_watson@baker.st");
+        user.setPassword(passwordEncoder.encode("1234"));
         user.setFirstName("John");
         user.setLastName("Watson");
         user.setRegistrationDate(LocalDateTime.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("Sherlock Holmes' mate");
-        user.getRoles().add(userRole);
+        user.setAuthority(UserAuthority.USER);
 
         userRepository.save(user);
-    }
-
-    private void assignLeaderRoleToDaleCooper() {
-        User user = userRepository.findOne(2L);
-        UserRole leaderRole = userRoleRepository.getByName("leader");
-        user.getRoles().add(leaderRole);
-    }
-
-    private void assignLeaderRoleToSherlockHolmes() {
-        User user = userRepository.findOne(4L);
-        UserRole leaderRole = userRoleRepository.getByName("leader");
-        user.getRoles().add(leaderRole);
     }
 
     private void addProperties() {
