@@ -1,4 +1,4 @@
-package org.teapot.backend.model;
+package org.teapot.backend.model.meta;
 
 import javax.persistence.*;
 import java.io.Serializable;

@@ -3,7 +3,7 @@ package org.teapot.backend.test.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.teapot.backend.model.TeapotProperty;
+import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.repository.TeapotPropertyRepository;
 
 import java.util.Arrays;
