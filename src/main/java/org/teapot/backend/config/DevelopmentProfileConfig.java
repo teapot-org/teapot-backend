@@ -66,6 +66,7 @@ public class DevelopmentProfileConfig {
         admin.setUsername("admin");
         admin.setEmail("admin@teapot.org");
         admin.setPassword(passwordEncoder.encode("1234"));
+        admin.setActivated(true);
         admin.setFirstName("Cake");
         admin.setLastName("Lover");
         admin.setRegistrationDate(LocalDateTime.now());
@@ -82,6 +83,7 @@ public class DevelopmentProfileConfig {
         user.setUsername("dale_cooper");
         user.setEmail("dale_cooper@twin.peaks");
         user.setPassword(passwordEncoder.encode("1234"));
+        user.setActivated(true);
         user.setFirstName("Dale");
         user.setLastName("Cooper");
         user.setRegistrationDate(LocalDateTime.now());
@@ -98,6 +100,7 @@ public class DevelopmentProfileConfig {
         user.setUsername("lora_palmer");
         user.setEmail("lora_palmer@twin.peaks");
         user.setPassword(passwordEncoder.encode("1234"));
+        user.setActivated(true);
         user.setFirstName("Lora");
         user.setLastName("Palmer");
         user.setRegistrationDate(LocalDateTime.now());
@@ -114,6 +117,7 @@ public class DevelopmentProfileConfig {
         user.setUsername("sherlock_holmes");
         user.setEmail("sherlock_holmes@baker.st");
         user.setPassword(passwordEncoder.encode("1234"));
+        user.setActivated(true);
         user.setFirstName("Sherlock");
         user.setLastName("Holmes");
         user.setRegistrationDate(LocalDateTime.now());
@@ -130,6 +134,7 @@ public class DevelopmentProfileConfig {
         user.setUsername("dr_watson");
         user.setEmail("dr_watson@baker.st");
         user.setPassword(passwordEncoder.encode("1234"));
+        user.setActivated(true);
         user.setFirstName("John");
         user.setLastName("Watson");
         user.setRegistrationDate(LocalDateTime.now());

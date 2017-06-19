@@ -8,12 +8,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
 import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserAuthority;
 import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.util.VerificationMailSender;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
@@ -30,6 +32,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private VerificationMailSender verificationMailSender;
 
     /**
      * Метод доступен всем пользователям, в том числе и неавторизованным.
@@ -82,8 +87,8 @@ public class UserController {
      * указанным id не найден в базе данных - устанавливает код состояния
      * 404 Not Found, выбрасывая исключение {@link ResourceNotFoundException}.
      * Если пользователь с таким id найден, то его данные изменяются на новые
-     * данные (кроме даты регистрации). Если никаких ошибок не
-     * произошло - устаналивается код состояния 204 No Content.
+     * данные (кроме даты регистрации и значения isActivated). Если никаких
+     * ошибок не произошло - устаналивается код состояния 204 No Content.
      *
      * @param id   идентификатор изменяемого пользователя
      * @param user объект, содержащий новые данные пользователя
@@ -100,6 +105,7 @@ public class UserController {
 
         user.setId(id);
         user.setRegistrationDate(existingUser.getRegistrationDate());
+        user.setActivated(existingUser.isActivated());
         // если пароль изменился
         if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -160,6 +166,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public User registerUser(@RequestBody User user,
                              HttpServletResponse response,
+                             WebRequest request,
                              Authentication auth) {
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new BadRequestException();
@@ -167,11 +174,10 @@ public class UserController {
 
         user.setRegistrationDate(LocalDateTime.now());
         if (auth == null) {
-            user.setAuthority(UserAuthority.USER);
-            user.setAvailable(false);
-            userRepository.save(user);
-            // TODO: генерация VerificationToken и передача в почтовый сервис
+            user = userRepository.save(user);
+            verificationMailSender.createTokenAndSend(user, request.getLocale());
         } else if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
+            user.setActivated(true);
             userRepository.save(user);
         }
 
@@ -187,11 +193,11 @@ public class UserController {
      * неуказанные в параметрах данные не изменяются. Пользователь с
      * ролью ADMIN может изменить любыые данные, кроме даты регистрации.
      * Пользователь, идентификатор которого равен идентификатору в
-     * маппинге '/{id}', может изменить только username, firstName или
-     * lastName. В случае успеха устаналивает код состояния 204 No Content.
-     * В случае, если ресурс с указанным id не найден - код состояния
-     * 404 Not Found. Если доступ пользователю к ресурсу запрещен -
-     * код состояния 403 Forbidden.
+     * маппинге '/{id}', может изменить только username, firstName, lastName
+     * и isAvailable (отолько на false). В случае успеха устаналивает код
+     * состояния 204 No Content. В случае, если ресурс с указанным id не
+     * найден - код состояния 404 Not Found. Если доступ пользователю к
+     * ресурсу запрещен - код состояния 403 Forbidden.
      *
      * @param id          идентификатор пользователя, данные которого нужно
      *                    изменить
@@ -240,6 +246,7 @@ public class UserController {
         } else if (auth.getName().equals(user.getEmail())) {
 
             if (username != null) user.setUsername(firstName);
+            if ((available != null) && (!available)) user.setAvailable(false);
             if (firstName != null) user.setFirstName(firstName);
             if (lastName != null) user.setLastName(lastName);
             if (birthday != null) user.setBirthday(birthday);
