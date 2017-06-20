@@ -3,6 +3,7 @@ package org.teapot.backend.controller;
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -181,7 +182,7 @@ public class UserController {
             userRepository.save(user);
         }
 
-        response.setHeader("Location", "/users/" + user.getId());
+        response.setHeader(HttpHeaders.LOCATION, "/users/" + user.getId());
         return user;
     }
 
@@ -245,7 +246,7 @@ public class UserController {
 
         } else if (auth.getName().equals(user.getEmail())) {
 
-            if (username != null) user.setUsername(firstName);
+            if (username != null) user.setUsername(username);
             if ((available != null) && (!available)) user.setAvailable(false);
             if (firstName != null) user.setFirstName(firstName);
             if (lastName != null) user.setLastName(lastName);
