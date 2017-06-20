@@ -9,14 +9,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.teapot.backend.model.TeapotProperty;
+import org.teapot.backend.model.meta.TeapotAction;
+import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.model.User;
 import org.teapot.backend.model.UserAuthority;
+import org.teapot.backend.model.meta.TeapotResource;
+import org.teapot.backend.repository.TeapotActionRepository;
 import org.teapot.backend.repository.TeapotPropertyRepository;
+import org.teapot.backend.repository.TeapotResourceRepository;
 import org.teapot.backend.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 
 @Configuration
@@ -28,6 +33,12 @@ public class DevelopmentProfileConfig {
 
     @Autowired
     private TeapotPropertyRepository propertyRepository;
+
+    @Autowired
+    private TeapotActionRepository actionRepository;
+
+    @Autowired
+    private TeapotResourceRepository resourceRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -57,6 +68,8 @@ public class DevelopmentProfileConfig {
             registerDoctorWatson();
 
             addProperties();
+            addResources();
+            addActions();
         };
     }
 
@@ -157,5 +170,30 @@ public class DevelopmentProfileConfig {
 
         propertyRepository.save(property1);
         propertyRepository.save(property2);
+    }
+
+    private void addResources() {
+        TeapotResource resource1 = new TeapotResource();
+
+        resource1.setName("user");
+        resource1.setUri("/users");
+        resource1.setDescription(
+                "Available methods:\n\nGET /users/{id|username}\n" +
+                "POST /users\nPUT /users\nDELETE /users/{id}\n\n");
+
+        resourceRepository.save(resource1);
+    }
+
+    private void addActions() {
+        TeapotAction action1 = new TeapotAction();
+        TeapotAction action2 = new TeapotAction();
+
+        action1.setName("help");
+        action1.setUsage("/actions/help?resource={name|id}|action={name|id}");
+
+        action2.setName("activate");
+        action2.setUsage("/actions/activate?user={username|id}&token={token}");
+
+        actionRepository.save(Arrays.asList(action1, action2));
     }
 }

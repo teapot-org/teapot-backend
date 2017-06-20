@@ -3,6 +3,6 @@ package org.teapot.backend.controller.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class ForbiddenException extends RuntimeException {
+@ResponseStatus(HttpStatus.CONFLICT)
+public class ConflictException extends RuntimeException {
 }
