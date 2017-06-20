@@ -1,5 +1,7 @@
 package org.teapot.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +28,9 @@ public class User {
     @Column(name = "is_available")
     private Boolean isAvailable = true;
 
+    @Column(name = "is_activated")
+    private Boolean isActivated = false;
+
     @Column(name = "first_name", length = 32)
     private String firstName;
 
@@ -41,6 +46,10 @@ public class User {
     private LocalDate birthday;
 
     private String description;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    private VerificationToken verificationToken;
 
     public User() {
     }
@@ -83,6 +92,14 @@ public class User {
 
     public void setAvailable(Boolean available) {
         isAvailable = available;
+    }
+
+    public Boolean isActivated() {
+        return isActivated;
+    }
+
+    public void setActivated(Boolean activated) {
+        isActivated = activated;
     }
 
     public String getFirstName() {
@@ -131,6 +148,14 @@ public class User {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public VerificationToken getVerificationToken() {
+        return verificationToken;
+    }
+
+    public void setVerificationToken(VerificationToken verificationToken) {
+        this.verificationToken = verificationToken;
     }
 
     @Override
