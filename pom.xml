@@ -35,9 +35,6 @@
     <!-- Hibernate -->
     <hibernate.version>5.2.10.Final</hibernate.version>
 
-    <!--Jackson java8time Serializer/Deserializer-->
-    <jackson-datatype-jsr310.version>2.8.5</jackson-datatype-jsr310.version>
-
     <!--Google Guava-->
     <guava.version>22.0</guava.version>
   </properties>
@@ -136,7 +133,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>${jackson-datatype-jsr310.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
@@ -144,6 +140,12 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

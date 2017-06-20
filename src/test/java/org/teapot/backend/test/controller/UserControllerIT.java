@@ -1,16 +1,19 @@
 package org.teapot.backend.test.controller;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.teapot.backend.model.User;
-import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.model.UserAuthority;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARER_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -19,23 +22,17 @@ public class UserControllerIT extends AbstractControllerIT {
 
     private static final String API_URL = "/users";
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     private User getUserOne = new User();
     private User getUserTwo = new User();
-    private User postUser = new User();
+    private User postUserOne = new User();
+    private User postUserTwo = new User();
     private User repeatedPostUser = new User();
     private User updateUser = new User();
     private User deleteUser = new User();
+    private User patchUser = new User();
 
     @Before
-    public void init() {
-        userRepository.deleteAllInBatch();
-
+    public void addTestUsers() {
         getUserOne.setUsername("getUserOne");
         getUserOne.setEmail("getUserOne@mail.com");
         getUserOne.setPassword(passwordEncoder.encode("pass"));
@@ -46,9 +43,13 @@ public class UserControllerIT extends AbstractControllerIT {
         getUserTwo.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserTwo);
 
-        postUser.setUsername("postUser");
-        postUser.setEmail("postUser@mail.com");
-        postUser.setPassword(passwordEncoder.encode("pass"));
+        postUserOne.setUsername("postUser");
+        postUserOne.setEmail("postUser@mail.com");
+        postUserOne.setPassword(passwordEncoder.encode("pass"));
+
+        postUserTwo.setUsername("postUser");
+        postUserTwo.setEmail("postUser@mail.com");
+        postUserTwo.setPassword(passwordEncoder.encode("pass"));
 
         repeatedPostUser.setUsername("repeatedPostUser");
         repeatedPostUser.setEmail("repeatedPostUser@mail.com");
@@ -64,7 +65,14 @@ public class UserControllerIT extends AbstractControllerIT {
         deleteUser.setEmail("deleteUser@mail.com");
         deleteUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(deleteUser);
+
+        patchUser.setUsername("patchUser");
+        patchUser.setEmail("patchUser@mail.com");
+        patchUser.setPassword(passwordEncoder.encode("pass"));
+        userRepository.save(patchUser);
     }
+
+    // GET
 
     @Test
     public void getUsersTest() throws Exception {
@@ -100,50 +108,180 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isNotFound());
     }
 
+    // POST
+
     @Test
-    public void registerUserTest() throws Exception {
+    public void registerUserTestByAnonymous() throws Exception {
         mockMvc.perform(post(API_URL)
-                .content(json(postUser))
+                .content(json(postUserOne))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", containsString(API_URL)));
     }
 
     @Test
-    public void repeatRegisterUserTest() throws Exception {
+    public void registerUserTestByUser() throws Exception {
         mockMvc.perform(post(API_URL)
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
+                .content(json(postUserTwo))
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void registerUserTestByAdmin() throws Exception {
+        mockMvc.perform(post(API_URL)
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
+                .content(json(postUserTwo))
+                .contentType(contentType))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", containsString(API_URL)));
+    }
+
+    @Test
+    public void repeatRegisterUserTestByAdmin() throws Exception {
+        mockMvc.perform(post(API_URL)
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
                 .content(json(repeatedPostUser))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().doesNotExist("Location"));
     }
 
+    // PUT
+
     @Test
-    public void updateUserTest() throws Exception {
+    public void updateUserTestByAnonymous() throws Exception {
         updateUser.setBirthday(LocalDate.now());
         mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
+                .content(json(updateUser))
+                .contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void updateUserTestByUser() throws Exception {
+        updateUser.setBirthday(LocalDate.now());
+        mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
+                .content(json(updateUser))
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void updateUserTestByAdmin() throws Exception {
+        updateUser.setBirthday(LocalDate.now());
+        mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
                 .content(json(updateUser))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void updateNotExistsUserTest() throws Exception {
+    public void updateNotExistsUserTestByAdmin() throws Exception {
         mockMvc.perform(put(String.format("%s/-1", API_URL))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
                 .content(json(updateUser))
                 .contentType(contentType))
                 .andExpect(status().isNotFound());
     }
 
+    // DELETE
+
     @Test
-    public void deleteUserTest() throws Exception {
+    public void deleteUserTestByAnonymous() throws Exception {
         mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void deleteUserTestByUser() throws Exception {
+        mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void deleteUserTestByAdmin() throws Exception {
+        mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void deleteNotExistsUserTest() throws Exception {
-        mockMvc.perform(delete(String.format("%s/-1", API_URL)))
+    public void deleteNotExistsUserTestByAdmin() throws Exception {
+        mockMvc.perform(delete(String.format("%s/-1", API_URL))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
+                .andExpect(status().isNotFound());
+    }
+
+    // PATCH
+
+    @Test
+    public void patchUserTestByAnonymous() throws Exception {
+        mockMvc.perform(patch(String.format("%s/%d", API_URL, patchUser.getId())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void patchUserTestByUserSameId() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("username", "newUserWithUserRole");
+        params.add("firstName", "Bob");
+        params.add("lastName", "Brown");
+
+        mockMvc.perform(patch(String.format("%s/%d", API_URL, userWithUserRole.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
+                .params(params))
+                .andExpect(status().isNoContent());
+
+        User newUserWithUserRole = userRepository.findOne(userWithUserRole.getId());
+        Assert.assertEquals("newUserWithUserRole", newUserWithUserRole.getUsername());
+        Assert.assertEquals("Bob", newUserWithUserRole.getFirstName());
+        Assert.assertEquals("Brown", newUserWithUserRole.getLastName());
+    }
+
+    @Test
+    public void patchUserTestByUserNotSameId() throws Exception {
+        mockMvc.perform(patch(String.format("%s/%d", API_URL, patchUser.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void patchUserTestByAdmin() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("username", "newPatchUser");
+        params.add("email", "newPatchUser@test.org");
+        params.add("password", "123456");
+        params.add("available", "false");
+        params.add("firstName", "Bob");
+        params.add("lastName", "Brown");
+        params.add("authority", "ADMIN");
+        params.add("description", "newPatchUser");
+
+        mockMvc.perform(patch(String.format("%s/%d", API_URL, patchUser.getId()))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
+                .params(params))
+                .andExpect(status().isNoContent());
+
+        User newPatchUser = userRepository.findOne(patchUser.getId());
+        Assert.assertEquals("newPatchUser", newPatchUser.getUsername());
+        Assert.assertEquals("newPatchUser@test.org", newPatchUser.getEmail());
+        Assert.assertTrue(passwordEncoder.matches("123456", newPatchUser.getPassword()));
+        Assert.assertFalse(newPatchUser.isAvailable());
+        Assert.assertEquals("Bob", newPatchUser.getFirstName());
+        Assert.assertEquals("Brown", newPatchUser.getLastName());
+        Assert.assertEquals(UserAuthority.ADMIN, newPatchUser.getAuthority());
+        Assert.assertEquals("newPatchUser", newPatchUser.getDescription());
+    }
+
+    @Test
+    public void patchNotExistsUserTestByAdmin() throws Exception {
+        mockMvc.perform(patch(String.format("%s/-1", API_URL))
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
                 .andExpect(status().isNotFound());
     }
 }
