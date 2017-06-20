@@ -17,9 +17,6 @@ public class VerificationToken {
     @Column(nullable = false)
     private LocalDateTime expireDateTime = LocalDateTime.now().plusDays(1);
 
-    @Column(name = "is_activated")
-    private Boolean isActivated = false;
-
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
@@ -38,10 +35,6 @@ public class VerificationToken {
         return expireDateTime;
     }
 
-    public Boolean isActivated() {
-        return isActivated;
-    }
-
     public User getUser() {
         return user;
     }
@@ -56,10 +49,6 @@ public class VerificationToken {
 
     public void setExpireDateTime(LocalDateTime expireDateTime) {
         this.expireDateTime = expireDateTime;
-    }
-
-    public void setActivated(Boolean activated) {
-        isActivated = activated;
     }
 
     public void setUser(User user) {

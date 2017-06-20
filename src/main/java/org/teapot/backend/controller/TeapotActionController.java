@@ -2,14 +2,22 @@ package org.teapot.backend.controller;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
+import org.teapot.backend.controller.exception.BadRequestException;
+import org.teapot.backend.controller.exception.ConflictException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
+import org.teapot.backend.model.User;
+import org.teapot.backend.model.VerificationToken;
 import org.teapot.backend.model.meta.TeapotAction;
-import org.teapot.backend.model.meta.TeapotResource;
 import org.teapot.backend.repository.TeapotActionRepository;
 import org.teapot.backend.repository.TeapotResourceRepository;
+import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.repository.VerificationTokenRepository;
+import org.teapot.backend.util.VerificationMailSender;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/actions")
@@ -21,55 +29,69 @@ public class TeapotActionController {
     @Autowired
     private TeapotResourceRepository resourceRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private VerificationTokenRepository tokenRepository;
+
+    @Autowired
+    private VerificationMailSender verificationMailSender;
+
     @GetMapping("/{nameOrId}")
     public TeapotAction getAction(@PathVariable String nameOrId) {
-        TeapotAction action;
-
-        Long id = Long.valueOf(nameOrId);
-
-        if (id != null) {
-            action = actionRepository.findOne(id);
-        } else {
-            action = actionRepository.findByName(nameOrId);
-        }
-
-        if (action == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        return action;
+        Long id = Longs.tryParse(nameOrId);
+        return Optional.ofNullable((id != null)
+                ? actionRepository.findOne(id)
+                : actionRepository.findByName(nameOrId))
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @GetMapping("/help")
-    public ResponseEntity<?> help(
-            @RequestParam(name = "resource") String resourceNameOrId
+    public Object help(
+            @RequestParam(name = "resource", required = false) String resourceNameOrId,
+            @RequestParam(name = "action", required = false) String actionNameOrId
     ) {
-        if (resourceNameOrId != null) {
-            TeapotResource resource;
-
-            Long id = Longs.tryParse(resourceNameOrId);
-
-            if (id != null) {
-                resource = resourceRepository.findOne(id);
-            } else {
-                resource = resourceRepository.findByName(resourceNameOrId);
-            }
-
-            if (resource == null) {
-                throw new ResourceNotFoundException();
-            }
-
-            return new ResponseEntity<>(resource, HttpStatus.OK);
+        if ((resourceNameOrId != null) && (actionNameOrId != null)) {
+            throw new ConflictException();
         }
 
-        return new ResponseEntity(null, HttpStatus.NOT_FOUND);
+        if (resourceNameOrId != null) {
+            Long id = Longs.tryParse(resourceNameOrId);
+            return Optional.ofNullable((id != null)
+                    ? resourceRepository.findOne(id)
+                    : resourceRepository.findByName(resourceNameOrId))
+                    .orElseThrow(ResourceNotFoundException::new);
+        }
+
+        if (actionNameOrId != null) {
+            Long id = Longs.tryParse(actionNameOrId);
+            return Optional.ofNullable((id != null)
+                    ? actionRepository.findOne(id)
+                    : actionRepository.findByName(actionNameOrId))
+                    .orElseThrow(ResourceNotFoundException::new);
+        }
+
+        throw new BadRequestException();
     }
 
     @PostMapping("/activate")
     public void activate(
-            @RequestParam(name = "user") String usernameOrId,
-            @RequestParam String token
+            @RequestParam("token") String tokenString,
+            WebRequest request
     ) {
-        // todo
+        VerificationToken token = Optional
+                .ofNullable(tokenRepository.findByToken(tokenString))
+                .orElseThrow(ResourceNotFoundException::new);
+        User user = token.getUser();
+
+        tokenRepository.delete(token);
+
+        if (token.getExpireDateTime().isAfter(LocalDateTime.now())) {
+            user.setActivated(true);
+            userRepository.save(user);
+        } else {
+            verificationMailSender.createTokenAndSend(user, request.getLocale());
+        }
     }
 }
