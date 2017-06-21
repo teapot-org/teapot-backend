@@ -16,9 +16,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserAuthority;
-import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.UserAuthority;
+import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
 import java.io.IOException;

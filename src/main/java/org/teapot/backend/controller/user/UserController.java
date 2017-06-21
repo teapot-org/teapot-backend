@@ -1,4 +1,4 @@
-package org.teapot.backend.controller;
+package org.teapot.backend.controller.user;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserAuthority;
-import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.UserAuthority;
+import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.VerificationMailSender;
 
 import javax.servlet.http.HttpServletResponse;

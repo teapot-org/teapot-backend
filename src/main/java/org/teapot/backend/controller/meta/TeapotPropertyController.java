@@ -1,4 +1,4 @@
-package org.teapot.backend.controller;
+package org.teapot.backend.controller.meta;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
 import org.teapot.backend.model.meta.TeapotProperty;
-import org.teapot.backend.repository.TeapotPropertyRepository;
+import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;

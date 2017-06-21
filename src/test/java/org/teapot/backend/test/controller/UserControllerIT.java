@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserAuthority;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.UserAuthority;
 
 import java.time.LocalDate;
 import java.util.List;

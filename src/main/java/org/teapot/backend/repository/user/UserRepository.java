@@ -1,7 +1,7 @@
-package org.teapot.backend.repository;
+package org.teapot.backend.repository.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.teapot.backend.model.User;
+import org.teapot.backend.model.user.User;
 
 import javax.transaction.Transactional;
 

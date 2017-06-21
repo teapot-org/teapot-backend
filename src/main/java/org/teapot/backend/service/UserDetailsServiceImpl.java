@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.teapot.backend.model.User;
-import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.repository.user.UserRepository;
 
 import java.util.Collections;
 
