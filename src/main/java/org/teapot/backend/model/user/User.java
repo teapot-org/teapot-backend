@@ -166,12 +166,14 @@ public class User {
                 email,
                 password,
                 isAvailable,
+                isActivated,
                 firstName,
                 lastName,
                 authority,
                 registrationDate,
                 birthday,
-                description
+                description,
+                verificationToken
         );
     }
 
@@ -189,11 +191,13 @@ public class User {
                 && Objects.equals(this.email, other.email)
                 && Objects.equals(this.password, other.password)
                 && Objects.equals(this.isAvailable, other.isAvailable)
+                && Objects.equals(this.isActivated, other.isActivated)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
                 && Objects.equals(this.authority, other.authority)
                 && Objects.equals(this.registrationDate, other.registrationDate)
                 && Objects.equals(this.birthday, other.birthday)
-                && Objects.equals(this.description, other.description);
+                && Objects.equals(this.description, other.description)
+                && Objects.equals(this.verificationToken, other.verificationToken);
     }
 }

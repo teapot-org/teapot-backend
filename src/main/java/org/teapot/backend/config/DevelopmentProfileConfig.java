@@ -11,12 +11,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.meta.TeapotProperty;
-import org.teapot.backend.model.meta.TeapotResource;
+import org.teapot.backend.model.organization.Member;
+import org.teapot.backend.model.organization.MemberStatus;
+import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
+import org.teapot.backend.model.meta.TeapotResource;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
+import org.teapot.backend.repository.organization.MemberRepository;
+import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
 
 import java.time.LocalDate;
@@ -42,6 +47,12 @@ public class DevelopmentProfileConfig {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,6 +81,8 @@ public class DevelopmentProfileConfig {
             addProperties();
             addResources();
             addActions();
+            addOrganizations();
+            addMembers();
         };
     }
 
@@ -195,5 +208,47 @@ public class DevelopmentProfileConfig {
         action2.setUsage("/actions/activate?user={username|id}&token={token}");
 
         actionRepository.save(Arrays.asList(action1, action2));
+    }
+
+    private void addOrganizations() {
+        Organization teapot = new Organization();
+        teapot.setName("teapot");
+        teapot.setCreationDate(LocalDate.now());
+        organizationRepository.save(teapot);
+
+        Organization someOrganization = new Organization();
+        someOrganization.setName("someOrganization");
+        someOrganization.setCreationDate(LocalDate.now());
+        organizationRepository.save(someOrganization);
+    }
+
+    private void addMembers() {
+        Member member1 = new Member();
+        member1.setAdmissionDate(LocalDate.now());
+        member1.setOrganization(organizationRepository.findByName("teapot"));
+        member1.setUser(userRepository.findByUsername("dr_watson"));
+        member1.setStatus(MemberStatus.CREATOR);
+        memberRepository.save(member1);
+
+        Member member2 = new Member();
+        member2.setAdmissionDate(LocalDate.now());
+        member2.setOrganization(organizationRepository.findByName("teapot"));
+        member2.setUser(userRepository.findByUsername("lora_palmer"));
+        member2.setStatus(MemberStatus.WORKER);
+        memberRepository.save(member2);
+
+        Member member3 = new Member();
+        member3.setAdmissionDate(LocalDate.now());
+        member3.setOrganization(organizationRepository.findByName("someOrganization"));
+        member3.setUser(userRepository.findByUsername("dale_cooper"));
+        member3.setStatus(MemberStatus.CREATOR);
+        memberRepository.save(member3);
+
+        Member member4 = new Member();
+        member4.setAdmissionDate(LocalDate.now());
+        member4.setOrganization(organizationRepository.findByName("someOrganization"));
+        member4.setUser(userRepository.findByUsername("sherlock_holmes"));
+        member4.setStatus(MemberStatus.OWNER);
+        memberRepository.save(member4);
     }
 }
