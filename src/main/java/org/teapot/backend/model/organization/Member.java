@@ -24,12 +24,29 @@ public class Member implements Serializable {
     @Enumerated
     private MemberStatus status;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Organization organization;
 
     @Column(name = "admission_date")
     private LocalDate admissionDate;
+
+    public Member() {
+    }
+
+    public Member(Long id, User user, MemberStatus status, Organization organization, LocalDate admissionDate) {
+        this.id = id;
+        this.user = user;
+        this.status = status;
+        this.organization = organization;
+        this.admissionDate = admissionDate;
+    }
+
+    public Member(User user, MemberStatus status, Organization organization, LocalDate admissionDate) {
+        this.user = user;
+        this.status = status;
+        this.organization = organization;
+        this.admissionDate = admissionDate;
+    }
 
     public Long getId() {
         return id;

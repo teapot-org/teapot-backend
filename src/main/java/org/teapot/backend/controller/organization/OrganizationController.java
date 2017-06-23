@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
+import org.teapot.backend.dto.MemberDto;
+import org.teapot.backend.dto.OrganizationDto;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -18,10 +20,12 @@ import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
+import org.teapot.backend.util.converters.Converter;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -38,6 +42,9 @@ public class OrganizationController {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private Converter converter;
+
     private Organization findOrganizationByIdOrName(String idOrName) {
         Long id = Longs.tryParse(idOrName);
         return ofNullable((id != null)
@@ -47,7 +54,7 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN.
+     * Метод доступен сем авторизованным пользователям
      * Возвращает список всех организаций, либо список не всех организаций,
      * если в параметрах запроса указаны номер страницы, количество элементов
      * на странице и порядок сортировки.
@@ -57,15 +64,17 @@ public class OrganizationController {
      *                 кол-во элементов на странице, порядок сортировки
      * @return сформированный список организаций
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
-    public List<Organization> getOrganizations(Pageable pageable) {
-        return organizationRepository.findAll(pageable).getContent();
+    public List<OrganizationDto> getOrganizations(Pageable pageable) {
+        return organizationRepository.findAll(pageable).getContent()
+                .stream()
+                .map(organization -> converter.convert(organization))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN или участникам
-     * организации.
+     * Метод доступен всем авторизованным пользователям.
      * Ищет в базе данных организацию с указанным id или name. Если
      * организация найдена, возвращает эту организацию и устаналивает код
      * состояния 200 OK; если организация не найдена - устаналивает код
@@ -78,7 +87,7 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{idOrName:.+}")
-    public Organization getOrganization(
+    public OrganizationDto getOrganization(
             @PathVariable String idOrName,
             Authentication auth
     ) {
@@ -87,15 +96,7 @@ public class OrganizationController {
             throw new ResourceNotFoundException();
         }
 
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
-
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null)) {
-            return organization;
-        }
-        throw new ForbiddenException();
+        return converter.convert(organization);
     }
 
     /**
@@ -145,19 +146,21 @@ public class OrganizationController {
      * добавлением в список members создателя организации со статусом
      * CREATOR
      *
-     * @param organization данные нового пользователя
-     * @param response     объект, содержащий заголовки ответа
-     * @param auth         данные об аутентификации пользователя
+     * @param organizationDto данные нового пользователя
+     * @param response        объект, содержащий заголовки ответа
+     * @param auth            данные об аутентификации пользователя
      * @return добавленный пользователь
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Organization createOrganization(
-            @RequestBody Organization organization,
+    public OrganizationDto createOrganization(
+            @RequestBody OrganizationDto organizationDto,
             HttpServletResponse response,
             Authentication auth
     ) {
+        Organization organization = converter.convert(organizationDto);
+
         if (organizationRepository.findByName(organization.getName()) != null) {
             throw new BadRequestException();
         }
@@ -175,7 +178,7 @@ public class OrganizationController {
 
         response.setHeader(HttpHeaders.LOCATION,
                 "/organizations/" + organization.getId());
-        return organization;
+        return converter.convert(organization);
     }
 
     /**
@@ -248,7 +251,7 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members")
-    public List<Member> getOrganizationMembers(
+    public List<MemberDto> getOrganizationMembers(
             @PathVariable String organizationIdOrName,
             Pageable pageable,
             Authentication auth
@@ -267,7 +270,9 @@ public class OrganizationController {
 
         if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
                 || (authMember != null)) {
-            return members;
+            return members.stream()
+                    .map(member -> converter.convert(member))
+                    .collect(Collectors.toList());
         }
         throw new ForbiddenException();
     }
@@ -289,7 +294,7 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members/{memberId}")
-    public Member getOrganizationMember(
+    public MemberDto getOrganizationMember(
             @PathVariable String organizationIdOrName,
             @PathVariable Long memberId,
             Authentication auth
@@ -309,7 +314,7 @@ public class OrganizationController {
 
         if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
                 || (authMember != null)) {
-            return returnMember;
+            return converter.convert(returnMember);
         }
         throw new ForbiddenException();
     }
@@ -322,17 +327,19 @@ public class OrganizationController {
      * организация не существует, устаналивает код состояния 404 Not Found.
      *
      * @param organizationId id организации
-     * @param member         новый участник
+     * @param memberDto         новый участник
      */
     // todo: приглашение нового участника
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{organizationId}/members")
     @ResponseStatus(HttpStatus.CREATED)
-    public Member addMember(
+    public MemberDto addMember(
             @PathVariable Long organizationId,
-            @RequestBody Member member,
+            @RequestBody MemberDto memberDto,
             HttpServletResponse response
     ) {
+        Member member = converter.convert(memberDto);
+
         Organization organization = ofNullable(
                 organizationRepository.findOne(organizationId))
                 .orElseThrow(ResourceNotFoundException::new);
@@ -348,7 +355,7 @@ public class OrganizationController {
         response.setHeader(HttpHeaders.LOCATION,
                 String.format("/organizations/%d/members/%d",
                         organizationId, member.getId()));
-        return member;
+        return converter.convert(member);
     }
 
     /**

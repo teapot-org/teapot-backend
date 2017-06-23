@@ -30,6 +30,21 @@ public class Organization {
     public Organization() {
     }
 
+    public Organization(Long id, String name, String fullName, LocalDate creationDate, Set<Member> members) {
+        this.id = id;
+        this.name = name;
+        this.fullName = fullName;
+        this.creationDate = creationDate;
+        this.members = members;
+    }
+
+    public Organization(String name, String fullName, LocalDate creationDate, Set<Member> members) {
+        this.name = name;
+        this.fullName = fullName;
+        this.creationDate = creationDate;
+        this.members = members;
+    }
+
     public Long getId() {
         return id;
     }
