@@ -17,12 +17,19 @@ public class OrganizationDto {
     public OrganizationDto() {
     }
 
-    public OrganizationDto(Long id, String name, String fullName, LocalDate creationDate, String membersLink) {
+    public OrganizationDto(String name, String fullName, LocalDate creationDate, Link members) {
+        this.name = name;
+        this.fullName = fullName;
+        this.creationDate = creationDate;
+        this.members = members;
+    }
+
+    public OrganizationDto(Long id, String name, String fullName, LocalDate creationDate, Link members) {
         this.id = id;
         this.name = name;
         this.fullName = fullName;
         this.creationDate = creationDate;
-        this.members = new Link(membersLink);
+        this.members = members;
     }
 
     public Long getId() {

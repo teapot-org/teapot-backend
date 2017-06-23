@@ -179,7 +179,7 @@ public class DevelopmentProfileConfig {
         property1.setValue("1");
 
         property2.setName("site-uri");
-        property2.setValue("localhost:8080");
+        property2.setValue("http://localhost:8080");
 
         propertyRepository.save(property1);
         propertyRepository.save(property2);

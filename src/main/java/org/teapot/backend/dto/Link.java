@@ -1,7 +1,5 @@
 package org.teapot.backend.dto;
 
-import org.teapot.backend.Application;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,9 +10,9 @@ public class Link implements CharSequence, Serializable {
     public Link() {
     }
 
-    public Link(String relativeLink) {
-        if (relativeLink != null) {
-            value = Application.SITE_URL + relativeLink;
+    public Link(String link) {
+        if (link != null) {
+            value = link;
         }
     }
 

@@ -26,11 +26,11 @@ public class MemberDto {
         this.admissionDate = admissionDate;
     }
 
-    public MemberDto(Long id, String userLink, MemberStatus status, String organizationLink, LocalDate admissionDate) {
+    public MemberDto(Long id, Link user, MemberStatus status, Link organization, LocalDate admissionDate) {
         this.id = id;
-        this.user = new Link(userLink);
+        this.user = user;
         this.status = status;
-        this.organization = new Link(organizationLink);
+        this.organization = organization;
         this.admissionDate = admissionDate;
     }
 

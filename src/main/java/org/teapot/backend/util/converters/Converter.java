@@ -11,6 +11,7 @@ import org.teapot.backend.dto.OrganizationDto;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.util.LinkBuilder;
 
 import java.util.Set;
 
@@ -29,6 +30,9 @@ public class Converter {
     @Autowired
     private RestTemplate template;
 
+    @Autowired
+    private LinkBuilder linkBuilder;
+
     public Organization convert(OrganizationDto source) {
         Set<Member> members = (Set<Member>)template.getForObject(source.getMembers().toString(), Set.class);
         return new Organization(
@@ -46,7 +50,7 @@ public class Converter {
                 source.getName(),
                 source.getFullName(),
                 source.getCreationDate(),
-                String.format("/organizations/%s/members", source.getId())
+                linkBuilder.format("/organizations/%s/members", source.getId())
         );
     }
 
@@ -65,9 +69,9 @@ public class Converter {
     public MemberDto convert(Member source) {
         return new MemberDto(
                 source.getId(),
-                String.format("/users/%d", source.getId()),
+                linkBuilder.format("/users/%d", source.getId()),
                 source.getStatus(),
-                String.format("/organizations/%d", source.getOrganization().getId()),
+                linkBuilder.format("/organizations/%d", source.getOrganization().getId()),
                 source.getAdmissionDate()
         );
     }
