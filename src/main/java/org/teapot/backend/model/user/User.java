@@ -49,7 +49,6 @@ public class User {
 
     private String description;
 
-    @JsonIgnore
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private VerificationToken verificationToken;
 

@@ -3,6 +3,7 @@ package org.teapot.backend.test.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 
@@ -78,7 +79,7 @@ public class TeapotPropertyControllerIT extends AbstractControllerIT {
         mockMvc.perform(post(API_URL).content(json(nonexistentProperty))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString(API_URL)));
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString(API_URL)));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class TeapotPropertyControllerIT extends AbstractControllerIT {
         mockMvc.perform(post(API_URL).content(json(existentProperty))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().doesNotExist("Location"));
+                .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
     }
 
     @Test

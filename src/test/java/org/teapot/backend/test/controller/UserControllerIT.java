@@ -3,6 +3,7 @@ package org.teapot.backend.test.controller;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.teapot.backend.model.user.User;
@@ -84,11 +85,9 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
                 .andExpect(jsonPath("$[0].username", is(all.get(0).getUsername())))
                 .andExpect(jsonPath("$[0].email", is(all.get(0).getEmail())))
-                .andExpect(jsonPath("$[0].password", is(all.get(0).getPassword())))
                 .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())))
                 .andExpect(jsonPath("$[1].username", is(all.get(1).getUsername())))
-                .andExpect(jsonPath("$[1].email", is(all.get(1).getEmail())))
-                .andExpect(jsonPath("$[1].password", is(all.get(1).getPassword())));
+                .andExpect(jsonPath("$[1].email", is(all.get(1).getEmail())));
     }
 
     @Test
@@ -98,8 +97,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
                 .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
-                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())))
-                .andExpect(jsonPath("$.password", is(getUserOne.getPassword())));
+                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
     @Test
@@ -116,7 +114,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .content(json(postUserOne))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString(API_URL)));
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString(API_URL)));
     }
 
     @Test
@@ -135,7 +133,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .content(json(postUserTwo))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString(API_URL)));
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString(API_URL)));
     }
 
     @Test
@@ -145,7 +143,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .content(json(repeatedPostUser))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
-                .andExpect(header().doesNotExist("Location"));
+                .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
     }
 
     // PUT

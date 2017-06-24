@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.node.NumericNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.teapot.backend.model.organization.Member;
@@ -38,19 +38,25 @@ public class MemberDeserializer extends StdDeserializer<Member> {
     public Member deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         TreeNode node = p.getCodec().readTree(p);
 
-        NumericNode idNode = (NumericNode) node.get("id");
-        Long id = idNode != null ? idNode.asLong() : null;
+        ValueNode idNode = (ValueNode) node.get("id");
+        Long id = (idNode instanceof NullNode) || (idNode == null)
+                ? null
+                : idNode.asLong();
 
-        NumericNode userIdNode = (NumericNode) node.get("userId");
-        User user = userIdNode != null ? userRepository.findOne(userIdNode.asLong()) : null;
+        ValueNode userIdNode = (ValueNode) node.get("userId");
+        User user = (userIdNode instanceof NullNode) || (userIdNode == null)
+                ? null
+                : userRepository.findOne(userIdNode.asLong());
 
-        TextNode statusNode = (TextNode) node.get("status");
-        MemberStatus status = statusNode != null ? MemberStatus.valueOf(statusNode.asText()) : null;
+        ValueNode statusNode = (ValueNode) node.get("status");
+        MemberStatus status = (statusNode instanceof NullNode) || (statusNode == null)
+                ? null
+                : MemberStatus.valueOf(statusNode.asText());
 
-        NumericNode organizationIdNode = (NumericNode) node.get("organizationId");
-        Organization organization = organizationIdNode != null
-                ? organizationRepository.findOne(organizationIdNode.asLong())
-                : null;
+        ValueNode organizationIdNode = (ValueNode) node.get("organizationId");
+        Organization organization = (organizationIdNode instanceof NullNode) || (organizationIdNode == null)
+                ? null
+                : organizationRepository.findOne(organizationIdNode.asLong());
 
         return new Member(
                 id,

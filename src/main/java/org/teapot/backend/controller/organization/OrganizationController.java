@@ -47,15 +47,15 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен сем авторизованным пользователям
-     * Возвращает список всех организаций, либо список не всех организаций,
-     * если в параметрах запроса указаны номер страницы, количество элементов
-     * на странице и порядок сортировки.
-     * Устаналивает код состояния 200 OK
-     *
-     * @param pageable объект, содержащий параметры запроса - номер страницы,
-     *                 кол-во элементов на странице, порядок сортировки
-     * @return сформированный список организаций
+     * GET /organizations
+     * ?[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
+     * <p>
+     * Доступен всем авторизованным пользователям.
+     * Возвращает список всех организаций (или не всех, при указании параметров в запросе).
+     * <p>
+     * Возможные коды состояний:
+     * 200 OK
+     * 401 Unauthorized
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping
@@ -64,22 +64,20 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен всем авторизованным пользователям.
-     * Ищет в базе данных организацию с указанным id или name. Если
-     * организация найдена, возвращает эту организацию и устаналивает код
-     * состояния 200 OK; если организация не найдена - устаналивает код
-     * состояния 404 Not Found, выбрасывая исключение
-     * {@link ResourceNotFoundException}
-     *
-     * @param idOrName id или name организации
-     * @param auth     данные об аутентификации пользователя
-     * @return найденная организация
+     * GET /organizations/{idOrName}
+     * <p>
+     * Доступен всем авторизованным пользователям.
+     * Возвращает организацию с указанным id или name.
+     * <p>
+     * Возможные коды состояний:
+     * 200 OK
+     * 401 Unauthorized
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{idOrName:.+}")
     public Organization getOrganization(
-            @PathVariable String idOrName,
-            Authentication auth
+            @PathVariable String idOrName
     ) {
         Organization organization = findOrganizationByIdOrName(idOrName);
         if (organization == null) {
@@ -90,15 +88,16 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN или владельцам
-     * (или создателям) организации.
-     * Удаляет организацию с указанным id, если такая организация существует.
-     * После удаления устаналивает код состояния 204 No Content. Если
-     * организация с указанным id не найдена, устаналивает код состояния
-     * 404 Not Found, выбрасывая исключение {@link ResourceNotFoundException}.
-     *
-     * @param organizationId id удаляемой организации
-     * @param auth           данные об аутентификации пользователя
+     * DELETE /organizations/{id}
+     * <p>
+     * Доступен администраторам или создателю организации.
+     * Удаляет организацию с указанным id.
+     * <p>
+     * Возможные коды состояний:
+     * 204 No Content
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{organizationId}")
@@ -118,8 +117,7 @@ public class OrganizationController {
                         userRepository.findByEmail(auth.getName()));
 
         if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.OWNER))) {
+                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))) {
             organizationRepository.delete(organization);
         } else {
             throw new ForbiddenException();
@@ -127,19 +125,21 @@ public class OrganizationController {
     }
 
     /**
+     * POST /organizations
+     * Тело запроса:
+     * {
+     * "name": "название",
+     * "fillName": "полное название" (не обязательно)
+     * }
+     * <p>
      * Метод доступен всем авторизованным пользователям.
-     * Принимает на вход объект, содержащий данные о новой организации.
-     * Общее назначение метода - проверка на наличие в базе организации с
-     * указанным name (в таком случае устаналивает код состояния 400 Bad
-     * Request, выбрасывая исключение {@link BadRequestException}) и, в
-     * случае отсутствия таковой, добавление новой организации в базу с
-     * добавлением в список members создателя организации со статусом
-     * CREATOR
-     *
-     * @param organization данные нового пользователя
-     * @param response     объект, содержащий заголовки ответа
-     * @param auth         данные об аутентификации пользователя
-     * @return добавленный пользователь
+     * Создает новую организацию с указанными данными. Устаналивает пользователя, выполнившего запрос, создателем
+     * организации. Устаналивает заголовок Location и возвращает созданную организацию.
+     * <p>
+     * Возможные коды состояний:
+     * 201 Created
+     * 400 Bad Request
+     * 401 Unauthorized
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping
@@ -170,18 +170,17 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN или владельцам
-     * (или создателям) организации.
-     * Изменяет поля организации с указанным id на те, что указаны в параметрах
-     * запроса, если такая организация существует. Можно изменить только поля
-     * name и fullName. Если организация с указанным id не найдена,
-     * устанавливает код состояния 404 Not Found, выбрасывая исключение
-     * {@link ResourceNotFoundException}.
-     *
-     * @param id       идентификатор изменяемой организации
-     * @param name     новое название организации
-     * @param fullName новое полное название организации
-     * @param auth     данные об аутентификации пользователя
+     * PATCH /organizations/{id}
+     * ?[name(string)]&[fullName(string)]
+     * <p>
+     * Доступен администраторам, создателю организации и владельцам организации.
+     * Изменяет name и fullName организации, если соответсвующие параметры указаны.
+     * <p>
+     * Возможные коды состояний:
+     * 204 No Content
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{id}")
@@ -219,23 +218,17 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN или участникам
-     * организации.
-     * Возвращает список всех участников организации с полем id или name
-     * равным organizationIdOrName, либо список не всех участников,
-     * если в параметрах запроса указаны номер страницы, количество
-     * элементов на странице и порядок сортировки. Устаналивает код
-     * состояния 200 OK в случае успеха. Если организация с указанным
-     * идентификатором не найдена - устаналивает код состояния 404 Not
-     * Found, выбрасывая исключение {@link ResourceNotFoundException}
-     *
-     * @param organizationIdOrName id или name организации
-     * @param pageable             объект, содержащий параметры запроса -
-     *                             номер страницы,
-     *                             кол-во элементов на странице, порядок
-     *                             сортировки
-     * @param auth                 данные об аутентификации пользователя
-     * @return сформированный список участников организации
+     * GET /organizations/{organizationId}/members
+     * ?[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
+     * <p>
+     * Доступен администраторам и участникам организации.
+     * Возвращает список всех участников организации (или не всех, при указании параметров в запросе).
+     * <p>
+     * Возможные коды состояний:
+     * 200 OK
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members")
@@ -264,19 +257,17 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN или участникам
-     * организации.
-     * Ищет в базе данных участника с id равным memberId организации с id
-     * или name равным organizationIdOrName. Если организация и участник
-     * этой организации найдены, возвращает этого участника и устаналивает
-     * код состояния 200 OK; если организация или участник не найдены -
-     * устаналивает код остояния 404 Not Found, выбрасывая исключение
-     * {@link ResourceNotFoundException}
-     *
-     * @param organizationIdOrName id или name организации
-     * @param memberId             id участника организации
-     * @param auth                 данные об аутентификации пользователя
-     * @return найденный учатсник организации
+     * GET /organizations/{organizationId}/members/{memberId}
+     * <p>
+     * <p>
+     * Доступен администраторам, создателю и владельцам организации.
+     * Возвращает участника memberId организации organizationId.
+     * <p>
+     * Возможные коды состояний:
+     * 200 OK
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members/{memberId}")
@@ -306,14 +297,23 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только пользователям с ролью ADMIN.
-     * Добавляет нового участника в организацию, если организация существует.
-     * В случае успеха устаналивает код состояния 201 CREATED, устаналивает
-     * заголовок Location и возвращает добавленного участника. Если
-     * организация не существует, устаналивает код состояния 404 Not Found.
-     *
-     * @param organizationId id организации
-     * @param member         новый участник
+     * POST /organizations/{organizationId}/members
+     * Тело запроса:
+     * {
+     * "status": "статус",
+     * "userId": 123
+     * }
+     * <p>
+     * Доступен только администраторам.
+     * Добавляет в организацию участника с полученными данными. Нельзя добавить участника со статусом создателя, так
+     * как создатель может быть только один.
+     * <p>
+     * Возможные коды состояний:
+     * 201 Created
+     * 400 Bad Request
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     // todo: приглашение нового участника
     @PreAuthorize("hasRole('ADMIN')")
@@ -327,6 +327,11 @@ public class OrganizationController {
         Organization organization = ofNullable(
                 organizationRepository.findOne(organizationId))
                 .orElseThrow(ResourceNotFoundException::new);
+
+        if (memberRepository.findByOrganizationAndUser(organization,
+                member.getUser()) != null) {
+            throw new BadRequestException();
+        }
 
         member.setAdmissionDate(LocalDate.now());
         member.setOrganization(organization);
@@ -343,18 +348,17 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен только администраторам и владельцам организации.
-     * Позволяет изменить статус участника. Можно изменить статус
-     * любого участника (кроме создателя) на любой другой статус
-     * (кроме статуса CREATOR). В случае успеха устаналивается код
-     * состояния 200 OK. Если организация или участник с указанным
-     * идентификатором не существуют, устаналивает код состояния
-     * 404 Not Found.
-     *
-     * @param organizationId id организации
-     * @param memberId       id участника организации
-     * @param newStatus      новый статус участника
-     * @param auth           данные об аутентификации пользователя
+     * PATCH /organizations/{organizationId}/members/{memberId}
+     * ?status(string)
+     * <p>
+     * Доступен администраторам, создателю и владельцам организации.
+     * Изменяет статус участника. Нельзя изменить статус создателя и статус другого участника на статус создателя.
+     * <p>
+     * Возможные коды состояний:
+     * 204 No Content
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{organizationId}/members/{memberId}")
@@ -362,7 +366,7 @@ public class OrganizationController {
     public void patchMember(
             @PathVariable Long organizationId,
             @PathVariable Long memberId,
-            @RequestParam MemberStatus newStatus,
+            @RequestParam("status") MemberStatus newStatus,
             Authentication auth
     ) {
         Organization organization = ofNullable(
@@ -393,16 +397,16 @@ public class OrganizationController {
     }
 
     /**
-     * Метод доступен пользователям с ролью ADMIN и владельцам
-     * (и создателю) организации. Удаляет участника из организации с
-     * указанными идентифкаторами организации и участника. В случае
-     * успеха устаналивает код состояния 204 No Content. Если о
-     * рганизации или участника с указанным id не найдено,
-     * устаналивает код состояния 404 Not Found.
-     *
-     * @param organizationId id организации
-     * @param memberId       id участника организации
-     * @param auth           данные об аутентификации пользователя
+     * DELETE /organizations/{organizationId}/members/{memberId}
+     * <p>
+     * Доступен администраторам, создателю и владельцам организации.
+     * Удаляет участника memberId из организации organizationId.
+     * <p>
+     * Возможные коды состояний:
+     * 204 No Content
+     * 401 Unauthorized
+     * 403 Forbidden
+     * 404 Not Found
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{organizationId}/members/{memberId}")
@@ -424,12 +428,18 @@ public class OrganizationController {
                 .findByOrganizationAndUser(organization,
                         userRepository.findByEmail(auth.getName()));
 
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.OWNER))) {
+        if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
             memberRepository.delete(member);
-        } else {
-            throw new ForbiddenException();
+            return;
+
+        } else if ((authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))
+                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.OWNER))) {
+
+            if (!member.getStatus().equals(MemberStatus.CREATOR)) {
+                memberRepository.delete(member);
+                return;
+            }
         }
+        throw new ForbiddenException();
     }
 }

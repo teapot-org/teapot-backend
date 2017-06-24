@@ -1,14 +1,13 @@
 package org.teapot.backend.test.controller;
 
-import org.junit.Assert;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.http.MockHttpOutputMessage;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,7 +22,6 @@ import org.teapot.backend.test.AbstractIT;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,7 +43,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
     protected JacksonJsonParser parser = new JacksonJsonParser();
 
-    private HttpMessageConverter mappingJackson2HttpMessageConverter;
+    protected ObjectMapper mapper;
 
     @Autowired
     protected UserRepository userRepository;
@@ -60,30 +58,23 @@ public abstract class AbstractControllerIT extends AbstractIT {
     protected String userAccessToken;
 
     @Autowired
-    private void setConverters(HttpMessageConverter<?>[] converters) {
-        mappingJackson2HttpMessageConverter = Arrays.stream(converters)
-                .filter(converter -> converter instanceof MappingJackson2HttpMessageConverter)
-                .findAny().get();
-        Assert.assertNotNull(mappingJackson2HttpMessageConverter);
-    }
-
-    @Autowired
-    public void setMockMvc(WebApplicationContext wac, FilterChainProxy filter) throws Exception {
+    public void setMockMvcAndMapper(WebApplicationContext wac, FilterChainProxy filter) throws Exception {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(wac)
                 .addFilters(filter)
+                .build();
+
+        mapper = Jackson2ObjectMapperBuilder.json()
+                .featuresToDisable(MapperFeature.USE_ANNOTATIONS)
                 .build();
     }
 
     @SuppressWarnings("unchecked")
     protected String json(Object object) throws IOException {
-        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
-        mappingJackson2HttpMessageConverter.write(
-                object, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
-        return mockHttpOutputMessage.getBodyAsString();
+        return mapper.writeValueAsString(object);
     }
 
-    private String obtainAccessToken(String email, String password) throws Exception {
+    protected String obtainAccessToken(String email, String password) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
         params.add("username", email);
