@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.dto.MemberDto;
-import org.teapot.backend.dto.OrganizationDto;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -20,12 +18,10 @@ import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
-import org.teapot.backend.util.converters.Converter;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -41,9 +37,6 @@ public class OrganizationController {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private Converter converter;
 
     private Organization findOrganizationByIdOrName(String idOrName) {
         Long id = Longs.tryParse(idOrName);
@@ -66,11 +59,8 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping
-    public List<OrganizationDto> getOrganizations(Pageable pageable) {
-        return organizationRepository.findAll(pageable).getContent()
-                .stream()
-                .map(organization -> converter.convert(organization))
-                .collect(Collectors.toList());
+    public List<Organization> getOrganizations(Pageable pageable) {
+        return organizationRepository.findAll(pageable).getContent();
     }
 
     /**
@@ -87,7 +77,7 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{idOrName:.+}")
-    public OrganizationDto getOrganization(
+    public Organization getOrganization(
             @PathVariable String idOrName,
             Authentication auth
     ) {
@@ -96,7 +86,7 @@ public class OrganizationController {
             throw new ResourceNotFoundException();
         }
 
-        return converter.convert(organization);
+        return organization;
     }
 
     /**
@@ -146,21 +136,19 @@ public class OrganizationController {
      * добавлением в список members создателя организации со статусом
      * CREATOR
      *
-     * @param organizationDto данные нового пользователя
-     * @param response        объект, содержащий заголовки ответа
-     * @param auth            данные об аутентификации пользователя
+     * @param organization данные нового пользователя
+     * @param response     объект, содержащий заголовки ответа
+     * @param auth         данные об аутентификации пользователя
      * @return добавленный пользователь
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrganizationDto createOrganization(
-            @RequestBody OrganizationDto organizationDto,
+    public Organization createOrganization(
+            @RequestBody Organization organization,
             HttpServletResponse response,
             Authentication auth
     ) {
-        Organization organization = converter.convert(organizationDto);
-
         if (organizationRepository.findByName(organization.getName()) != null) {
             throw new BadRequestException();
         }
@@ -178,7 +166,7 @@ public class OrganizationController {
 
         response.setHeader(HttpHeaders.LOCATION,
                 "/organizations/" + organization.getId());
-        return converter.convert(organization);
+        return organization;
     }
 
     /**
@@ -251,7 +239,7 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members")
-    public List<MemberDto> getOrganizationMembers(
+    public List<Member> getOrganizationMembers(
             @PathVariable String organizationIdOrName,
             Pageable pageable,
             Authentication auth
@@ -270,9 +258,7 @@ public class OrganizationController {
 
         if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
                 || (authMember != null)) {
-            return members.stream()
-                    .map(member -> converter.convert(member))
-                    .collect(Collectors.toList());
+            return members;
         }
         throw new ForbiddenException();
     }
@@ -294,7 +280,7 @@ public class OrganizationController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members/{memberId}")
-    public MemberDto getOrganizationMember(
+    public Member getOrganizationMember(
             @PathVariable String organizationIdOrName,
             @PathVariable Long memberId,
             Authentication auth
@@ -314,7 +300,7 @@ public class OrganizationController {
 
         if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
                 || (authMember != null)) {
-            return converter.convert(returnMember);
+            return returnMember;
         }
         throw new ForbiddenException();
     }
@@ -327,19 +313,17 @@ public class OrganizationController {
      * организация не существует, устаналивает код состояния 404 Not Found.
      *
      * @param organizationId id организации
-     * @param memberDto         новый участник
+     * @param member         новый участник
      */
     // todo: приглашение нового участника
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{organizationId}/members")
     @ResponseStatus(HttpStatus.CREATED)
-    public MemberDto addMember(
+    public Member addMember(
             @PathVariable Long organizationId,
-            @RequestBody MemberDto memberDto,
+            @RequestBody Member member,
             HttpServletResponse response
     ) {
-        Member member = converter.convert(memberDto);
-
         Organization organization = ofNullable(
                 organizationRepository.findOne(organizationId))
                 .orElseThrow(ResourceNotFoundException::new);
@@ -355,7 +339,7 @@ public class OrganizationController {
         response.setHeader(HttpHeaders.LOCATION,
                 String.format("/organizations/%d/members/%d",
                         organizationId, member.getId()));
-        return converter.convert(member);
+        return member;
     }
 
     /**

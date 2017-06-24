@@ -1,5 +1,8 @@
 package org.teapot.backend.model.organization;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.teapot.backend.util.ser.OrganizationSerializer;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -8,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "organization")
+@JsonSerialize(using = OrganizationSerializer.class)
 public class Organization {
 
     @Id
@@ -30,15 +34,12 @@ public class Organization {
     public Organization() {
     }
 
-    public Organization(Long id, String name, String fullName, LocalDate creationDate, Set<Member> members) {
+    public Organization(Long id,
+                        String name,
+                        String fullName,
+                        LocalDate creationDate,
+                        Set<Member> members) {
         this.id = id;
-        this.name = name;
-        this.fullName = fullName;
-        this.creationDate = creationDate;
-        this.members = members;
-    }
-
-    public Organization(String name, String fullName, LocalDate creationDate, Set<Member> members) {
         this.name = name;
         this.fullName = fullName;
         this.creationDate = creationDate;

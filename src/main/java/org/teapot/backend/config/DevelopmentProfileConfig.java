@@ -11,12 +11,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.meta.TeapotProperty;
+import org.teapot.backend.model.meta.TeapotResource;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
-import org.teapot.backend.model.meta.TeapotResource;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
@@ -25,7 +25,6 @@ import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 
@@ -95,7 +94,7 @@ public class DevelopmentProfileConfig {
         admin.setActivated(true);
         admin.setFirstName("Cake");
         admin.setLastName("Lover");
-        admin.setRegistrationDate(LocalDateTime.now());
+        admin.setRegistrationDate(LocalDate.now());
         admin.setBirthday(LocalDate.now());
         admin.setDescription("i manage everything");
         admin.setAuthority(UserAuthority.ADMIN);
@@ -112,7 +111,7 @@ public class DevelopmentProfileConfig {
         user.setActivated(true);
         user.setFirstName("Dale");
         user.setLastName("Cooper");
-        user.setRegistrationDate(LocalDateTime.now());
+        user.setRegistrationDate(LocalDate.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("a special FBI agent");
         user.setAuthority(UserAuthority.USER);
@@ -129,7 +128,7 @@ public class DevelopmentProfileConfig {
         user.setActivated(true);
         user.setFirstName("Lora");
         user.setLastName("Palmer");
-        user.setRegistrationDate(LocalDateTime.now());
+        user.setRegistrationDate(LocalDate.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("a dead girl");
         user.setAuthority(UserAuthority.USER);
@@ -146,7 +145,7 @@ public class DevelopmentProfileConfig {
         user.setActivated(true);
         user.setFirstName("Sherlock");
         user.setLastName("Holmes");
-        user.setRegistrationDate(LocalDateTime.now());
+        user.setRegistrationDate(LocalDate.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("private detective");
         user.setAuthority(UserAuthority.USER);
@@ -163,7 +162,7 @@ public class DevelopmentProfileConfig {
         user.setActivated(true);
         user.setFirstName("John");
         user.setLastName("Watson");
-        user.setRegistrationDate(LocalDateTime.now());
+        user.setRegistrationDate(LocalDate.now());
         user.setBirthday(LocalDate.now());
         user.setDescription("Sherlock Holmes' mate");
         user.setAuthority(UserAuthority.USER);

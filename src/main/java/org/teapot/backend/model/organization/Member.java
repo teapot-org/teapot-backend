@@ -1,9 +1,12 @@
 package org.teapot.backend.model.organization;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.util.deser.MemberDeserializer;
+import org.teapot.backend.util.ser.MemberSerializer;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,13 +14,15 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "organization_member")
+@JsonSerialize(using = MemberSerializer.class)
+@JsonDeserialize(using = MemberDeserializer.class)
 public class Member implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
@@ -33,15 +38,12 @@ public class Member implements Serializable {
     public Member() {
     }
 
-    public Member(Long id, User user, MemberStatus status, Organization organization, LocalDate admissionDate) {
+    public Member(Long id,
+                  User user,
+                  MemberStatus status,
+                  Organization organization,
+                  LocalDate admissionDate) {
         this.id = id;
-        this.user = user;
-        this.status = status;
-        this.organization = organization;
-        this.admissionDate = admissionDate;
-    }
-
-    public Member(User user, MemberStatus status, Organization organization, LocalDate admissionDate) {
         this.user = user;
         this.status = status;
         this.organization = organization;

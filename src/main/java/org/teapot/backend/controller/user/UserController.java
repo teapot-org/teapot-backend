@@ -20,7 +20,6 @@ import org.teapot.backend.util.VerificationMailSender;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -173,7 +172,7 @@ public class UserController {
             throw new BadRequestException();
         }
 
-        user.setRegistrationDate(LocalDateTime.now());
+        user.setRegistrationDate(LocalDate.now());
         if (auth == null) {
             user = userRepository.save(user);
             verificationMailSender.createTokenAndSend(user, request.getLocale());
