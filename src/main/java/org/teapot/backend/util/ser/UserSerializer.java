@@ -33,7 +33,7 @@ public class UserSerializer extends StdSerializer<User> {
         gen.writeObjectField("authority", user.getAuthority());
         gen.writeObjectField("registrationDate", user.getRegistrationDate());
         gen.writeObjectField("birthday", user.getBirthday());
-        gen.writeObjectField("description", user.getBirthday());
+        gen.writeObjectField("description", user.getDescription());
         gen.writeEndObject();
     }
 }
