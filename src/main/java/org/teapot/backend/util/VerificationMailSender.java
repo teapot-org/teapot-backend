@@ -5,10 +5,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.VerificationToken;
-import org.teapot.backend.repository.TeapotPropertyRepository;
-import org.teapot.backend.repository.VerificationTokenRepository;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.VerificationToken;
+import org.teapot.backend.repository.meta.TeapotPropertyRepository;
+import org.teapot.backend.repository.user.VerificationTokenRepository;
 
 import java.util.Locale;
 

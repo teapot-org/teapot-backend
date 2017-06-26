@@ -1,4 +1,4 @@
-package org.teapot.backend.controller;
+package org.teapot.backend.controller.meta;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,13 +7,13 @@ import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ConflictException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.VerificationToken;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.VerificationToken;
 import org.teapot.backend.model.meta.TeapotAction;
-import org.teapot.backend.repository.TeapotActionRepository;
-import org.teapot.backend.repository.TeapotResourceRepository;
-import org.teapot.backend.repository.UserRepository;
-import org.teapot.backend.repository.VerificationTokenRepository;
+import org.teapot.backend.repository.meta.TeapotActionRepository;
+import org.teapot.backend.repository.meta.TeapotResourceRepository;
+import org.teapot.backend.repository.user.UserRepository;
+import org.teapot.backend.repository.user.VerificationTokenRepository;
 import org.teapot.backend.util.VerificationMailSender;
 
 import java.time.LocalDateTime;
