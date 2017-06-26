@@ -1,4 +1,4 @@
-package org.teapot.backend.model;
+package org.teapot.backend.model.user;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

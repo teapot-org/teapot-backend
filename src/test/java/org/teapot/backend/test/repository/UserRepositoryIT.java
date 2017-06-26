@@ -5,9 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserAuthority;
-import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.UserAuthority;
+import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
 

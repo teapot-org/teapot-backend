@@ -1,4 +1,4 @@
-package org.teapot.backend.controller;
+package org.teapot.backend.controller.user;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +13,13 @@ import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ForbiddenException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.model.User;
-import org.teapot.backend.model.UserAuthority;
-import org.teapot.backend.repository.UserRepository;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.UserAuthority;
+import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.VerificationMailSender;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -173,7 +172,7 @@ public class UserController {
             throw new BadRequestException();
         }
 
-        user.setRegistrationDate(LocalDateTime.now());
+        user.setRegistrationDate(LocalDate.now());
         if (auth == null) {
             user = userRepository.save(user);
             verificationMailSender.createTokenAndSend(user, request.getLocale());
