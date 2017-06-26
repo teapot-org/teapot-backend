@@ -3,13 +3,18 @@ package org.teapot.backend.util.ser;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.util.LinkBuilder;
 
 import java.io.IOException;
 
 @Component
 public class UserSerializer extends StdSerializer<User> {
+
+    @Autowired
+    private LinkBuilder linkBuilder;
 
     public UserSerializer()  {
         this(null);
@@ -34,6 +39,8 @@ public class UserSerializer extends StdSerializer<User> {
         gen.writeObjectField("registrationDate", user.getRegistrationDate());
         gen.writeObjectField("birthday", user.getBirthday());
         gen.writeObjectField("description", user.getDescription());
+        gen.writeObjectField("organizations",
+                linkBuilder.format("/organizations?user=%d", user.getId()));
         gen.writeEndObject();
     }
 }

@@ -228,12 +228,6 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     // GET ORGANIZATIONS
 
     @Test
-    public void getOrganizationsTestByAnonymous() throws Exception {
-        mockMvc.perform(get(String.format("/%s", ORGANIZATIONS_URL)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
     public void getOrganizationsTestByUser() throws Exception {
         List<Organization> all = organizationRepository.findAll();
         mockMvc.perform(get(String.format("/%s", ORGANIZATIONS_URL))
@@ -247,12 +241,6 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(jsonPath("$[0].members",
                         is(linkBuilder.format("/%s/%d/%s", ORGANIZATIONS_URL,
                                 all.get(0).getId().intValue(), MEMBERS_URL))));
-    }
-
-    @Test
-    public void getSingleOrganizationByIdTestByAnonymous() throws Exception {
-        mockMvc.perform(get(String.format("/%s/%d", ORGANIZATIONS_URL, getOrganization.getId())))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -270,12 +258,6 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     }
 
     @Test
-    public void getNotExistsOrganizationTestByAnonymous() throws Exception {
-        mockMvc.perform(get(String.format("/%s/-1", ORGANIZATIONS_URL)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
     public void getNotExistsOrganizationTestByUser() throws Exception {
         mockMvc.perform(get(String.format("/%s/-1", ORGANIZATIONS_URL))
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
@@ -283,19 +265,6 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     }
 
     // GET MEMBERS
-
-    @Test
-    public void getMembersInOrganizationByAnonymous() throws Exception {
-        mockMvc.perform(get(String.format("/%s/%d/%s", ORGANIZATIONS_URL, getOrganization.getId(), MEMBERS_URL)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void getMembersInOrganizationByUser() throws Exception {
-        mockMvc.perform(get(String.format("/%s/%d/%s", ORGANIZATIONS_URL, getOrganization.getId(), MEMBERS_URL))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
-                .andExpect(status().isForbidden());
-    }
 
     @Test
     public void getMembersInOrganizationByAdmin() throws Exception {
@@ -333,25 +302,6 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(jsonPath("$[0].organization",
                         is(linkBuilder.format("/%s/%d",
                                 ORGANIZATIONS_URL, members.get(0).getOrganization().getId()))));
-    }
-
-    @Test
-    public void getMemberInOrganizationByAnonymous() throws Exception {
-        Member member = memberRepository.findAllByOrganization(getOrganization).get(0);
-
-        mockMvc.perform(get(String.format("/%s/%d/%s/%d",
-                ORGANIZATIONS_URL, member.getOrganization().getId(), MEMBERS_URL, member.getId())))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void getMemberInOrganizationByUser() throws Exception {
-        Member member = memberRepository.findAllByOrganization(getOrganization).get(0);
-
-        mockMvc.perform(get(String.format("/%s/%d/%s/%d",
-                ORGANIZATIONS_URL, member.getOrganization().getId(), MEMBERS_URL, member.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
-                .andExpect(status().isForbidden());
     }
 
     @Test

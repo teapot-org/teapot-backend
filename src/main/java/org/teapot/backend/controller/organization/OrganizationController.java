@@ -14,6 +14,7 @@ import org.teapot.backend.controller.exception.ResourceNotFoundException;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
+import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
@@ -22,6 +23,9 @@ import org.teapot.backend.repository.user.UserRepository;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -50,31 +54,55 @@ public class OrganizationController {
      * GET /organizations
      * ?[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
      * <p>
-     * Доступен всем авторизованным пользователям.
+     * Доступен всем пользователям.
      * Возвращает список всех организаций (или не всех, при указании параметров в запросе).
      * <p>
      * Возможные коды состояний:
      * 200 OK
-     * 401 Unauthorized
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public List<Organization> getOrganizations(Pageable pageable) {
         return organizationRepository.findAll(pageable).getContent();
     }
 
     /**
+     * GET /organizations
+     * ?user(number|string)&[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
+     * <p>
+     * Доступен всем пользователям
+     * Возвращает список организаций, в которых состоит пользователь с указанным id или username.
+     * <p>
+     * Возможные коды состояний:
+     * 200 OK
+     * 404 Not Found
+     */
+    @GetMapping(params = "user")
+    public List<Organization> getOrganizationsOfUser(
+            @RequestParam("user") String idOrUsername,
+            Pageable pageable
+    ) {
+        Long id = Longs.tryParse(idOrUsername);
+        User user = ofNullable((id != null)
+                ? userRepository.findOne(id)
+                : userRepository.findByUsername(idOrUsername))
+                .orElseThrow(ResourceNotFoundException::new);
+
+        return memberRepository.findByUser(user, pageable)
+                .stream()
+                .map(Member::getOrganization)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * GET /organizations/{idOrName}
      * <p>
-     * Доступен всем авторизованным пользователям.
+     * Доступен всем пользователям.
      * Возвращает организацию с указанным id или name.
      * <p>
      * Возможные коды состояний:
      * 200 OK
-     * 401 Unauthorized
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{idOrName:.+}")
     public Organization getOrganization(
             @PathVariable String idOrName
@@ -220,39 +248,25 @@ public class OrganizationController {
      * GET /organizations/{organizationId}/members
      * ?[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
      * <p>
-     * Доступен администраторам и участникам организации.
+     * Доступен всем пользователям.
      * Возвращает список всех участников организации (или не всех, при указании параметров в запросе).
      * <p>
      * Возможные коды состояний:
      * 200 OK
-     * 401 Unauthorized
-     * 403 Forbidden
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members")
     public List<Member> getOrganizationMembers(
             @PathVariable String organizationIdOrName,
-            Pageable pageable,
-            Authentication auth
+            Pageable pageable
     ) {
         Organization organization = ofNullable(
                 findOrganizationByIdOrName(organizationIdOrName))
                 .orElseThrow(ResourceNotFoundException::new);
 
-        List<Member> members = memberRepository
+        return memberRepository
                 .findAllByOrganization(organization, pageable)
                 .getContent();
-
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
-
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null)) {
-            return members;
-        }
-        throw new ForbiddenException();
     }
 
     /**
@@ -264,11 +278,8 @@ public class OrganizationController {
      * <p>
      * Возможные коды состояний:
      * 200 OK
-     * 401 Unauthorized
-     * 403 Forbidden
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{organizationIdOrName}/members/{memberId}")
     public Member getOrganizationMember(
             @PathVariable String organizationIdOrName,
@@ -280,19 +291,9 @@ public class OrganizationController {
                 findOrganizationByIdOrName(organizationIdOrName))
                 .orElseThrow(ResourceNotFoundException::new);
 
-        Member returnMember = ofNullable(memberRepository
+        return ofNullable(memberRepository
                 .findByOrganizationAndId(organization, memberId))
                 .orElseThrow(ResourceNotFoundException::new);
-
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
-
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null)) {
-            return returnMember;
-        }
-        throw new ForbiddenException();
     }
 
     /**

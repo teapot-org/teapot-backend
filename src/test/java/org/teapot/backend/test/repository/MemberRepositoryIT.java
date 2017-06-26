@@ -1,5 +1,6 @@
 package org.teapot.backend.test.repository;
 
+import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,10 +30,12 @@ public class MemberRepositoryIT extends AbstractIT {
     private UserRepository userRepository;
 
     private Organization memberRepositoryTestOrg = new Organization();
+    private Organization findByUserTestOrg = new Organization();
     private User user1;
     private User user2;
     private Member member1;
     private Member member2;
+    private Member member3;
 
     @Before
     public void setup() {
@@ -43,6 +46,9 @@ public class MemberRepositoryIT extends AbstractIT {
         memberRepositoryTestOrg.setName("memberRepositoryTestOrg");
         memberRepositoryTestOrg.setCreationDate(LocalDate.now());
         organizationRepository.save(memberRepositoryTestOrg);
+
+        findByUserTestOrg.setName("findByUserTestOrg");
+        organizationRepository.save(findByUserTestOrg);
 
         user1 = new User();
         user1.setUsername("u1");
@@ -69,6 +75,13 @@ public class MemberRepositoryIT extends AbstractIT {
         member2.setStatus(MemberStatus.WORKER);
         member2.setUser(user2);
         memberRepository.save(member2);
+
+        member3 = new Member();
+        member3.setOrganization(findByUserTestOrg);
+        member3.setAdmissionDate(LocalDate.now());
+        member3.setStatus(MemberStatus.CREATOR);
+        member3.setUser(user1);
+        memberRepository.save(member3);
     }
 
     @Test
@@ -87,5 +100,12 @@ public class MemberRepositoryIT extends AbstractIT {
     public void findByOrganizationAndUserTest() {
         Assert.assertEquals(member2, memberRepository
                 .findByOrganizationAndUser(memberRepositoryTestOrg, user2));
+    }
+
+    @Test
+    public void findByUserTest() {
+        Assert.assertEquals(Lists.newArrayList(member1, member3)
+                ,memberRepository.findByUser(user1)
+        );
     }
 }
