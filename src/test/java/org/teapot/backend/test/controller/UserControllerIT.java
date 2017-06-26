@@ -101,8 +101,40 @@ public class UserControllerIT extends AbstractControllerIT {
     }
 
     @Test
-    public void getNotExistsUserTest() throws Exception {
+    public void getNotExistsUserByIdTest() throws Exception {
         mockMvc.perform(get(String.format("%s/-1", API_URL)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getSingleUserByUsernameTest() throws Exception {
+        mockMvc.perform(get(String.format("%s/%s", API_URL, getUserOne.getUsername())))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
+                .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
+                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
+    }
+
+    @Test
+    public void getNotExistsUserByUsernameTest() throws Exception {
+        mockMvc.perform(get(String.format("%s/%s", API_URL, "not_exists")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getSingleUserByEmailTest() throws Exception {
+        mockMvc.perform(get(String.format("%s/%s", API_URL, getUserOne.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
+                .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
+                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
+    }
+
+    @Test
+    public void getNotExistsUserByIEmailTest() throws Exception {
+        mockMvc.perform(get(String.format("%s/%s", API_URL, "not_exists@email.com")))
                 .andExpect(status().isNotFound());
     }
 
