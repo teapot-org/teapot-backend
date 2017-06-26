@@ -196,9 +196,8 @@ public class OrganizationController {
             throw new ResourceNotFoundException();
         }
 
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
+        Member authMember = memberRepository.findByOrganizationAndUser(organization,
+                userRepository.findByEmail(auth.getName()));
 
         if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
                 || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))

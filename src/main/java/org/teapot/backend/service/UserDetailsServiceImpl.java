@@ -1,7 +1,6 @@
 package org.teapot.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,9 +10,7 @@ import org.teapot.backend.repository.user.UserRepository;
 
 import java.util.Collections;
 
-
 @Service
-@Profile("security")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
