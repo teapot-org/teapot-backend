@@ -173,6 +173,8 @@ public class UserController {
         }
 
         user.setRegistrationDate(LocalDate.now());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         if (auth == null) {
             user = userRepository.save(user);
             verificationMailSender.createTokenAndSend(user, request.getLocale());
