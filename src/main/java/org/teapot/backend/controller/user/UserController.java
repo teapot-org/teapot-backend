@@ -54,24 +54,26 @@ public class UserController {
 
     /**
      * Метод доступен всем пользователям, в том числе и неавторизованным.
-     * Ищет в базе данных пользователя с указанным id или username. Если
-     * пользователь найден, возвращает этого пользователя и устаналивает код
-     * состояния 200 OK; если пользователь не найден - устаналивает код
+     * Ищет в базе данных пользователя с указанным id или username или email.
+     * Если пользователь найден, возвращает этого пользователя и устаналивает
+     * код состояния 200 OK; если пользователь не найден - устаналивает код
      * состояния 404 Not Found, выбрасывая исключение
      * {@link ResourceNotFoundException}
      *
-     * @param idOrUsername id или username пользователя
+     * @param idOrUsernameOrEmail id или username или email пользователя
      * @return найденный пользователь
      */
-    @GetMapping("/{idOrUsername:.+}")
-    public User getUser(@PathVariable String idOrUsername) {
+    @GetMapping("/{idOrUsernameOrEmail:.+}")
+    public User getUser(@PathVariable String idOrUsernameOrEmail) {
         User user;
 
-        Long id = Longs.tryParse(idOrUsername);
+        Long id = Longs.tryParse(idOrUsernameOrEmail);
         if (id != null) {
             user = userRepository.findOne(id);
+        } else if (idOrUsernameOrEmail.contains("@")) {
+            user = userRepository.findByEmail(idOrUsernameOrEmail);
         } else {
-            user = userRepository.findByUsername(idOrUsername);
+            user = userRepository.findByUsername(idOrUsernameOrEmail);
         }
 
         if (user == null) {
