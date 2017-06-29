@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.user.UserRepository;
@@ -16,8 +15,6 @@ public class UserRepositoryIT extends AbstractIT {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     private User findByUsernameTestUser = new User();
     private User findByEmailTestUser = new User();
@@ -26,13 +23,13 @@ public class UserRepositoryIT extends AbstractIT {
     public void init() {
         findByUsernameTestUser.setUsername("findByUsername");
         findByUsernameTestUser.setEmail("findByUsername@mail.com");
-        findByUsernameTestUser.setPassword(passwordEncoder.encode("pass"));
+        findByUsernameTestUser.setPassword("pass");
         findByUsernameTestUser.setAuthority(UserAuthority.ADMIN);
         userRepository.save(findByUsernameTestUser);
 
         findByEmailTestUser.setUsername("findByEmail");
         findByEmailTestUser.setEmail("findByEmail@mail.com");
-        findByEmailTestUser.setPassword(passwordEncoder.encode("pass"));
+        findByEmailTestUser.setPassword("pass");
         findByEmailTestUser.setAuthority(UserAuthority.USER);
         userRepository.save(findByEmailTestUser);
     }

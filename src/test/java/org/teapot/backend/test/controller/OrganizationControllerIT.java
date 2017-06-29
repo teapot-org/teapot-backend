@@ -8,7 +8,6 @@ import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
-import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
@@ -81,7 +80,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user1 = new User();
         user1.setUsername("user1");
         user1.setEmail("user1@email.com");
-        user1.setPassword(passwordEncoder.encode("pass"));
+        user1.setPassword("pass");
         user1.setActivated(true);
         user1.setFirstName("user1");
         user1.setLastName("user1");
@@ -99,7 +98,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user2 = new User();
         user2.setUsername("user2");
         user2.setEmail("user2@email.com");
-        user2.setPassword(passwordEncoder.encode("pass"));
+        user2.setPassword("pass");
         userRepository.save(user2);
 
         member2 = new Member();
@@ -127,7 +126,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user3 = new User();
         user3.setUsername("user3");
         user3.setEmail("user3@email.com");
-        user3.setPassword(passwordEncoder.encode("pass"));
+        user3.setPassword("pass");
         user3.setActivated(true);
         userRepository.save(user3);
 
@@ -136,42 +135,42 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user4 = new User();
         user4.setUsername("user4");
         user4.setEmail("user4@email.com");
-        user4.setPassword(passwordEncoder.encode("pass"));
+        user4.setPassword("pass");
         user4.setActivated(true);
         userRepository.save(user4);
 
         user5 = new User();
         user5.setUsername("user5");
         user5.setEmail("user5@email.com");
-        user5.setPassword(passwordEncoder.encode("pass"));
+        user5.setPassword("pass");
         user5.setActivated(true);
         userRepository.save(user5);
 
         user6 = new User();
         user6.setUsername("user6");
         user6.setEmail("user6@email.com");
-        user6.setPassword(passwordEncoder.encode("pass"));
+        user6.setPassword("pass");
         user6.setActivated(true);
         userRepository.save(user6);
 
         user7 = new User();
         user7.setUsername("user7");
         user7.setEmail("user7@email.com");
-        user7.setPassword(passwordEncoder.encode("pass"));
+        user7.setPassword("pass");
         user7.setActivated(true);
         userRepository.save(user7);
 
         user8 = new User();
         user8.setUsername("user8");
         user8.setEmail("user8@email.com");
-        user8.setPassword(passwordEncoder.encode("pass"));
+        user8.setPassword("pass");
         user8.setActivated(true);
         userRepository.save(user8);
 
         user9 = new User();
         user9.setUsername("user9");
         user9.setEmail("user9@email.com");
-        user9.setPassword(passwordEncoder.encode("pass"));
+        user9.setPassword("pass");
         user9.setActivated(true);
         userRepository.save(user9);
 
