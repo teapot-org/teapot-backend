@@ -155,7 +155,7 @@ public class UserController {
      * @param response объект, содержащий заголовки ответа
      * @return добавленный пользователь
      */
-    @PreAuthorize("isAnonymous() || hasRole('ADMIN')")
+    @PreAuthorize("isAnonymous() or hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User registerUser(@RequestBody User user,

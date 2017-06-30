@@ -381,7 +381,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     }
 
     @Test
-    public void deleteNotExistsOrganizationTestByCreator() throws Exception {
+    public void deleteOrganizationTestByCreator() throws Exception {
         mockMvc.perform(delete(String.format("/%s/%d", ORGANIZATIONS_URL, deleteOrganizationCreator.getId()))
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, creatorAccessToken)))
                 .andExpect(status().isNoContent());
