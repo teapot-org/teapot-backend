@@ -2,14 +2,15 @@ package org.teapot.backend.controller.meta;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ConflictException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
+import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.VerificationToken;
-import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
 import org.teapot.backend.repository.user.UserRepository;
@@ -17,11 +18,15 @@ import org.teapot.backend.repository.user.VerificationTokenRepository;
 import org.teapot.backend.util.VerificationMailSender;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/actions")
 public class TeapotActionController {
+
+    @Autowired
+    private Environment env;
 
     @Autowired
     private TeapotActionRepository actionRepository;
@@ -35,7 +40,7 @@ public class TeapotActionController {
     @Autowired
     private VerificationTokenRepository tokenRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
 
     @GetMapping("/{nameOrId}")
@@ -80,6 +85,14 @@ public class TeapotActionController {
             @RequestParam("token") String tokenString,
             WebRequest request
     ) {
+        boolean isVerificationEnabled = Arrays
+                .stream(env.getActiveProfiles())
+                .anyMatch("verification"::equalsIgnoreCase);
+
+        if (!isVerificationEnabled) {
+            return;
+        }
+
         VerificationToken token = Optional
                 .ofNullable(tokenRepository.findByToken(tokenString))
                 .orElseThrow(ResourceNotFoundException::new);
