@@ -2,14 +2,15 @@ package org.teapot.backend.controller.meta;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.exception.BadRequestException;
 import org.teapot.backend.controller.exception.ConflictException;
 import org.teapot.backend.controller.exception.ResourceNotFoundException;
+import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.VerificationToken;
-import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
 import org.teapot.backend.repository.user.UserRepository;
@@ -35,7 +36,7 @@ public class TeapotActionController {
     @Autowired
     private VerificationTokenRepository tokenRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
 
     @GetMapping("/{nameOrId}")
@@ -76,6 +77,7 @@ public class TeapotActionController {
     }
 
     @PostMapping("/activate")
+    @Profile("verification")
     public void activate(
             @RequestParam("token") String tokenString,
             WebRequest request

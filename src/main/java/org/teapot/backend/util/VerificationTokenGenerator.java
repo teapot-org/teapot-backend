@@ -1,6 +1,7 @@
 package org.teapot.backend.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.teapot.backend.model.user.VerificationToken;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
@@ -9,6 +10,7 @@ import org.teapot.backend.repository.user.VerificationTokenRepository;
 import java.time.LocalDateTime;
 
 @Component
+@Profile("verification")
 public final class VerificationTokenGenerator {
 
     @Autowired

@@ -2,6 +2,8 @@ package org.teapot.backend.controller.user;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import org.teapot.backend.util.VerificationMailSender;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -28,12 +31,15 @@ import java.util.List;
 public class UserController {
 
     @Autowired
+    private Environment env;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
+    @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
 
     /**
@@ -177,10 +183,14 @@ public class UserController {
         user.setRegistrationDate(LocalDate.now());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        if (auth == null) {
+        boolean isVerificationEnabled = Arrays
+                .stream(env.getActiveProfiles())
+                .anyMatch("verification"::equalsIgnoreCase);
+
+        if ((auth == null) && isVerificationEnabled) {
             user = userRepository.save(user);
             verificationMailSender.createTokenAndSend(user, request.getLocale());
-        } else if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
+        } else {
             user.setActivated(true);
             userRepository.save(user);
         }
