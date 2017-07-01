@@ -15,6 +15,7 @@ import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 
@@ -44,14 +45,14 @@ public class MemberRepositoryIT extends AbstractIT {
         organizationRepository.deleteAllInBatch();
 
         memberRepositoryTestOrg.setName("memberRepositoryTestOrg");
-        memberRepositoryTestOrg.setCreationDate(LocalDate.now());
+        memberRepositoryTestOrg.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.save(memberRepositoryTestOrg);
 
         findByUserTestOrg.setName("findByUserTestOrg");
         organizationRepository.save(findByUserTestOrg);
 
         user1 = new User();
-        user1.setUsername("u1");
+        user1.setName("u1");
         user1.setEmail("u1@email.com");
         user1.setPassword("pass");
         userRepository.save(user1);
@@ -64,7 +65,7 @@ public class MemberRepositoryIT extends AbstractIT {
         memberRepository.save(member1);
 
         user2 = new User();
-        user2.setUsername("u2");
+        user2.setName("u2");
         user2.setEmail("u2@email.com");
         user2.setPassword("pass");
         userRepository.save(user2);

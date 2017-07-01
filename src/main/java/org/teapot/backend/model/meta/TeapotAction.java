@@ -1,14 +1,12 @@
 package org.teapot.backend.model.meta;
 
+import org.springframework.data.jpa.domain.AbstractPersistable;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "action")
-public class TeapotAction {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class TeapotAction extends AbstractPersistable<Long> {
 
     @Column(nullable = false, unique = true, length = 32)
     private String name;
@@ -22,12 +20,9 @@ public class TeapotAction {
     public TeapotAction() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
+    @Override
     public void setId(Long id) {
-        this.id = id;
+        super.setId(id);
     }
 
     public String getName() {

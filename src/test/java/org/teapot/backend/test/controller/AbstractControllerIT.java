@@ -97,7 +97,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
         userRepository.deleteAllInBatch();
 
         userWithAdminRole.setEmail("admin@auth.com");
-        userWithAdminRole.setUsername("admin");
+        userWithAdminRole.setName("admin");
         userWithAdminRole.setPassword(passwordEncoder.encode("pass"));
         userWithAdminRole.setAuthority(UserAuthority.ADMIN);
         userWithAdminRole.setActivated(true);
@@ -105,7 +105,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
         adminAccessToken = obtainAccessToken(userWithAdminRole.getEmail(), "pass");
 
         userWithUserRole.setEmail("user@auth.com");
-        userWithUserRole.setUsername("user");
+        userWithUserRole.setName("user");
         userWithUserRole.setPassword(passwordEncoder.encode("pass"));
         userWithUserRole.setAuthority(UserAuthority.USER);
         userWithUserRole.setActivated(true);

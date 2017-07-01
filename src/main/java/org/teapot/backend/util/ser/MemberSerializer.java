@@ -29,19 +29,11 @@ public class MemberSerializer extends StdSerializer<Member> {
             throws IOException {
         gen.writeStartObject();
         gen.writeObjectField("id", member.getId());
-        if (member.getUser() == null) {
-            gen.writeNullField("user");
-        } else {
-            gen.writeStringField("user",
-                    linkBuilder.format("/users/%d", member.getUser().getId()));
-        }
+        gen.writeStringField("user",
+                linkBuilder.format("/users/%d", member.getUser().getId()));
         gen.writeObjectField("status", member.getStatus());
-        if (member.getOrganization() == null) {
-            gen.writeNullField("organization");
-        } else {
-            gen.writeStringField("organization",
-                    linkBuilder.format("/organizations/%d", member.getOrganization().getId()));
-        }
+        gen.writeStringField("organization",
+                linkBuilder.format("/organizations/%d", member.getOrganization().getId()));
         gen.writeObjectField("admissionDate", member.getAdmissionDate());
         gen.writeEndObject();
     }

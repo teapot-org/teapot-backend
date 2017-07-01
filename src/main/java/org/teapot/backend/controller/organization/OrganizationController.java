@@ -22,6 +22,7 @@ import org.teapot.backend.repository.user.UserRepository;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class OrganizationController {
         Long id = Longs.tryParse(idOrUsername);
         User user = ofNullable((id != null)
                 ? userRepository.findOne(id)
-                : userRepository.findByUsername(idOrUsername))
+                : userRepository.findByName(idOrUsername))
                 .orElseThrow(ResourceNotFoundException::new);
 
         return memberRepository.findByUser(user, pageable)
@@ -179,7 +180,7 @@ public class OrganizationController {
             throw new BadRequestException();
         }
 
-        organization.setCreationDate(LocalDate.now());
+        organization.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.saveAndFlush(organization);
 
         Member creator = new Member();

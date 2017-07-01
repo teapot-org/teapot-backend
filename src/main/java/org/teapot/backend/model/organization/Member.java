@@ -1,26 +1,19 @@
 package org.teapot.backend.model.organization;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.teapot.backend.model.AbstractPersistable;
 import org.teapot.backend.model.user.User;
-import org.teapot.backend.util.deser.MemberDeserializer;
 import org.teapot.backend.util.ser.MemberSerializer;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "organization_member")
 @JsonSerialize(using = MemberSerializer.class)
-@JsonDeserialize(using = MemberDeserializer.class)
-public class Member implements Serializable {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Member extends AbstractPersistable<Long> {
 
     @ManyToOne(optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -29,13 +22,22 @@ public class Member implements Serializable {
     @Enumerated
     private MemberStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Organization organization;
 
-    @Column(name = "admission_date")
     private LocalDate admissionDate;
 
     public Member() {
+    }
+
+    public Member(User user,
+                  MemberStatus status,
+                  Organization organization,
+                  LocalDate admissionDate) {
+        setUser(user);
+        setStatus(status);
+        setOrganization(organization);
+        setAdmissionDate(admissionDate);
     }
 
     public Member(Long id,
@@ -43,19 +45,16 @@ public class Member implements Serializable {
                   MemberStatus status,
                   Organization organization,
                   LocalDate admissionDate) {
-        this.id = id;
-        this.user = user;
-        this.status = status;
-        this.organization = organization;
-        this.admissionDate = admissionDate;
+        setId(id);
+        setUser(user);
+        setStatus(status);
+        setOrganization(organization);
+        setAdmissionDate(admissionDate);
     }
 
-    public Long getId() {
-        return id;
-    }
-
+    @Override
     public void setId(Long id) {
-        this.id = id;
+        super.setId(id);
     }
 
     public User getUser() {

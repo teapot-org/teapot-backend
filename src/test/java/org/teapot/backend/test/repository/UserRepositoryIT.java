@@ -19,18 +19,18 @@ public class UserRepositoryIT extends AbstractIT {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private User findByUsernameTestUser = new User();
+    private User findByNameTestUser = new User();
     private User findByEmailTestUser = new User();
 
     @Before
     public void init() {
-        findByUsernameTestUser.setUsername("findByUsername");
-        findByUsernameTestUser.setEmail("findByUsername@mail.com");
-        findByUsernameTestUser.setPassword(passwordEncoder.encode("pass"));
-        findByUsernameTestUser.setAuthority(UserAuthority.ADMIN);
-        userRepository.save(findByUsernameTestUser);
+        findByNameTestUser.setName("findByOwnerName");
+        findByNameTestUser.setEmail("findByOwnerName@mail.com");
+        findByNameTestUser.setPassword(passwordEncoder.encode("pass"));
+        findByNameTestUser.setAuthority(UserAuthority.ADMIN);
+        userRepository.save(findByNameTestUser);
 
-        findByEmailTestUser.setUsername("findByEmail");
+        findByEmailTestUser.setName("findByEmail");
         findByEmailTestUser.setEmail("findByEmail@mail.com");
         findByEmailTestUser.setPassword(passwordEncoder.encode("pass"));
         findByEmailTestUser.setAuthority(UserAuthority.USER);
@@ -38,10 +38,10 @@ public class UserRepositoryIT extends AbstractIT {
     }
 
     @Test
-    public void findByUsernameTest() {
-        User foundUser = userRepository.findByUsername("findByUsername");
+    public void findByNameTest() {
+        User foundUser = userRepository.findByName("findByOwnerName");
         Assert.assertNotNull(foundUser);
-        Assert.assertEquals(findByUsernameTestUser, foundUser);
+        Assert.assertEquals(findByNameTestUser, foundUser);
     }
 
     @Test

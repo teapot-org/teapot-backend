@@ -1,15 +1,14 @@
 package org.teapot.backend.model.meta;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import org.springframework.data.jpa.domain.AbstractPersistable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "property")
-public class TeapotProperty implements Serializable {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class TeapotProperty extends AbstractPersistable<Long> {
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -23,11 +22,6 @@ public class TeapotProperty implements Serializable {
         this.name = name;
         this.value = value;
     }
-
-    public Long getId() {
-        return id;
-    }
-
     public String getName() {
         return name;
     }
@@ -36,8 +30,9 @@ public class TeapotProperty implements Serializable {
         return value;
     }
 
+    @Override
     public void setId(Long id) {
-        this.id = id;
+        super.setId(id);
     }
 
     public void setName(String name) {

@@ -1,65 +1,52 @@
 package org.teapot.backend.model.organization;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.teapot.backend.model.Board;
+import org.teapot.backend.model.Owner;
+import org.teapot.backend.util.ser.MemberSerializer;
 import org.teapot.backend.util.ser.OrganizationSerializer;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "organization")
 @JsonSerialize(using = OrganizationSerializer.class)
-public class Organization {
+public class Organization extends Owner {
 
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(unique = true, nullable = false)
-    private String name;
-
-    @Column(name = "full_name")
+    @Column
     private String fullName;
-
-    @Column(name = "creation_date")
-    private LocalDate creationDate;
 
     @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Member> members = new HashSet<>();
 
     public Organization() {
+        super();
+    }
+
+    public Organization(String name,
+                        LocalDateTime registrationDateTime,
+                        List<Board> boards,
+                        String fullName,
+                        Set<Member> members) {
+        super(name, registrationDateTime, boards);
+        setFullName(fullName);
+        setMembers(members);
     }
 
     public Organization(Long id,
                         String name,
+                        LocalDateTime registrationDateTime,
+                        List<Board> boards,
                         String fullName,
-                        LocalDate creationDate,
                         Set<Member> members) {
-        this.id = id;
-        this.name = name;
-        this.fullName = fullName;
-        this.creationDate = creationDate;
-        this.members = members;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        super(id, name, registrationDateTime, boards);
+        setFullName(fullName);
+        setMembers(members);
     }
 
     public String getFullName() {
@@ -68,14 +55,6 @@ public class Organization {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public LocalDate getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(LocalDate creationDate) {
-        this.creationDate = creationDate;
     }
 
     public Set<Member> getMembers() {
@@ -88,13 +67,7 @@ public class Organization {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                id,
-                name,
-                fullName,
-                creationDate,
-                members
-        );
+        return 31 * super.hashCode() + Objects.hash(fullName, members);
     }
 
     @Override
@@ -105,11 +78,11 @@ public class Organization {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
+        if (!super.equals(obj)) {
+            return false;
+        }
         final Organization other = (Organization) obj;
-        return Objects.equals(this.id, other.id)
-                && Objects.equals(this.name, other.name)
-                && Objects.equals(this.fullName, other.fullName)
-                && Objects.equals(this.creationDate, other.creationDate)
+        return Objects.equals(this.fullName, other.fullName)
                 && Objects.equals(this.members, other.members);
     }
 }

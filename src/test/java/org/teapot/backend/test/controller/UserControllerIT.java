@@ -34,40 +34,40 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Before
     public void addTestUsers() {
-        getUserOne.setUsername("getUserOne");
+        getUserOne.setName("getUserOne");
         getUserOne.setEmail("getUserOne@mail.com");
         getUserOne.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserOne);
 
-        getUserTwo.setUsername("getUserTwo");
+        getUserTwo.setName("getUserTwo");
         getUserTwo.setEmail("getUserTwo@mail.com");
         getUserTwo.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(getUserTwo);
 
-        postUserOne.setUsername("postUser");
+        postUserOne.setName("postUser");
         postUserOne.setEmail("postUser@mail.com");
         postUserOne.setPassword(passwordEncoder.encode("pass"));
 
-        postUserTwo.setUsername("postUser");
+        postUserTwo.setName("postUser");
         postUserTwo.setEmail("postUser@mail.com");
         postUserTwo.setPassword(passwordEncoder.encode("pass"));
 
-        repeatedPostUser.setUsername("repeatedPostUser");
+        repeatedPostUser.setName("repeatedPostUser");
         repeatedPostUser.setEmail("repeatedPostUser@mail.com");
         repeatedPostUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(repeatedPostUser);
 
-        updateUser.setUsername("updateUser");
+        updateUser.setName("updateUser");
         updateUser.setEmail("updateUser@mail.com");
         updateUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(updateUser);
 
-        deleteUser.setUsername("deleteUser");
+        deleteUser.setName("deleteUser");
         deleteUser.setEmail("deleteUser@mail.com");
         deleteUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(deleteUser);
 
-        patchUser.setUsername("patchUser");
+        patchUser.setName("patchUser");
         patchUser.setEmail("patchUser@mail.com");
         patchUser.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(patchUser);
@@ -83,10 +83,10 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(all.size())))
                 .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].username", is(all.get(0).getUsername())))
+                .andExpect(jsonPath("$[0].username", is(all.get(0).getName())))
                 .andExpect(jsonPath("$[0].email", is(all.get(0).getEmail())))
                 .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())))
-                .andExpect(jsonPath("$[1].username", is(all.get(1).getUsername())))
+                .andExpect(jsonPath("$[1].username", is(all.get(1).getName())))
                 .andExpect(jsonPath("$[1].email", is(all.get(1).getEmail())));
     }
 
@@ -96,7 +96,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
+                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
                 .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
@@ -108,11 +108,11 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void getSingleUserByUsernameTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, getUserOne.getUsername())))
+        mockMvc.perform(get(String.format("%s/%s", API_URL, getUserOne.getName())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
+                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
                 .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
@@ -128,7 +128,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getUsername())))
+                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
                 .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
@@ -268,7 +268,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isNoContent());
 
         User newUserWithUserRole = userRepository.findOne(userWithUserRole.getId());
-        Assert.assertEquals("newUserWithUserRole", newUserWithUserRole.getUsername());
+        Assert.assertEquals("newUserWithUserRole", newUserWithUserRole.getName());
         Assert.assertEquals("Bob", newUserWithUserRole.getFirstName());
         Assert.assertEquals("Brown", newUserWithUserRole.getLastName());
     }
@@ -298,7 +298,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isNoContent());
 
         User newPatchUser = userRepository.findOne(patchUser.getId());
-        Assert.assertEquals("newPatchUser", newPatchUser.getUsername());
+        Assert.assertEquals("newPatchUser", newPatchUser.getName());
         Assert.assertEquals("newPatchUser@test.org", newPatchUser.getEmail());
         Assert.assertTrue(passwordEncoder.matches("123456", newPatchUser.getPassword()));
         Assert.assertFalse(newPatchUser.isAvailable());

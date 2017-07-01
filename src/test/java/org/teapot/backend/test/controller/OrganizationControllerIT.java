@@ -8,13 +8,13 @@ import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
-import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.LinkBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -75,11 +75,11 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     @Before
     public void addTestDate() throws Exception {
         getOrganization.setName("getOrganization");
-        getOrganization.setCreationDate(LocalDate.now());
+        getOrganization.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.save(getOrganization);
 
         user1 = new User();
-        user1.setUsername("user1");
+        user1.setName("user1");
         user1.setEmail("user1@email.com");
         user1.setPassword(passwordEncoder.encode("pass"));
         user1.setActivated(true);
@@ -97,7 +97,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         memberRepository.save(creator);
 
         user2 = new User();
-        user2.setUsername("user2");
+        user2.setName("user2");
         user2.setEmail("user2@email.com");
         user2.setPassword(passwordEncoder.encode("pass"));
         userRepository.save(user2);
@@ -125,7 +125,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         deleteOrganizationCreator.getMembers().add(deleteOrganizationCreatorCreator);
 
         user3 = new User();
-        user3.setUsername("user3");
+        user3.setName("user3");
         user3.setEmail("user3@email.com");
         user3.setPassword(passwordEncoder.encode("pass"));
         user3.setActivated(true);
@@ -134,42 +134,42 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         workerAccessToken = obtainAccessToken("user3@email.com", "pass");
 
         user4 = new User();
-        user4.setUsername("user4");
+        user4.setName("user4");
         user4.setEmail("user4@email.com");
         user4.setPassword(passwordEncoder.encode("pass"));
         user4.setActivated(true);
         userRepository.save(user4);
 
         user5 = new User();
-        user5.setUsername("user5");
+        user5.setName("user5");
         user5.setEmail("user5@email.com");
         user5.setPassword(passwordEncoder.encode("pass"));
         user5.setActivated(true);
         userRepository.save(user5);
 
         user6 = new User();
-        user6.setUsername("user6");
+        user6.setName("user6");
         user6.setEmail("user6@email.com");
         user6.setPassword(passwordEncoder.encode("pass"));
         user6.setActivated(true);
         userRepository.save(user6);
 
         user7 = new User();
-        user7.setUsername("user7");
+        user7.setName("user7");
         user7.setEmail("user7@email.com");
         user7.setPassword(passwordEncoder.encode("pass"));
         user7.setActivated(true);
         userRepository.save(user7);
 
         user8 = new User();
-        user8.setUsername("user8");
+        user8.setName("user8");
         user8.setEmail("user8@email.com");
         user8.setPassword(passwordEncoder.encode("pass"));
         user8.setActivated(true);
         userRepository.save(user8);
 
         user9 = new User();
-        user9.setUsername("user9");
+        user9.setName("user9");
         user9.setEmail("user9@email.com");
         user9.setPassword(passwordEncoder.encode("pass"));
         user9.setActivated(true);

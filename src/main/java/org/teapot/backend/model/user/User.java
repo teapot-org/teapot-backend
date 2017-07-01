@@ -1,25 +1,21 @@
 package org.teapot.backend.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.teapot.backend.model.Board;
+import org.teapot.backend.model.Owner;
 import org.teapot.backend.util.ser.UserSerializer;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 
 @Entity
 @Table(name = "user")
 @JsonSerialize(using = UserSerializer.class)
-public class User {
-
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(unique = true, nullable = false, length = 32)
-    private String username;
+public class User extends Owner {
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -27,76 +23,74 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "is_available")
     private Boolean isAvailable = true;
 
-    @Column(name = "is_activated")
     private Boolean isActivated = false;
 
-    @Column(name = "first_name", length = 32)
+    @Column(length = 32)
     private String firstName;
 
-    @Column(name = "last_name", length = 32)
+    @Column(length = 32)
     private String lastName;
 
     @Enumerated
     private UserAuthority authority = UserAuthority.USER;
 
-    @Column(name = "registration_date")
-    private LocalDate registrationDate;
-
     private LocalDate birthday;
 
     private String description;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     private VerificationToken verificationToken;
 
     public User() {
+        super();
     }
 
-    public User(Long id,
-                String username,
+    public User(String name,
+                LocalDateTime registrationDateTime,
+                List<Board> boards,
                 String email,
-                String password,
-                Boolean isAvailable,
-                Boolean isActivated,
-                String firstName,
+                String password, Boolean isAvailable,
+                Boolean isActivated, String firstName,
                 String lastName,
                 UserAuthority authority,
-                LocalDate registrationDate,
                 LocalDate birthday,
-                String description,
-                VerificationToken verificationToken) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.isAvailable = isAvailable;
-        this.isActivated = isActivated;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.authority = authority;
-        this.registrationDate = registrationDate;
-        this.birthday = birthday;
-        this.description = description;
-        this.verificationToken = verificationToken;
+                String description) {
+        super(name, registrationDateTime, boards);
+        setEmail(email);
+        setPassword(password);
+        setAvailable(isAvailable);
+        setActivated(isActivated);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setAuthority(authority);
+        setBirthday(birthday);
+        setDescription(description);
     }
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public User(Long id,
+                String ownerName,
+                LocalDateTime registrationDateTime,
+                List<Board> boards,
+                String email,
+                String password, Boolean isAvailable,
+                Boolean isActivated, String firstName,
+                String lastName,
+                UserAuthority authority,
+                LocalDate birthday,
+                String description) {
+        super(id, ownerName, registrationDateTime, boards);
+        setEmail(email);
+        setPassword(password);
+        setAvailable(isAvailable);
+        setActivated(isActivated);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setAuthority(authority);
+        setBirthday(birthday);
+        setDescription(description);
     }
 
     public String getEmail() {
@@ -155,14 +149,6 @@ public class User {
         this.authority = authority;
     }
 
-    public LocalDate getRegistrationDate() {
-        return registrationDate;
-    }
-
-    public void setRegistrationDate(LocalDate registrationDate) {
-        this.registrationDate = registrationDate;
-    }
-
     public LocalDate getBirthday() {
         return birthday;
     }
@@ -189,9 +175,7 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                id,
-                username,
+        return 31 * super.hashCode() + Objects.hash(
                 email,
                 password,
                 isAvailable,
@@ -199,7 +183,6 @@ public class User {
                 firstName,
                 lastName,
                 authority,
-                registrationDate,
                 birthday,
                 description,
                 verificationToken
@@ -214,17 +197,17 @@ public class User {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
+        if (!super.equals(obj)) {
+            return false;
+        }
         final User other = (User) obj;
-        return Objects.equals(this.id, other.id)
-                && Objects.equals(this.username, other.username)
-                && Objects.equals(this.email, other.email)
+        return Objects.equals(this.email, other.email)
                 && Objects.equals(this.password, other.password)
                 && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.isActivated, other.isActivated)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
                 && Objects.equals(this.authority, other.authority)
-                && Objects.equals(this.registrationDate, other.registrationDate)
                 && Objects.equals(this.birthday, other.birthday)
                 && Objects.equals(this.description, other.description)
                 && Objects.equals(this.verificationToken, other.verificationToken);

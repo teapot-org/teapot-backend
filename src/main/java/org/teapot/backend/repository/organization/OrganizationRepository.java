@@ -1,9 +1,10 @@
 package org.teapot.backend.repository.organization;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.teapot.backend.model.organization.Organization;
+import org.teapot.backend.repository.AbstractOwnerRepository;
 
-public interface OrganizationRepository extends JpaRepository<Organization, Long> {
+import javax.transaction.Transactional;
 
-    Organization findByName(String name);
+@Transactional
+public interface OrganizationRepository extends AbstractOwnerRepository<Organization> {
 }
