@@ -8,7 +8,7 @@ import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.test.AbstractIT;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 public class OrganizationRepositoryIT extends AbstractIT {
@@ -21,7 +21,7 @@ public class OrganizationRepositoryIT extends AbstractIT {
     @Before
     public void setup() {
         findByNameTestOrganization.setName("findByNameTestOrganization");
-        findByNameTestOrganization.setCreationDate(LocalDate.now());
+        findByNameTestOrganization.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.save(findByNameTestOrganization);
     }
 

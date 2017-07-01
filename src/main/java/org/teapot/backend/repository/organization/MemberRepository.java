@@ -7,8 +7,10 @@ import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
+@Transactional
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Page<Member> findAllByOrganization(Organization organization, Pageable pageable);

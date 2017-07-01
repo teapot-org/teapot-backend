@@ -1,15 +1,12 @@
 package org.teapot.backend.model.user;
 
+import org.teapot.backend.model.AbstractPersistable;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "verification_token")
-public class VerificationToken {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class VerificationToken extends AbstractPersistable<Long> {
 
     @Column(nullable = false, unique = true, length = 32, updatable = false)
     private String token;
@@ -23,32 +20,29 @@ public class VerificationToken {
     public VerificationToken() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public String getToken() {
         return token;
     }
 
-    public LocalDateTime getExpireDateTime() {
-        return expireDateTime;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
+    @Override
     public void setId(Long id) {
-        this.id = id;
+        super.setId(id);
     }
 
     public void setToken(String token) {
         this.token = token;
     }
 
+    public LocalDateTime getExpireDateTime() {
+        return expireDateTime;
+    }
+
     public void setExpireDateTime(LocalDateTime expireDateTime) {
         this.expireDateTime = expireDateTime;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public void setUser(User user) {

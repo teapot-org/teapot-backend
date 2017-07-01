@@ -20,6 +20,7 @@ import org.teapot.backend.util.VerificationMailSender;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -73,7 +74,7 @@ public class UserController {
         } else if (idOrUsernameOrEmail.contains("@")) {
             user = userRepository.findByEmail(idOrUsernameOrEmail);
         } else {
-            user = userRepository.findByUsername(idOrUsernameOrEmail);
+            user = userRepository.findByName(idOrUsernameOrEmail);
         }
 
         if (user == null) {
@@ -106,7 +107,7 @@ public class UserController {
         }
 
         user.setId(id);
-        user.setRegistrationDate(existingUser.getRegistrationDate());
+        user.setRegistrationDateTime(existingUser.getRegistrationDateTime());
         user.setActivated(existingUser.isActivated());
         // если пароль изменился
         if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
@@ -174,7 +175,7 @@ public class UserController {
             throw new BadRequestException();
         }
 
-        user.setRegistrationDate(LocalDate.now());
+        user.setRegistrationDateTime(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         if (auth == null) {
@@ -237,7 +238,7 @@ public class UserController {
 
         if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
 
-            if (username != null) user.setUsername(username);
+            if (username != null) user.setName(username);
             if (email != null) user.setEmail(email);
             if (password != null) user.setPassword(passwordEncoder.encode(password));
             if (available != null) user.setAvailable(available);
@@ -249,7 +250,7 @@ public class UserController {
 
         } else if (auth.getName().equals(user.getEmail())) {
 
-            if (username != null) user.setUsername(username);
+            if (username != null) user.setName(username);
             if ((available != null) && (!available)) user.setAvailable(false);
             if (firstName != null) user.setFirstName(firstName);
             if (lastName != null) user.setLastName(lastName);
