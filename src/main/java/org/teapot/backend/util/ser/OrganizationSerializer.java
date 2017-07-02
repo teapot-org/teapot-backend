@@ -33,6 +33,7 @@ public class OrganizationSerializer extends StdSerializer<Organization> {
         gen.writeObjectField("id", org.getId());
         gen.writeObjectField("name", org.getName());
         gen.writeObjectField("fullName", org.getFullName());
+        gen.writeObjectField("isAvailable", org.isAvailable());
         gen.writeObjectField("registrationDateTime", org.getRegistrationDateTime());
         gen.writeStringField("members",
                 linkBuilder.format("/organizations/%d/members", org.getId()));

@@ -33,10 +33,11 @@ public class Organization extends Owner {
 
     public Organization(String name,
                         LocalDateTime registrationDateTime,
+                        Boolean isAvailable,
                         Set<Board> boards,
                         String fullName,
                         Set<Member> members) {
-        super(name, registrationDateTime, boards);
+        super(name, registrationDateTime, isAvailable, boards);
         setFullName(fullName);
         setMembers(members);
     }
@@ -44,10 +45,11 @@ public class Organization extends Owner {
     public Organization(Long id,
                         String name,
                         LocalDateTime registrationDateTime,
+                        Boolean isAvailable,
                         Set<Board> boards,
                         String fullName,
                         Set<Member> members) {
-        super(id, name, registrationDateTime, boards);
+        super(id, name, registrationDateTime, isAvailable, boards);
         setFullName(fullName);
         setMembers(members);
     }

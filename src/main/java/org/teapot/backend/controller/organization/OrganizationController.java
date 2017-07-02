@@ -314,7 +314,6 @@ public class OrganizationController {
      * 403 Forbidden
      * 404 Not Found
      */
-    // todo: приглашение нового участника
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{organizationId}/members")
     @ResponseStatus(HttpStatus.CREATED)

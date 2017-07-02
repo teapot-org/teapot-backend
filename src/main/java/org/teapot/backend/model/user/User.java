@@ -24,8 +24,6 @@ public class User extends Owner {
     @Column(nullable = false)
     private String password;
 
-    private Boolean isAvailable = true;
-
     private Boolean isActivated = false;
 
     @Column(length = 32)
@@ -57,13 +55,15 @@ public class User extends Owner {
                 LocalDateTime registrationDateTime,
                 Set<Board> boards,
                 String email,
-                String password, Boolean isAvailable,
-                Boolean isActivated, String firstName,
+                String password,
+                Boolean isAvailable,
+                Boolean isActivated,
+                String firstName,
                 String lastName,
                 UserAuthority authority,
                 LocalDate birthday,
                 String description) {
-        super(name, registrationDateTime, boards);
+        super(name, registrationDateTime, isAvailable, boards);
         setEmail(email);
         setPassword(password);
         setAvailable(isAvailable);
@@ -81,13 +81,15 @@ public class User extends Owner {
                 LocalDateTime registrationDateTime,
                 Set<Board> boards,
                 String email,
-                String password, Boolean isAvailable,
-                Boolean isActivated, String firstName,
+                String password,
+                Boolean isAvailable,
+                Boolean isActivated,
+                String firstName,
                 String lastName,
                 UserAuthority authority,
                 LocalDate birthday,
                 String description) {
-        super(id, ownerName, registrationDateTime, boards);
+        super(id, ownerName, registrationDateTime, isAvailable, boards);
         setEmail(email);
         setPassword(password);
         setAvailable(isAvailable);
@@ -113,14 +115,6 @@ public class User extends Owner {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Boolean isAvailable() {
-        return isAvailable;
-    }
-
-    public void setAvailable(Boolean available) {
-        isAvailable = available;
     }
 
     public Boolean isActivated() {
@@ -179,19 +173,27 @@ public class User extends Owner {
         this.verificationToken = verificationToken;
     }
 
+    public Set<Member> getMembers() {
+        return members;
+    }
+
+    public void setMembers(Set<Member> members) {
+        this.members = members;
+    }
+
     @Override
     public int hashCode() {
         return 31 * super.hashCode() + Objects.hash(
                 email,
                 password,
-                isAvailable,
                 isActivated,
                 firstName,
                 lastName,
                 authority,
                 birthday,
                 description,
-                verificationToken
+                verificationToken,
+                members
         );
     }
 
@@ -209,21 +211,13 @@ public class User extends Owner {
         final User other = (User) obj;
         return Objects.equals(this.email, other.email)
                 && Objects.equals(this.password, other.password)
-                && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.isActivated, other.isActivated)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
                 && Objects.equals(this.authority, other.authority)
                 && Objects.equals(this.birthday, other.birthday)
                 && Objects.equals(this.description, other.description)
-                && Objects.equals(this.verificationToken, other.verificationToken);
-    }
-
-    public Set<Member> getMembers() {
-        return members;
-    }
-
-    public void setMembers(Set<Member> members) {
-        this.members = members;
+                && Objects.equals(this.verificationToken, other.verificationToken)
+                && Objects.equals(this.members, other.members);
     }
 }

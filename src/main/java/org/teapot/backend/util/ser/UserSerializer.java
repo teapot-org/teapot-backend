@@ -31,7 +31,7 @@ public class UserSerializer extends StdSerializer<User> {
         gen.writeStartObject();
         gen.writeObjectField("type", OwnerType.USER);
         gen.writeObjectField("id", user.getId());
-        gen.writeObjectField("name", user.getName());
+        gen.writeObjectField("username", user.getName());
         gen.writeObjectField("email", user.getEmail());
         gen.writeObjectField("isAvailable", user.isAvailable());
         gen.writeObjectField("isActivated", user.isActivated());

@@ -1,5 +1,6 @@
 package org.teapot.backend.model;
 
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -18,6 +19,8 @@ public abstract class Owner extends AbstractPersistable<Long> {
 
     private LocalDateTime registrationDateTime;
 
+    private Boolean isAvailable = true;
+
     @OneToMany(mappedBy = "owner")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Board> boards = new HashSet<>();
@@ -25,21 +28,25 @@ public abstract class Owner extends AbstractPersistable<Long> {
     public Owner() {
     }
 
-    public Owner(String name,
-                 LocalDateTime registrationDateTime,
-                 Set<Board> boards) {
-        setName(name);
-        setRegistrationDateTime(registrationDateTime);
-        setBoards(boards);
-    }
-
     public Owner(Long id,
                  String name,
                  LocalDateTime registrationDateTime,
+                 Boolean isAvailable,
                  Set<Board> boards) {
         setId(id);
         setName(name);
         setRegistrationDateTime(registrationDateTime);
+        setAvailable(isAvailable);
+        setBoards(boards);
+    }
+
+    public Owner(String name,
+                 LocalDateTime registrationDateTime,
+                 Boolean isAvailable,
+                 Set<Board> boards) {
+        setName(name);
+        setRegistrationDateTime(registrationDateTime);
+        setAvailable(isAvailable);
         setBoards(boards);
     }
 
@@ -64,6 +71,14 @@ public abstract class Owner extends AbstractPersistable<Long> {
         this.registrationDateTime = registrationDateTime;
     }
 
+    public Boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(Boolean available) {
+        isAvailable = available;
+    }
+
     public Set<Board> getBoards() {
         return boards;
     }
@@ -77,6 +92,7 @@ public abstract class Owner extends AbstractPersistable<Long> {
         return 31 * super.hashCode() + Objects.hash(
                 name,
                 registrationDateTime,
+                isAvailable,
                 boards
         );
     }
@@ -95,6 +111,7 @@ public abstract class Owner extends AbstractPersistable<Long> {
         final Owner other = (Owner) obj;
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.registrationDateTime, other.registrationDateTime)
+                && Objects.equals(this.isAvailable, other.isAvailable)
                 && Objects.equals(this.boards, other.boards);
     }
 }
