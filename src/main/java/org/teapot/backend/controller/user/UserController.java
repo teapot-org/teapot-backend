@@ -206,7 +206,7 @@ public class UserController {
      *
      * @param id          идентификатор пользователя, данные которого нужно
      *                    изменить
-     * @param username    новое имя пользователя
+     * @param name        новое имя пользователя
      * @param email       новый e-mail
      * @param password    новый пароль
      * @param available   новое состояние available
@@ -221,7 +221,7 @@ public class UserController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchUser(@PathVariable Long id,
-                          @RequestParam(required = false) String username,
+                          @RequestParam(required = false) String name,
                           @RequestParam(required = false) String email,
                           @RequestParam(required = false) String password,
                           @RequestParam(required = false) Boolean available,
@@ -238,7 +238,7 @@ public class UserController {
 
         if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
 
-            if (username != null) user.setName(username);
+            if (name != null) user.setName(name);
             if (email != null) user.setEmail(email);
             if (password != null) user.setPassword(passwordEncoder.encode(password));
             if (available != null) user.setAvailable(available);
@@ -250,7 +250,7 @@ public class UserController {
 
         } else if (auth.getName().equals(user.getEmail())) {
 
-            if (username != null) user.setName(username);
+            if (name != null) user.setName(name);
             if ((available != null) && (!available)) user.setAvailable(false);
             if (firstName != null) user.setFirstName(firstName);
             if (lastName != null) user.setLastName(lastName);

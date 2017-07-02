@@ -1,9 +1,13 @@
 package org.teapot.backend.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -15,14 +19,15 @@ public abstract class Owner extends AbstractPersistable<Long> {
     private LocalDateTime registrationDateTime;
 
     @OneToMany(mappedBy = "owner")
-    private List<Board> boards;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Board> boards = new HashSet<>();
 
     public Owner() {
     }
 
     public Owner(String name,
                  LocalDateTime registrationDateTime,
-                 List<Board> boards) {
+                 Set<Board> boards) {
         setName(name);
         setRegistrationDateTime(registrationDateTime);
         setBoards(boards);
@@ -31,7 +36,7 @@ public abstract class Owner extends AbstractPersistable<Long> {
     public Owner(Long id,
                  String name,
                  LocalDateTime registrationDateTime,
-                 List<Board> boards) {
+                 Set<Board> boards) {
         setId(id);
         setName(name);
         setRegistrationDateTime(registrationDateTime);
@@ -59,11 +64,11 @@ public abstract class Owner extends AbstractPersistable<Long> {
         this.registrationDateTime = registrationDateTime;
     }
 
-    public List<Board> getBoards() {
+    public Set<Board> getBoards() {
         return boards;
     }
 
-    public void setBoards(List<Board> boards) {
+    public void setBoards(Set<Board> boards) {
         this.boards = boards;
     }
 

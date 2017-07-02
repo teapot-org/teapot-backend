@@ -105,8 +105,8 @@ public class MemberRepositoryIT extends AbstractIT {
 
     @Test
     public void findByUserTest() {
-        Assert.assertEquals(Lists.newArrayList(member1, member3)
-                ,memberRepository.findByUser(user1)
+        Assert.assertEquals(Lists.newArrayList(member1, member3),
+                memberRepository.findByUser(user1)
         );
     }
 }

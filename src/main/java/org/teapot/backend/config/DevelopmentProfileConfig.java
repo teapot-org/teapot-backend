@@ -198,7 +198,7 @@ public class DevelopmentProfileConfig {
         resource1.setUri("/users");
         resource1.setDescription(
                 "Available methods:\n\nGET /users/{id|username}\n" +
-                "POST /users\nPUT /users\nDELETE /users/{id}\n\n");
+                        "POST /users\nPUT /users\nDELETE /users/{id}\n\n");
 
         resourceRepository.save(resource1);
     }

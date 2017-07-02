@@ -1,7 +1,7 @@
 package org.teapot.backend.repository.user;
 
-import org.teapot.backend.repository.AbstractOwnerRepository;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.repository.AbstractOwnerRepository;
 
 import javax.transaction.Transactional;
 

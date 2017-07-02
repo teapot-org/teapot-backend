@@ -1,10 +1,10 @@
 package org.teapot.backend.model.organization;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.teapot.backend.model.AbstractPersistable;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.util.deser.MemberDeserializer;
 import org.teapot.backend.util.ser.MemberSerializer;
 
 import javax.persistence.*;
@@ -13,10 +13,10 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "organization_member")
 @JsonSerialize(using = MemberSerializer.class)
+@JsonDeserialize(using = MemberDeserializer.class)
 public class Member extends AbstractPersistable<Long> {
 
     @ManyToOne(optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @Enumerated
