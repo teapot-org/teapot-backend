@@ -10,7 +10,6 @@ import org.teapot.backend.test.AbstractIT;
 
 import java.time.LocalDateTime;
 
-
 public class OrganizationRepositoryIT extends AbstractIT {
 
     @Autowired

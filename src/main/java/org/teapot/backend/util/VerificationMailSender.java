@@ -12,7 +12,6 @@ import org.teapot.backend.repository.user.VerificationTokenRepository;
 
 import java.util.Locale;
 
-
 @Component
 public class VerificationMailSender {
 

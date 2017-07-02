@@ -16,11 +16,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class TeapotPropertyControllerIT extends AbstractControllerIT {
 
+    private static final String API_URL = "/props";
     @Autowired
     private TeapotPropertyRepository propertyRepository;
-
-    private static final String API_URL = "/props";
-
     private List<TeapotProperty> properties;
 
     private TeapotProperty existentProperty = new TeapotProperty("property-4", "value-4");

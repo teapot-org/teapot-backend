@@ -22,24 +22,25 @@ public class TeapotProperty extends AbstractPersistable<Long> {
         this.name = name;
         this.value = value;
     }
+
     public String getName() {
         return name;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public void setId(Long id) {
-        super.setId(id);
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public void setId(Long id) {
+        super.setId(id);
     }
 }

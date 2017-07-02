@@ -18,7 +18,6 @@ import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARE
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 public class UserControllerIT extends AbstractControllerIT {
 
     private static final String API_URL = "/users";
@@ -83,10 +82,10 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(all.size())))
                 .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].username", is(all.get(0).getName())))
+                .andExpect(jsonPath("$[0].name", is(all.get(0).getName())))
                 .andExpect(jsonPath("$[0].email", is(all.get(0).getEmail())))
                 .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())))
-                .andExpect(jsonPath("$[1].username", is(all.get(1).getName())))
+                .andExpect(jsonPath("$[1].name", is(all.get(1).getName())))
                 .andExpect(jsonPath("$[1].email", is(all.get(1).getEmail())));
     }
 
@@ -96,7 +95,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
+                .andExpect(jsonPath("$.name", is(getUserOne.getName())))
                 .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
@@ -112,7 +111,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
+                .andExpect(jsonPath("$.name", is(getUserOne.getName())))
                 .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
@@ -128,7 +127,7 @@ public class UserControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
+                .andExpect(jsonPath("$.name", is(getUserOne.getName())))
                 .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
     }
 
@@ -258,7 +257,7 @@ public class UserControllerIT extends AbstractControllerIT {
     @Test
     public void patchUserTestByUserSameId() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("username", "newUserWithUserRole");
+        params.add("name", "newUserWithUserRole");
         params.add("firstName", "Bob");
         params.add("lastName", "Brown");
 
@@ -283,7 +282,7 @@ public class UserControllerIT extends AbstractControllerIT {
     @Test
     public void patchUserTestByAdmin() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("username", "newPatchUser");
+        params.add("name", "newPatchUser");
         params.add("email", "newPatchUser@test.org");
         params.add("password", "123456");
         params.add("available", "false");

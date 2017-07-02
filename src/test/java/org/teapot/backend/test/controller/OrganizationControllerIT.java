@@ -24,7 +24,6 @@ import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARE
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 public class OrganizationControllerIT extends AbstractControllerIT {
 
     private static final String ORGANIZATIONS_URL = "organizations";

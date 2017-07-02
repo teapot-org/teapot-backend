@@ -2,7 +2,10 @@ package org.teapot.backend.model.user;
 
 import org.teapot.backend.model.AbstractPersistable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,13 +27,13 @@ public class VerificationToken extends AbstractPersistable<Long> {
         return token;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     public void setId(Long id) {
         super.setId(id);
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public LocalDateTime getExpireDateTime() {

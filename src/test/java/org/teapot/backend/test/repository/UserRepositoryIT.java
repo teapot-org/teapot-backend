@@ -10,7 +10,6 @@ import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
-
 public class UserRepositoryIT extends AbstractIT {
 
     @Autowired

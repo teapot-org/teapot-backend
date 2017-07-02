@@ -1,15 +1,18 @@
 package org.teapot.backend.model.organization;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.teapot.backend.model.Board;
 import org.teapot.backend.model.Owner;
-import org.teapot.backend.util.ser.MemberSerializer;
 import org.teapot.backend.util.ser.OrganizationSerializer;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,8 +23,8 @@ public class Organization extends Owner {
     @Column
     private String fullName;
 
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Member> members = new HashSet<>();
 
     public Organization() {
@@ -30,7 +33,7 @@ public class Organization extends Owner {
 
     public Organization(String name,
                         LocalDateTime registrationDateTime,
-                        List<Board> boards,
+                        Set<Board> boards,
                         String fullName,
                         Set<Member> members) {
         super(name, registrationDateTime, boards);
@@ -41,7 +44,7 @@ public class Organization extends Owner {
     public Organization(Long id,
                         String name,
                         LocalDateTime registrationDateTime,
-                        List<Board> boards,
+                        Set<Board> boards,
                         String fullName,
                         Set<Member> members) {
         super(id, name, registrationDateTime, boards);

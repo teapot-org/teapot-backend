@@ -1,19 +1,20 @@
 package org.teapot.backend.model.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.teapot.backend.model.Board;
 import org.teapot.backend.model.Owner;
+import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.util.ser.UserSerializer;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
-
+import java.util.Set;
 
 @Entity
-@Table(name = "user")
 @JsonSerialize(using = UserSerializer.class)
 public class User extends Owner {
 
@@ -40,8 +41,13 @@ public class User extends Owner {
 
     private String description;
 
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private VerificationToken verificationToken;
+
+    @OneToMany(mappedBy = "user")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Member> members;
 
     public User() {
         super();
@@ -49,7 +55,7 @@ public class User extends Owner {
 
     public User(String name,
                 LocalDateTime registrationDateTime,
-                List<Board> boards,
+                Set<Board> boards,
                 String email,
                 String password, Boolean isAvailable,
                 Boolean isActivated, String firstName,
@@ -73,7 +79,7 @@ public class User extends Owner {
     public User(Long id,
                 String ownerName,
                 LocalDateTime registrationDateTime,
-                List<Board> boards,
+                Set<Board> boards,
                 String email,
                 String password, Boolean isAvailable,
                 Boolean isActivated, String firstName,
@@ -211,5 +217,13 @@ public class User extends Owner {
                 && Objects.equals(this.birthday, other.birthday)
                 && Objects.equals(this.description, other.description)
                 && Objects.equals(this.verificationToken, other.verificationToken);
+    }
+
+    public Set<Member> getMembers() {
+        return members;
+    }
+
+    public void setMembers(Set<Member> members) {
+        this.members = members;
     }
 }
