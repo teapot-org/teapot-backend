@@ -15,10 +15,10 @@ import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
-import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
+import org.teapot.backend.service.MemberService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
@@ -40,6 +40,9 @@ public class OrganizationController {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private MemberService memberService;
 
     private Organization findOrganizationByIdOrName(String idOrName) {
         Long id = Longs.tryParse(idOrName);
@@ -126,29 +129,15 @@ public class OrganizationController {
      * 403 Forbidden
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreator(#organizationId, authentication?.name)")
     @DeleteMapping("/{organizationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrganization(
-            @PathVariable Long organizationId,
-            Authentication auth
+            @PathVariable Long organizationId
     ) {
-        Organization organization = organizationRepository
-                .findOne(organizationId);
-        if (organization == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
-
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))) {
-            organizationRepository.delete(organization);
-        } else {
-            throw new ForbiddenException();
-        }
+        Organization organization = ofNullable(organizationRepository.findOne(organizationId))
+                .orElseThrow(ResourceNotFoundException::new);
+        organizationRepository.delete(organization);
     }
 
     /**
@@ -209,7 +198,7 @@ public class OrganizationController {
      * 403 Forbidden
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication?.name)")
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchOrganization(
@@ -218,29 +207,13 @@ public class OrganizationController {
             @RequestParam(required = false) String fullName,
             Authentication auth
     ) {
-        Organization organization = organizationRepository.findOne(id);
-        if (organization == null) {
-            throw new ResourceNotFoundException();
-        }
+        Organization organization = ofNullable(organizationRepository.findOne(id))
+                .orElseThrow(ResourceNotFoundException::new);
 
-        Member authMember = memberRepository.findByOrganizationAndUser(organization,
-                userRepository.findByEmail(auth.getName()));
+        if (name != null) organization.setName(name);
+        if (fullName != null) organization.setFullName(fullName);
 
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.OWNER))) {
-
-            if (name != null) {
-                organization.setName(name);
-            }
-            if (fullName != null) {
-                organization.setFullName(fullName);
-            }
-            organizationRepository.save(organization);
-
-        } else {
-            throw new ForbiddenException();
-        }
+        organizationRepository.save(organization);
     }
 
     /**
@@ -358,14 +331,13 @@ public class OrganizationController {
      * 403 Forbidden
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#organizationId, authentication?.name)")
     @PatchMapping("/{organizationId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchMember(
             @PathVariable Long organizationId,
             @PathVariable Long memberId,
-            @RequestParam("status") MemberStatus newStatus,
-            Authentication auth
+            @RequestParam("status") MemberStatus newStatus
     ) {
         Organization organization = ofNullable(
                 organizationRepository.findOne(organizationId))
@@ -375,23 +347,13 @@ public class OrganizationController {
                 .findByOrganizationAndId(organization, memberId))
                 .orElseThrow(ResourceNotFoundException::new);
 
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
-
-        if ((auth.getAuthorities().contains(UserAuthority.ADMIN))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.OWNER))) {
-
-            if (!member.getStatus().equals(MemberStatus.CREATOR)
-                    && !newStatus.equals(MemberStatus.CREATOR)) {
-
-                member.setStatus(newStatus);
-                memberRepository.save(member);
-                return;
-            }
+        if (member.getStatus().equals(MemberStatus.CREATOR)
+                || newStatus.equals(MemberStatus.CREATOR)) {
+            throw new ForbiddenException();
         }
-        throw new ForbiddenException();
+
+        member.setStatus(newStatus);
+        memberRepository.save(member);
     }
 
     /**
@@ -406,13 +368,12 @@ public class OrganizationController {
      * 403 Forbidden
      * 404 Not Found
      */
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#organizationId, authentication.name)")
     @DeleteMapping("/{organizationId}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMember(
             @PathVariable Long organizationId,
-            @PathVariable Long memberId,
-            Authentication auth
+            @PathVariable Long memberId
     ) {
         Organization organization = ofNullable(
                 organizationRepository.findOne(organizationId))
@@ -422,22 +383,10 @@ public class OrganizationController {
                 .findByOrganizationAndId(organization, memberId))
                 .orElseThrow(ResourceNotFoundException::new);
 
-        Member authMember = memberRepository
-                .findByOrganizationAndUser(organization,
-                        userRepository.findByEmail(auth.getName()));
-
-        if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
-            memberRepository.delete(member);
-            return;
-
-        } else if ((authMember != null) && (authMember.getStatus().equals(MemberStatus.CREATOR))
-                || (authMember != null) && (authMember.getStatus().equals(MemberStatus.OWNER))) {
-
-            if (!member.getStatus().equals(MemberStatus.CREATOR)) {
-                memberRepository.delete(member);
-                return;
-            }
+        if (member.getStatus().equals(MemberStatus.CREATOR)) {
+            throw new ForbiddenException();
         }
-        throw new ForbiddenException();
+
+        memberRepository.delete(member);
     }
 }

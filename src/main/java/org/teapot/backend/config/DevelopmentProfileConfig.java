@@ -7,8 +7,6 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.Board;
 import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.meta.TeapotProperty;
@@ -47,9 +45,6 @@ public class DevelopmentProfileConfig {
     private TeapotResourceRepository resourceRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private OrganizationRepository organizationRepository;
 
     @Autowired
@@ -57,11 +52,6 @@ public class DevelopmentProfileConfig {
 
     @Autowired
     private BoardRepository boardRepository;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -96,7 +86,7 @@ public class DevelopmentProfileConfig {
 
         admin.setName("admin");
         admin.setEmail("admin@teapot.org");
-        admin.setPassword(passwordEncoder.encode("1234"));
+        admin.setPassword("1234");
         admin.setActivated(true);
         admin.setFirstName("Cake");
         admin.setLastName("Lover");
@@ -113,7 +103,7 @@ public class DevelopmentProfileConfig {
 
         user.setName("dale_cooper");
         user.setEmail("dale_cooper@twin.peaks");
-        user.setPassword(passwordEncoder.encode("1234"));
+        user.setPassword("1234");
         user.setActivated(true);
         user.setFirstName("Dale");
         user.setLastName("Cooper");
@@ -130,7 +120,7 @@ public class DevelopmentProfileConfig {
 
         user.setName("lora_palmer");
         user.setEmail("lora_palmer@twin.peaks");
-        user.setPassword(passwordEncoder.encode("1234"));
+        user.setPassword("1234");
         user.setActivated(true);
         user.setFirstName("Lora");
         user.setLastName("Palmer");
@@ -147,7 +137,7 @@ public class DevelopmentProfileConfig {
 
         user.setName("sherlock_holmes");
         user.setEmail("sherlock_holmes@baker.st");
-        user.setPassword(passwordEncoder.encode("1234"));
+        user.setPassword("1234");
         user.setActivated(true);
         user.setFirstName("Sherlock");
         user.setLastName("Holmes");
@@ -164,7 +154,7 @@ public class DevelopmentProfileConfig {
 
         user.setName("dr_watson");
         user.setEmail("dr_watson@baker.st");
-        user.setPassword(passwordEncoder.encode("1234"));
+        user.setPassword("1234");
         user.setActivated(true);
         user.setFirstName("John");
         user.setLastName("Watson");

@@ -3,6 +3,8 @@ package org.teapot.backend.model.user;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.Board;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.organization.Member;
@@ -17,6 +19,8 @@ import java.util.Set;
 @Entity
 @JsonSerialize(using = UserSerializer.class)
 public class User extends Owner {
+
+    public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -114,7 +118,7 @@ public class User extends Owner {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = PASSWORD_ENCODER.encode(password);
     }
 
     public Boolean isActivated() {
