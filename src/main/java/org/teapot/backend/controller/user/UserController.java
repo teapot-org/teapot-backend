@@ -93,7 +93,7 @@ public class UserController extends AbstractController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchUser(
             @PathVariable Long id,
-            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String password,
             @RequestParam(required = false) Boolean available,
@@ -110,7 +110,7 @@ public class UserController extends AbstractController {
         }
 
         if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
-            if (username != null) user.setName(username);
+            if (name != null) user.setName(name);
             if (email != null) user.setEmail(email);
             if (password != null) user.setPassword(password);
             if (available != null) user.setAvailable(available);
@@ -120,7 +120,7 @@ public class UserController extends AbstractController {
             if (birthday != null) user.setBirthday(birthday);
             if (description != null) user.setDescription(description);
         } else {
-            if (username != null) user.setName(username);
+            if (name != null) user.setName(name);
             if ((available != null) && (!available)) user.setAvailable(false);
             if (firstName != null) user.setFirstName(firstName);
             if (lastName != null) user.setLastName(lastName);
