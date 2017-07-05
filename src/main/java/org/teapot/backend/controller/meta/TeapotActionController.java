@@ -1,38 +1,28 @@
 package org.teapot.backend.controller.meta;
 
-import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.WebRequest;
-import org.teapot.backend.controller.exception.BadRequestException;
-import org.teapot.backend.controller.exception.ConflictException;
-import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.VerificationToken;
-import org.teapot.backend.repository.meta.TeapotActionRepository;
-import org.teapot.backend.repository.meta.TeapotResourceRepository;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.repository.user.VerificationTokenRepository;
 import org.teapot.backend.util.VerificationMailSender;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Optional;
 
-@RestController
+@Controller
 @RequestMapping("/actions")
 public class TeapotActionController {
 
     @Autowired
     private Environment env;
-
-    @Autowired
-    private TeapotActionRepository actionRepository;
-
-    @Autowired
-    private TeapotResourceRepository resourceRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -42,43 +32,6 @@ public class TeapotActionController {
 
     @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
-
-    @GetMapping("/{nameOrId}")
-    public TeapotAction getAction(@PathVariable String nameOrId) {
-        Long id = Longs.tryParse(nameOrId);
-        return Optional.ofNullable((id != null)
-                ? actionRepository.findOne(id)
-                : actionRepository.findByName(nameOrId))
-                .orElseThrow(ResourceNotFoundException::new);
-    }
-
-    @GetMapping("/help")
-    public Object help(
-            @RequestParam(name = "resource", required = false) String resourceNameOrId,
-            @RequestParam(name = "action", required = false) String actionNameOrId
-    ) {
-        if ((resourceNameOrId != null) && (actionNameOrId != null)) {
-            throw new ConflictException();
-        }
-
-        if (resourceNameOrId != null) {
-            Long id = Longs.tryParse(resourceNameOrId);
-            return Optional.ofNullable((id != null)
-                    ? resourceRepository.findOne(id)
-                    : resourceRepository.findByName(resourceNameOrId))
-                    .orElseThrow(ResourceNotFoundException::new);
-        }
-
-        if (actionNameOrId != null) {
-            Long id = Longs.tryParse(actionNameOrId);
-            return Optional.ofNullable((id != null)
-                    ? actionRepository.findOne(id)
-                    : actionRepository.findByName(actionNameOrId))
-                    .orElseThrow(ResourceNotFoundException::new);
-        }
-
-        throw new BadRequestException();
-    }
 
     @PostMapping("/activate")
     public void activate(
@@ -93,11 +46,12 @@ public class TeapotActionController {
             return;
         }
 
-        VerificationToken token = Optional
-                .ofNullable(tokenRepository.findByToken(tokenString))
-                .orElseThrow(ResourceNotFoundException::new);
-        User user = token.getUser();
+        VerificationToken token = tokenRepository.findByToken(tokenString);
+        if (token == null) {
+            throw new ResourceNotFoundException();
+        }
 
+        User user = token.getUser();
         tokenRepository.delete(token);
 
         if (token.getExpireDateTime().isAfter(LocalDateTime.now())) {

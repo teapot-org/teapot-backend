@@ -1,47 +1,30 @@
 package org.teapot.backend.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.*;
-import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.model.Board;
-import org.teapot.backend.model.Owner;
-import org.teapot.backend.repository.BoardRepository;
-import org.teapot.backend.repository.OwnerRepository;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.List;
+@RepositoryRestController
+public class BoardController extends AbstractController {
 
-import static java.util.Optional.ofNullable;
+    public static final String BOARDS_ENDPOINT = "/boards";
+    public static final String SINGLE_BOARD_ENDPOINT = BOARDS_ENDPOINT + "/{id}";
 
-@RestController
-@RequestMapping("/boards")
-public class BoardController {
-
-    @Autowired
-    private BoardRepository boardRepository;
-
-    @Autowired
-    private OwnerRepository ownerRepository;
-
-    @GetMapping
-    public List<Board> getBoards(Pageable pageable) {
-        return boardRepository.findAll(pageable).getContent();
+    @PostMapping(BOARDS_ENDPOINT)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public void notAllowedPostBoard() {
     }
 
-    @GetMapping(params = "owner")
-    public List<Board> getOwnerBoards(
-            @RequestParam("owner") Long ownerId,
-            Pageable pageable
-    ) {
-        Owner owner = ofNullable(ownerRepository.findOne(ownerId))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        return boardRepository.findByOwner(owner, pageable).getContent();
+    @PutMapping(SINGLE_BOARD_ENDPOINT)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public void notAllowedPutBoard() {
     }
 
-    @GetMapping("/{id}")
-    public Board getBoard(@PathVariable Long id) {
-        return ofNullable(boardRepository.findOne(id))
-                .orElseThrow(ResourceNotFoundException::new);
+    @PatchMapping(SINGLE_BOARD_ENDPOINT)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public void notAllowedPatchBoard() {
     }
 }

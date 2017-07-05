@@ -8,7 +8,6 @@ import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.BoardRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
-import org.teapot.backend.util.LinkBuilder;
 
 import java.util.List;
 
@@ -29,8 +28,6 @@ public class BoardControllerIT extends AbstractControllerIT {
     @Autowired
     private BoardRepository boardRepository;
 
-    @Autowired
-    private LinkBuilder linkBuilder;
 
     private User getBoard1Owner = new User();
     private Organization getBoard2Owner = new Organization();
@@ -42,7 +39,7 @@ public class BoardControllerIT extends AbstractControllerIT {
     public void addTestUsers() {
         getBoard1Owner.setName("getBoard1Owner");
         getBoard1Owner.setEmail("getBoard1Owner@mail.com");
-        getBoard1Owner.setPassword(passwordEncoder.encode("pass"));
+        getBoard1Owner.setPassword("pass");
         userRepository.save(getBoard1Owner);
 
         getBoard2Owner.setName("getBoard2Owner");
@@ -73,10 +70,7 @@ public class BoardControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getBoard1.getId().intValue())))
-                .andExpect(jsonPath("$.title", is(getBoard1.getTitle())))
-                .andExpect(jsonPath("$.owner",
-                        is(linkBuilder.format("/%s/%d", USERS_URL,
-                                getBoard1Owner.getId().intValue()))));
+                .andExpect(jsonPath("$.title", is(getBoard1.getTitle())));
     }
 
     @Test
@@ -91,10 +85,7 @@ public class BoardControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$[0].id", is(getBoard2.getId().intValue())))
-                .andExpect(jsonPath("$[0].title", is(getBoard2.getTitle())))
-                .andExpect(jsonPath("$[0].owner",
-                        is(linkBuilder.format("/%s/%d", ORGANIZATIONS_URL,
-                                getBoard2Owner.getId().intValue()))));
+                .andExpect(jsonPath("$[0].title", is(getBoard2.getTitle())));
     }
 
     @Test

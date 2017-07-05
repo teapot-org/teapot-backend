@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -87,7 +88,8 @@ public class MemberRepositoryIT extends AbstractIT {
     @Test
     public void findAllByOrganizationTest() {
         Assert.assertEquals(Arrays.asList(member1, member2),
-                memberRepository.findAllByOrganization(memberRepositoryTestOrg));
+                memberRepository.findAllByOrganization(memberRepositoryTestOrg, new PageRequest(1, 20))
+                        .getContent());
     }
 
     @Test
@@ -105,7 +107,7 @@ public class MemberRepositoryIT extends AbstractIT {
     @Test
     public void findByUserTest() {
         Assert.assertEquals(Lists.newArrayList(member1, member3),
-                memberRepository.findByUser(user1)
+                memberRepository.findByUser(user1, new PageRequest(1, 20)).getContent()
         );
     }
 

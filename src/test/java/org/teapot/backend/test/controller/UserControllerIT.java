@@ -300,7 +300,7 @@ public class UserControllerIT extends AbstractControllerIT {
         Assert.assertEquals("newPatchUser", newPatchUser.getName());
         Assert.assertEquals("newPatchUser@test.org", newPatchUser.getEmail());
         Assert.assertTrue(User.PASSWORD_ENCODER.matches("123456", newPatchUser.getPassword()));
-        Assert.assertFalse(newPatchUser.isAvailable());
+        Assert.assertFalse(newPatchUser.getAvailable());
         Assert.assertEquals("Bob", newPatchUser.getFirstName());
         Assert.assertEquals("Brown", newPatchUser.getLastName());
         Assert.assertEquals(UserAuthority.ADMIN, newPatchUser.getAuthority());

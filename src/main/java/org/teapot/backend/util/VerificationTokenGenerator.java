@@ -33,7 +33,6 @@ public final class VerificationTokenGenerator {
             verificationTokenExpireDays = 1;
         }
 
-
         while (true) {
             String tokenString = sequenceGenerator.generateSequence(32);
 

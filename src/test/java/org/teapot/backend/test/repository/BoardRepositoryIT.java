@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.teapot.backend.model.Board;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.organization.Organization;
@@ -33,6 +34,7 @@ public class BoardRepositoryIT extends AbstractIT {
 
     @Test
     public void findByOwnerTest() {
-        Assert.assertEquals(Lists.newArrayList(board), boardRepository.findByOwner(owner));
+        Assert.assertEquals(Lists.newArrayList(board),
+                boardRepository.findByOwner(owner, new PageRequest(1, 20)).getContent());
     }
 }
