@@ -11,8 +11,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.repository.user.UserRepository;
+
+import java.util.Collections;
+
+import static java.util.Optional.ofNullable;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +26,7 @@ import org.teapot.backend.model.user.User;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserRepository userRepository;
 
     public WebSecurityConfig() {
         super(true);
@@ -40,6 +45,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(User.PASSWORD_ENCODER);
+        auth.userDetailsService(username -> {
+            User user = ofNullable(userRepository.findByEmail(username))
+                    .orElseThrow(() -> new UsernameNotFoundException("User '" + username + "' not found"));
+
+            return new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    user.getPassword(),
+                    user.getAvailable() && user.getActivated(),
+                    true,
+                    true,
+                    true,
+                    Collections.singletonList(user.getAuthority())
+            );
+        }).passwordEncoder(User.PASSWORD_ENCODER);
     }
 }

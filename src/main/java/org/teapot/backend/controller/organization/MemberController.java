@@ -1,0 +1,99 @@
+package org.teapot.backend.controller.organization;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.rest.webmvc.*;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.teapot.backend.controller.AbstractController;
+import org.teapot.backend.model.organization.Member;
+import org.teapot.backend.model.organization.MemberStatus;
+import org.teapot.backend.repository.organization.MemberRepository;
+import org.teapot.backend.repository.organization.OrganizationRepository;
+
+import java.time.LocalDate;
+
+@RepositoryRestController
+public class MemberController extends AbstractController {
+
+    public static final String MEMBERS_ENDPOINT = "/members";
+    public static final String SINGLE_MEMBER_ENDPOINT = MEMBERS_ENDPOINT + "/{id}";
+
+    @Autowired
+    private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(MEMBERS_ENDPOINT)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> addMember(
+            @RequestBody Resource<Member> requestResource,
+            PersistentEntityResourceAssembler assembler,
+            Authentication auth
+    ) {
+        Member member = requestResource.getContent();
+
+        member.setAdmissionDate(LocalDate.now());
+        if (member.getStatus().equals(MemberStatus.CREATOR)) {
+            // нельзя добавить нового создателя организации
+            member.setStatus(MemberStatus.OWNER);
+        }
+        memberRepository.save(member);
+
+        PersistentEntityResource responseResource = assembler.toResource(member);
+        HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
+        addLocationHeader(headers, assembler, member);
+
+        return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication?.name)")
+    @PatchMapping(SINGLE_MEMBER_ENDPOINT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void patchMember(
+            @PathVariable Long id,
+            @RequestParam("status") MemberStatus newStatus
+    ) {
+        Member member = memberRepository.findOne(id);
+        if (member == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        boolean memberIsCreator = member.getStatus().equals(MemberStatus.CREATOR);
+        boolean newStatusIsCreator = newStatus.equals(MemberStatus.CREATOR);
+
+        if (memberIsCreator || newStatusIsCreator) {
+            throw new DataIntegrityViolationException("Not allowed for 'CREATOR' status");
+        }
+
+        member.setStatus(newStatus);
+        memberRepository.save(member);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication.name)")
+    @DeleteMapping(SINGLE_MEMBER_ENDPOINT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMember(
+            @PathVariable Long id
+    ) {
+        Member member = memberRepository.findOne(id);
+
+        if (member.getStatus().equals(MemberStatus.CREATOR)) {
+            throw new DataIntegrityViolationException("Not allowed for 'CREATOR' status");
+        }
+
+        memberRepository.delete(member);
+    }
+
+    @PutMapping(SINGLE_MEMBER_ENDPOINT)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public void notAllowedPutMember() {
+    }
+}

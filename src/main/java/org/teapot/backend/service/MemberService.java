@@ -16,32 +16,27 @@ public class MemberService {
 
     public boolean hasAnyMemberStatus(Long organizationId, String userEmail, String... statuses) {
         Member member = memberRepository.findByOrganizationIdAndUserEmail(organizationId, userEmail);
-        return member != null
+        return (member != null)
                 && Arrays.stream(statuses)
                 .map(MemberStatus::valueOf)
                 .anyMatch(status -> member.getStatus().equals(status));
     }
 
     public boolean isCreator(Long organizationId, String userEmail) {
-        Member member = memberRepository.findByOrganizationIdAndUserEmail(organizationId, userEmail);
-        return (member != null) && (member.getStatus().equals(MemberStatus.CREATOR));
+        return hasAnyMemberStatus(organizationId, userEmail, MemberStatus.CREATOR.toString());
     }
 
     public boolean isOwner(Long organizationId, String userEmail) {
-        Member member = memberRepository.findByOrganizationIdAndUserEmail(organizationId, userEmail);
-        return (member != null) && (member.getStatus().equals(MemberStatus.OWNER));
+        return hasAnyMemberStatus(organizationId, userEmail, MemberStatus.OWNER.toString());
     }
 
     public boolean isCreatorOrOwner(Long organizationId, String userEmail) {
-        Member member = memberRepository.findByOrganizationIdAndUserEmail(organizationId, userEmail);
-        return (member != null)
-                && (member.getStatus().equals(MemberStatus.CREATOR)
-                || member.getStatus().equals(MemberStatus.OWNER));
+        return hasAnyMemberStatus(organizationId, userEmail,
+                MemberStatus.CREATOR.toString(), MemberStatus.OWNER.toString());
     }
 
     public boolean isWorker(Long organizationId, String userEmail) {
-        Member member = memberRepository.findByOrganizationIdAndUserEmail(organizationId, userEmail);
-        return (member != null) && member.getStatus().equals(MemberStatus.WORKER);
+        return hasAnyMemberStatus(organizationId, userEmail, MemberStatus.WORKER.toString());
     }
 
     public boolean isMember(Long organizationId, String userEmail) {

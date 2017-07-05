@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -11,7 +12,6 @@ import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
-import org.teapot.backend.util.LinkBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,9 +38,6 @@ public class OrganizationControllerIT extends AbstractControllerIT {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private LinkBuilder linkBuilder;
 
     private Organization getOrganization = new Organization();
     private User user1;
@@ -236,10 +233,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(jsonPath("$", hasSize(all.size())))
                 .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
                 .andExpect(jsonPath("$[0].name", is(all.get(0).getName())))
-                .andExpect(jsonPath("$[0].fullName", is(all.get(0).getFullName())))
-                .andExpect(jsonPath("$[0].members",
-                        is(linkBuilder.format("/%s/%d/%s", ORGANIZATIONS_URL,
-                                all.get(0).getId().intValue(), MEMBERS_URL))));
+                .andExpect(jsonPath("$[0].fullName", is(all.get(0).getFullName())));
     }
 
     @Test
@@ -250,10 +244,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(getOrganization.getId().intValue())))
                 .andExpect(jsonPath("$.name", is(getOrganization.getName())))
-                .andExpect(jsonPath("$.fullName", is(getOrganization.getFullName())))
-                .andExpect(jsonPath("$.members",
-                        is(linkBuilder.format("/%s/%d/%s", ORGANIZATIONS_URL,
-                                getOrganization.getId().intValue(), MEMBERS_URL))));
+                .andExpect(jsonPath("$.fullName", is(getOrganization.getFullName())));
     }
 
     @Test
@@ -267,7 +258,8 @@ public class OrganizationControllerIT extends AbstractControllerIT {
 
     @Test
     public void getMembersInOrganizationByAdmin() throws Exception {
-        List<Member> members = memberRepository.findAllByOrganization(getOrganization);
+        List<Member> members = memberRepository.findAllByOrganization(getOrganization, new PageRequest(1, 20))
+                .getContent();
 
         mockMvc.perform(get(String.format("/%s/%d/%s", ORGANIZATIONS_URL, getOrganization.getId(), MEMBERS_URL))
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
@@ -275,18 +267,13 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(members.size())))
                 .andExpect(jsonPath("$[0].id", is(members.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].status", is(members.get(0).getStatus().toString())))
-                .andExpect(jsonPath("$[0].user",
-                        is(linkBuilder.format("/%s/%d",
-                                USERS_URL, members.get(0).getUser().getId()))))
-                .andExpect(jsonPath("$[0].organization",
-                        is(linkBuilder.format("/%s/%d",
-                                ORGANIZATIONS_URL, members.get(0).getOrganization().getId()))));
+                .andExpect(jsonPath("$[0].status", is(members.get(0).getStatus().toString())));
     }
 
     @Test
     public void getMembersInOrganizationByMember() throws Exception {
-        List<Member> members = memberRepository.findAllByOrganization(getOrganization);
+        List<Member> members = memberRepository.findAllByOrganization(getOrganization, new PageRequest(1, 20))
+                .getContent();
 
         mockMvc.perform(get(String.format("/%s/%d/%s", ORGANIZATIONS_URL, getOrganization.getId(), MEMBERS_URL))
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, creatorAccessToken)))
@@ -294,18 +281,13 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(members.size())))
                 .andExpect(jsonPath("$[0].id", is(members.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].status", is(members.get(0).getStatus().toString())))
-                .andExpect(jsonPath("$[0].user",
-                        is(linkBuilder.format("/%s/%d",
-                                USERS_URL, members.get(0).getUser().getId()))))
-                .andExpect(jsonPath("$[0].organization",
-                        is(linkBuilder.format("/%s/%d",
-                                ORGANIZATIONS_URL, members.get(0).getOrganization().getId()))));
+                .andExpect(jsonPath("$[0].status", is(members.get(0).getStatus().toString())));
     }
 
     @Test
     public void getMemberInOrganizationByAdmin() throws Exception {
-        Member member = memberRepository.findAllByOrganization(getOrganization).get(0);
+        Member member = memberRepository.findAllByOrganization(getOrganization, new PageRequest(1, 20))
+                .getContent().get(0);
 
         mockMvc.perform(get(String.format("/%s/%d/%s/%d",
                 ORGANIZATIONS_URL, member.getOrganization().getId(), MEMBERS_URL, member.getId()))
@@ -313,18 +295,13 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(member.getId().intValue())))
-                .andExpect(jsonPath("$.status", is(member.getStatus().toString())))
-                .andExpect(jsonPath("$.user",
-                        is(linkBuilder.format("/%s/%d",
-                                USERS_URL, member.getUser().getId()))))
-                .andExpect(jsonPath("$.organization",
-                        is(linkBuilder.format("/%s/%d",
-                                ORGANIZATIONS_URL, member.getOrganization().getId()))));
+                .andExpect(jsonPath("$.status", is(member.getStatus().toString())));
     }
 
     @Test
     public void getMemberInOrganizationByMember() throws Exception {
-        Member member = memberRepository.findAllByOrganization(getOrganization).get(0);
+        Member member = memberRepository.findAllByOrganization(getOrganization, new PageRequest(1, 20))
+                .getContent().get(0);
 
         mockMvc.perform(get(String.format("/%s/%d/%s/%d",
                 ORGANIZATIONS_URL, member.getOrganization().getId(), MEMBERS_URL, member.getId()))
@@ -332,18 +309,13 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(member.getId().intValue())))
-                .andExpect(jsonPath("$.status", is(member.getStatus().toString())))
-                .andExpect(jsonPath("$.user",
-                        is(linkBuilder.format("/%s/%d",
-                                USERS_URL, member.getUser().getId()))))
-                .andExpect(jsonPath("$.organization",
-                        is(linkBuilder.format("/%s/%d",
-                                ORGANIZATIONS_URL, member.getOrganization().getId()))));
+                .andExpect(jsonPath("$.status", is(member.getStatus().toString())));
     }
 
     @Test
     public void getNotExistsMemberInOrganizationByAdmin() throws Exception {
-        Member member = memberRepository.findAllByOrganization(getOrganization).get(0);
+        Member member = memberRepository.findAllByOrganization(getOrganization, new PageRequest(1, 20))
+                .getContent().get(0);
 
         mockMvc.perform(get(String.format("/%s/%d/%s/%d",
                 ORGANIZATIONS_URL, member.getOrganization().getId(), MEMBERS_URL, -1))
