@@ -2,6 +2,7 @@ package org.teapot.backend.controller.user;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,16 @@ import org.teapot.backend.util.VerificationMailSender;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    @Autowired
+    private Environment env;
 
     @Autowired
     private UserRepository userRepository;
@@ -33,7 +39,7 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
+    @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
 
     /**
@@ -60,20 +66,20 @@ public class UserController {
      * состояния 404 Not Found, выбрасывая исключение
      * {@link ResourceNotFoundException}
      *
-     * @param idOrUsernameOrEmail id или username или email пользователя
+     * @param idOrNameOrEmail id или username или email пользователя
      * @return найденный пользователь
      */
-    @GetMapping("/{idOrUsernameOrEmail:.+}")
-    public User getUser(@PathVariable String idOrUsernameOrEmail) {
+    @GetMapping("/{idOrNameOrEmail:.+}")
+    public User getUser(@PathVariable String idOrNameOrEmail) {
         User user;
 
-        Long id = Longs.tryParse(idOrUsernameOrEmail);
+        Long id = Longs.tryParse(idOrNameOrEmail);
         if (id != null) {
             user = userRepository.findOne(id);
-        } else if (idOrUsernameOrEmail.contains("@")) {
-            user = userRepository.findByEmail(idOrUsernameOrEmail);
+        } else if (idOrNameOrEmail.contains("@")) {
+            user = userRepository.findByEmail(idOrNameOrEmail);
         } else {
-            user = userRepository.findByName(idOrUsernameOrEmail);
+            user = userRepository.findByName(idOrNameOrEmail);
         }
 
         if (user == null) {
@@ -177,10 +183,14 @@ public class UserController {
         user.setRegistrationDateTime(LocalDateTime.now());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        if (auth == null) {
+        boolean isVerificationEnabled = Arrays
+                .stream(env.getActiveProfiles())
+                .anyMatch("verification"::equalsIgnoreCase);
+
+        if ((auth == null) && isVerificationEnabled) {
             user = userRepository.save(user);
             verificationMailSender.createTokenAndSend(user, request.getLocale());
-        } else if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
+        } else {
             user.setActivated(true);
             userRepository.save(user);
         }
