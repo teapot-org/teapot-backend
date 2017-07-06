@@ -13,7 +13,8 @@ import java.util.Set;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
+@ToString(exclude = "members")
+@EqualsAndHashCode(callSuper = true, exclude = "members")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Organization extends Owner {

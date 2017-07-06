@@ -1,9 +1,6 @@
 package org.teapot.backend.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -15,7 +12,8 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
-@EqualsAndHashCode(callSuper = true)
+@ToString(exclude = "boards")
+@EqualsAndHashCode(callSuper = true, exclude = "boards")
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class Owner extends AbstractPersistable<Long> {

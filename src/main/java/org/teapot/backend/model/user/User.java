@@ -17,8 +17,8 @@ import java.util.Set;
 
 @Entity
 @Data
-@ToString(exclude = {"password", "verificationToken", "members"})
-@EqualsAndHashCode(callSuper = true, exclude = "verificationToken")
+@ToString(exclude = {"password", "members"})
+@EqualsAndHashCode(callSuper = true, exclude = "members")
 @NoArgsConstructor
 public class User extends Owner {
 

@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true, exclude = "owner")
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Board extends AbstractPersistable<Long> {

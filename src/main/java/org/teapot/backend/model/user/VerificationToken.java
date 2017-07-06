@@ -1,9 +1,9 @@
 package org.teapot.backend.model.user;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.teapot.backend.model.AbstractPersistable;
 
 import javax.persistence.Column;
@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
+@ToString(exclude = "user")
+@EqualsAndHashCode(callSuper = true, exclude = "user")
 @NoArgsConstructor
-@AllArgsConstructor
 public class VerificationToken extends AbstractPersistable<Long> {
 
     @Column(nullable = false, unique = true, length = 32, updatable = false)
