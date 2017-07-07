@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.web.FilterChainProxy;
@@ -20,7 +21,6 @@ import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,10 +33,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
     private static final String CLIENT_ID = "client";
     private static final String CLIENT_SECRET = "secret";
-
-    protected MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-            MediaType.APPLICATION_JSON.getSubtype(),
-            Charset.forName("utf8"));
+    protected MediaType contentType = MediaType.parseMediaType("application/hal+json;charset=utf-8");
 
     protected MockMvc mockMvc;
 
@@ -62,7 +59,8 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
         mapper = Jackson2ObjectMapperBuilder.json()
                 .featuresToDisable(MapperFeature.USE_ANNOTATIONS)
-                .build();
+                .build()
+                .registerModule(new Jackson2HalModule());
     }
 
     @SuppressWarnings("unchecked")

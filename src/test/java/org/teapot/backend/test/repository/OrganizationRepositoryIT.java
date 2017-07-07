@@ -1,6 +1,5 @@
 package org.teapot.backend.test.repository;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,9 @@ import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.test.AbstractIT;
 
 import java.time.LocalDateTime;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class OrganizationRepositoryIT extends AbstractIT {
 
@@ -28,7 +30,7 @@ public class OrganizationRepositoryIT extends AbstractIT {
     public void findByNameTest() {
         Organization fromDataBase = organizationRepository
                 .findByName("findByNameTestOrganization");
-        Assert.assertNotNull(fromDataBase);
-        Assert.assertEquals(findByNameTestOrganization, fromDataBase);
+        assertNotNull(fromDataBase);
+        assertEquals(findByNameTestOrganization, fromDataBase);
     }
 }

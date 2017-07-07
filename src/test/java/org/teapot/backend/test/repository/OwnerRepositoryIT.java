@@ -25,7 +25,6 @@ public class OwnerRepositoryIT extends AbstractIT {
     @Test
     public void findByNameTest() {
         Owner owner = ownerRepository.findByName("findByNameTest");
-        Assert.assertNotNull(owner);
         Assert.assertEquals(testOwner, owner);
     }
 }

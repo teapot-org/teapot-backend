@@ -3,24 +3,23 @@ package org.teapot.backend.test.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.ResultActions;
 import org.teapot.backend.model.Board;
 import org.teapot.backend.model.organization.Organization;
-import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.BoardRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.teapot.backend.controller.BoardController.BOARDS_ENDPOINT;
+import static org.teapot.backend.controller.BoardController.SINGLE_BOARD_ENDPOINT;
 
 public class BoardControllerIT extends AbstractControllerIT {
-
-    private static final String API_URL = "/boards";
-    private static final String ORGANIZATIONS_URL = "organizations";
-    private static final String USERS_URL = "users";
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -28,69 +27,51 @@ public class BoardControllerIT extends AbstractControllerIT {
     @Autowired
     private BoardRepository boardRepository;
 
+    private Organization savedBoardOwner = new Organization();
 
-    private User getBoard1Owner = new User();
-    private Organization getBoard2Owner = new Organization();
+    private Board savedBoard = new Board("savedBoard", savedBoardOwner);
 
-    private Board getBoard1 = new Board("getBoard1", getBoard1Owner);
-    private Board getBoard2 = new Board("getBoard2", getBoard2Owner);
+    private List<Board> allBoards;
+
+    static ResultActions isBoardJsonAsExpected(ResultActions resultActions, String jsonPath, Board board)
+            throws Exception {
+        return resultActions.andExpect(jsonPath(jsonPath + ".title", is(board.getTitle())));
+    }
 
     @Before
     public void addTestUsers() {
-        getBoard1Owner.setName("getBoard1Owner");
-        getBoard1Owner.setEmail("getBoard1Owner@mail.com");
-        getBoard1Owner.setPassword("pass");
-        userRepository.save(getBoard1Owner);
+        savedBoardOwner.setName("getBoard1Owner");
+        organizationRepository.save(savedBoardOwner);
 
-        getBoard2Owner.setName("getBoard2Owner");
-        organizationRepository.save(getBoard2Owner);
-
-        boardRepository.save(getBoard1);
-        boardRepository.save(getBoard2);
+        boardRepository.save(savedBoard);
     }
-
-    // GET
 
     @Test
     public void getBoardsTest() throws Exception {
-        List<Board> all = boardRepository.findAll();
-        mockMvc.perform(get(API_URL))
+        allBoards = boardRepository.findAll();
+
+        ResultActions result = mockMvc.perform(get(BOARDS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(all.size())))
-                .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].title", is(all.get(0).getTitle())))
-                .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())))
-                .andExpect(jsonPath("$[1].title", is(all.get(1).getTitle())));
+                .andExpect(jsonPath("$._embedded.boards", hasSize(allBoards.size())));
+
+        for (int i = 0; i < allBoards.size(); i++) {
+            isBoardJsonAsExpected(result, format("$._embedded.boards[%d]", i), allBoards.get(i));
+        }
     }
 
     @Test
     public void getSingleBoardByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%d", API_URL, getBoard1.getId())))
+        ResultActions result = mockMvc.perform(get(SINGLE_BOARD_ENDPOINT, savedBoard.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getBoard1.getId().intValue())))
-                .andExpect(jsonPath("$.title", is(getBoard1.getTitle())));
+                .andExpect(content().contentType(contentType));
+
+        isBoardJsonAsExpected(result, "$", savedBoard);
     }
 
     @Test
     public void getNotExistsBoardByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/-1", API_URL)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getBoardsByOwnerIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s?%s=%d", API_URL, "owner", getBoard2Owner.getId())))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$[0].id", is(getBoard2.getId().intValue())))
-                .andExpect(jsonPath("$[0].title", is(getBoard2.getTitle())));
-    }
-
-    @Test
-    public void getNotExistsBoardsByOwnerIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s?%s=%d", API_URL, "owner", -1)))
+        mockMvc.perform(get(SINGLE_BOARD_ENDPOINT, -1))
                 .andExpect(status().isNotFound());
     }
 }
