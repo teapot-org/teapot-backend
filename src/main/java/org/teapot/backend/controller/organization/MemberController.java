@@ -8,13 +8,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.repository.organization.MemberRepository;
-import org.teapot.backend.repository.organization.OrganizationRepository;
 
 import java.time.LocalDate;
 
@@ -25,9 +23,6 @@ public class MemberController extends AbstractController {
     public static final String SINGLE_MEMBER_ENDPOINT = MEMBERS_ENDPOINT + "/{id}";
 
     @Autowired
-    private OrganizationRepository organizationRepository;
-
-    @Autowired
     private MemberRepository memberRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -35,10 +30,14 @@ public class MemberController extends AbstractController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addMember(
             @RequestBody Resource<Member> requestResource,
-            PersistentEntityResourceAssembler assembler,
-            Authentication auth
+            PersistentEntityResourceAssembler assembler
     ) {
         Member member = requestResource.getContent();
+
+        if (memberRepository.findByOrganizationIdAndUserId(member.getOrganization().getId(),
+                member.getUser().getId()) != null) {
+            throw new DataIntegrityViolationException("Already exists");
+        }
 
         member.setAdmissionDate(LocalDate.now());
         if (member.getStatus().equals(MemberStatus.CREATOR)) {
@@ -54,7 +53,8 @@ public class MemberController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication?.name)")
+    @PreAuthorize("hasRole('ADMIN') " +
+            "or @memberService.isCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication?.name)")
     @PatchMapping(SINGLE_MEMBER_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchMember(
@@ -77,12 +77,11 @@ public class MemberController extends AbstractController {
         memberRepository.save(member);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') " +
+            "or @memberService.isCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication.name)")
     @DeleteMapping(SINGLE_MEMBER_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMember(
-            @PathVariable Long id
-    ) {
+    public void deleteMember(@PathVariable Long id) {
         Member member = memberRepository.findOne(id);
 
         if (member.getStatus().equals(MemberStatus.CREATOR)) {

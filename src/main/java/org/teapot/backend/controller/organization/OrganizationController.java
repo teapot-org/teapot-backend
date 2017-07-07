@@ -1,6 +1,7 @@
 package org.teapot.backend.controller.organization;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.rest.webmvc.*;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +45,10 @@ public class OrganizationController extends AbstractController {
     ) {
         Organization organization = requestResource.getContent();
 
+        if (organizationRepository.findByName(organization.getName()) != null) {
+            throw new DataIntegrityViolationException("Already exists");
+        }
+
         organization.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.saveAndFlush(organization);
 
@@ -79,6 +84,17 @@ public class OrganizationController extends AbstractController {
         if (fullName != null) organization.setFullName(fullName);
 
         organizationRepository.save(organization);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreator(#id, authentication?.name)")
+    @DeleteMapping(SINGLE_ORGANIZATION_ENDPOINT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteOrganization(@PathVariable Long id) {
+        if (!organizationRepository.exists(id)) {
+            throw new ResourceNotFoundException();
+        }
+
+        organizationRepository.delete(id);
     }
 
     @PutMapping(SINGLE_ORGANIZATION_ENDPOINT)

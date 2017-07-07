@@ -2,6 +2,7 @@ package org.teapot.backend.controller.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.rest.webmvc.*;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
@@ -45,6 +46,11 @@ public class UserController extends AbstractController {
             Authentication auth
     ) {
         User user = requestResource.getContent();
+
+        if (userRepository.findByEmail(user.getEmail()) != null) {
+            throw new DataIntegrityViolationException("Already exists");
+        }
+
         user.setRegistrationDateTime(LocalDateTime.now());
 
         boolean isVerificationEnabled = Arrays
