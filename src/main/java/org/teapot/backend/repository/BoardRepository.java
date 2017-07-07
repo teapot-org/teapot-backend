@@ -3,10 +3,15 @@ package org.teapot.backend.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.Board;
-import org.teapot.backend.model.Owner;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-    Page<Board> findByOwner(Owner owner, Pageable pageable);
+    @RestResource(path = "find-by-owner-id")
+    Page<Board> findByOwnerId(@Param("ownerId") Long ownerId, Pageable pageable);
+
+    @RestResource(path = "find-by-owner-name")
+    Page<Board> findByOwnerName(@Param("ownerName") String ownerName, Pageable pageable);
 }
