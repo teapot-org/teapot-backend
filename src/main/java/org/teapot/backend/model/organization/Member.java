@@ -21,13 +21,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Member extends AbstractPersistable<Long> {
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private User user;
 
     @Enumerated
     private MemberStatus status;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Organization organization;
 
     private LocalDate admissionDate;

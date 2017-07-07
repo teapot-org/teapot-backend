@@ -24,6 +24,6 @@ public class VerificationToken extends AbstractPersistable<Long> {
     @Column(nullable = false)
     private LocalDateTime expireDateTime = LocalDateTime.now().plusDays(1);
 
-    @OneToOne
+    @OneToOne(optional = false)
     private User user;
 }
