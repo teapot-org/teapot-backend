@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.AbstractController;
+import org.teapot.backend.model.Board;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.user.UserRepository;
@@ -134,5 +135,21 @@ public class UserController extends AbstractController {
         }
 
         userRepository.save(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(SINGLE_USER_ENDPOINT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id) {
+        User user = userRepository.findOne(id);
+        if (user == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        for (Board board : user.getBoards()) {
+            board.setOwner(null);
+        }
+
+        userRepository.delete(id);
     }
 }

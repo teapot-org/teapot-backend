@@ -17,6 +17,6 @@ public class Board extends AbstractPersistable<Long> {
 
     private String title;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     private Owner owner;
 }

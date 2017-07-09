@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
+import org.teapot.backend.model.Board;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -90,8 +91,13 @@ public class OrganizationController extends AbstractController {
     @DeleteMapping(SINGLE_ORGANIZATION_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrganization(@PathVariable Long id) {
-        if (!organizationRepository.exists(id)) {
+        Organization organization = organizationRepository.findOne(id);
+        if (organization == null) {
             throw new ResourceNotFoundException();
+        }
+
+        for (Board board : organization.getBoards()) {
+            board.setOwner(null);
         }
 
         organizationRepository.delete(id);

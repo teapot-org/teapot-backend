@@ -1,8 +1,6 @@
 package org.teapot.backend.model;
 
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,6 +24,5 @@ public abstract class Owner extends AbstractPersistable<Long> {
     private Boolean available = true;
 
     @OneToMany(mappedBy = "owner")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Board> boards = new HashSet<>();
 }
