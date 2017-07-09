@@ -135,4 +135,16 @@ public class UserController extends AbstractController {
 
         userRepository.save(user);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(SINGLE_USER_ENDPOINT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id) {
+        User user = userRepository.findOne(id);
+        if (user == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        userRepository.delete(id);
+    }
 }
