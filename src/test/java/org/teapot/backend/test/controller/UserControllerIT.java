@@ -35,40 +35,40 @@ public class UserControllerIT extends AbstractControllerIT {
     public void addTestUsers() {
         getUserOne.setName("getUserOne");
         getUserOne.setEmail("getUserOne@mail.com");
-        getUserOne.setPassword(passwordEncoder.encode("pass"));
+        getUserOne.setPassword("pass");
         userRepository.save(getUserOne);
 
         getUserTwo.setName("getUserTwo");
         getUserTwo.setEmail("getUserTwo@mail.com");
-        getUserTwo.setPassword(passwordEncoder.encode("pass"));
+        getUserTwo.setPassword("pass");
         userRepository.save(getUserTwo);
 
         postUserOne.setName("postUser");
         postUserOne.setEmail("postUser@mail.com");
-        postUserOne.setPassword(passwordEncoder.encode("pass"));
+        postUserOne.setPassword("pass");
 
         postUserTwo.setName("postUser");
         postUserTwo.setEmail("postUser@mail.com");
-        postUserTwo.setPassword(passwordEncoder.encode("pass"));
+        postUserTwo.setPassword("pass");
 
         repeatedPostUser.setName("repeatedPostUser");
         repeatedPostUser.setEmail("repeatedPostUser@mail.com");
-        repeatedPostUser.setPassword(passwordEncoder.encode("pass"));
+        repeatedPostUser.setPassword("pass");
         userRepository.save(repeatedPostUser);
 
         updateUser.setName("updateUser");
         updateUser.setEmail("updateUser@mail.com");
-        updateUser.setPassword(passwordEncoder.encode("pass"));
+        updateUser.setPassword("pass");
         userRepository.save(updateUser);
 
         deleteUser.setName("deleteUser");
         deleteUser.setEmail("deleteUser@mail.com");
-        deleteUser.setPassword(passwordEncoder.encode("pass"));
+        deleteUser.setPassword("pass");
         userRepository.save(deleteUser);
 
         patchUser.setName("patchUser");
         patchUser.setEmail("patchUser@mail.com");
-        patchUser.setPassword(passwordEncoder.encode("pass"));
+        patchUser.setPassword("pass");
         userRepository.save(patchUser);
     }
 
@@ -299,7 +299,7 @@ public class UserControllerIT extends AbstractControllerIT {
         User newPatchUser = userRepository.findOne(patchUser.getId());
         Assert.assertEquals("newPatchUser", newPatchUser.getName());
         Assert.assertEquals("newPatchUser@test.org", newPatchUser.getEmail());
-        Assert.assertTrue(passwordEncoder.matches("123456", newPatchUser.getPassword()));
+        Assert.assertTrue(User.PASSWORD_ENCODER.matches("123456", newPatchUser.getPassword()));
         Assert.assertFalse(newPatchUser.isAvailable());
         Assert.assertEquals("Bob", newPatchUser.getFirstName());
         Assert.assertEquals("Brown", newPatchUser.getLastName());

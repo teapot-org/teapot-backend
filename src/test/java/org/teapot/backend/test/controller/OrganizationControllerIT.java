@@ -80,7 +80,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user1 = new User();
         user1.setName("user1");
         user1.setEmail("user1@email.com");
-        user1.setPassword(passwordEncoder.encode("pass"));
+        user1.setPassword("pass");
         user1.setActivated(true);
         user1.setFirstName("user1");
         user1.setLastName("user1");
@@ -98,7 +98,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user2 = new User();
         user2.setName("user2");
         user2.setEmail("user2@email.com");
-        user2.setPassword(passwordEncoder.encode("pass"));
+        user2.setPassword("pass");
         userRepository.save(user2);
 
         member2 = new Member();
@@ -126,7 +126,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user3 = new User();
         user3.setName("user3");
         user3.setEmail("user3@email.com");
-        user3.setPassword(passwordEncoder.encode("pass"));
+        user3.setPassword("pass");
         user3.setActivated(true);
         userRepository.save(user3);
 
@@ -135,42 +135,42 @@ public class OrganizationControllerIT extends AbstractControllerIT {
         user4 = new User();
         user4.setName("user4");
         user4.setEmail("user4@email.com");
-        user4.setPassword(passwordEncoder.encode("pass"));
+        user4.setPassword("pass");
         user4.setActivated(true);
         userRepository.save(user4);
 
         user5 = new User();
         user5.setName("user5");
         user5.setEmail("user5@email.com");
-        user5.setPassword(passwordEncoder.encode("pass"));
+        user5.setPassword("pass");
         user5.setActivated(true);
         userRepository.save(user5);
 
         user6 = new User();
         user6.setName("user6");
         user6.setEmail("user6@email.com");
-        user6.setPassword(passwordEncoder.encode("pass"));
+        user6.setPassword("pass");
         user6.setActivated(true);
         userRepository.save(user6);
 
         user7 = new User();
         user7.setName("user7");
         user7.setEmail("user7@email.com");
-        user7.setPassword(passwordEncoder.encode("pass"));
+        user7.setPassword("pass");
         user7.setActivated(true);
         userRepository.save(user7);
 
         user8 = new User();
         user8.setName("user8");
         user8.setEmail("user8@email.com");
-        user8.setPassword(passwordEncoder.encode("pass"));
+        user8.setPassword("pass");
         user8.setActivated(true);
         userRepository.save(user8);
 
         user9 = new User();
         user9.setName("user9");
         user9.setEmail("user9@email.com");
-        user9.setPassword(passwordEncoder.encode("pass"));
+        user9.setPassword("pass");
         user9.setActivated(true);
         userRepository.save(user9);
 
@@ -381,7 +381,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     }
 
     @Test
-    public void deleteNotExistsOrganizationTestByCreator() throws Exception {
+    public void deleteOrganizationTestByCreator() throws Exception {
         mockMvc.perform(delete(String.format("/%s/%d", ORGANIZATIONS_URL, deleteOrganizationCreator.getId()))
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, creatorAccessToken)))
                 .andExpect(status().isNoContent());

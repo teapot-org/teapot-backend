@@ -33,7 +33,7 @@ public class OwnerControllerIT extends AbstractControllerIT {
     public void addTestUsers() {
         getOwnerUser.setName("getOwnerUser");
         getOwnerUser.setEmail("getOwnerUser@mail.com");
-        getOwnerUser.setPassword(passwordEncoder.encode("pass"));
+        getOwnerUser.setPassword("pass");
         userRepository.save(getOwnerUser);
 
         getOwnerOrganization.setName("getUserTwo");

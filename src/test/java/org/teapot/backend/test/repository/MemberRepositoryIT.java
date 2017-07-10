@@ -108,4 +108,18 @@ public class MemberRepositoryIT extends AbstractIT {
                 memberRepository.findByUser(user1)
         );
     }
+
+    @Test
+    public void findByOrganizationIdAndUserIdTest() {
+        Assert.assertEquals(member3,
+                memberRepository.findByOrganizationIdAndUserId(findByUserTestOrg.getId(),
+                        user1.getId()));
+    }
+
+    @Test
+    public void findByOrganizationIdAndUserEmailTest() {
+        Assert.assertEquals(member3,
+                memberRepository.findByOrganizationIdAndUserEmail(findByUserTestOrg.getId(),
+                        user1.getEmail()));
+    }
 }

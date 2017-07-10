@@ -42,7 +42,7 @@ public class BoardControllerIT extends AbstractControllerIT {
     public void addTestUsers() {
         getBoard1Owner.setName("getBoard1Owner");
         getBoard1Owner.setEmail("getBoard1Owner@mail.com");
-        getBoard1Owner.setPassword(passwordEncoder.encode("pass"));
+        getBoard1Owner.setPassword("pass");
         userRepository.save(getBoard1Owner);
 
         getBoard2Owner.setName("getBoard2Owner");

@@ -2,6 +2,7 @@ package org.teapot.backend.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.teapot.backend.repository.user.VerificationTokenRepository;
 import java.util.Locale;
 
 @Component
+@Profile("verification")
 public class VerificationMailSender {
 
     @Autowired
