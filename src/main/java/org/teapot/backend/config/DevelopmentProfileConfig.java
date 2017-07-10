@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+
 @Configuration
 @Profile("development")
 public class DevelopmentProfileConfig {
@@ -200,7 +201,7 @@ public class DevelopmentProfileConfig {
         action1.setUsage("/actions/help?resource={name|id}|action={name|id}");
 
         action2.setName("activate");
-        action2.setUsage("/actions/activate?token={token}");
+        action2.setUsage("/actions/activate?user={username|id}&token={token}");
 
         actionRepository.save(Arrays.asList(action1, action2));
     }
