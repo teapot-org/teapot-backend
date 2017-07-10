@@ -1,7 +1,8 @@
 package org.teapot.backend.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.util.ser.UserSerializer;
 
 import javax.persistence.*;
@@ -13,6 +14,8 @@ import java.util.Objects;
 @Table(name = "user")
 @JsonSerialize(using = UserSerializer.class)
 public class User {
+
+    public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     @Id
     @GeneratedValue
@@ -71,7 +74,7 @@ public class User {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.password = password;
+        setPassword(password);
         this.isAvailable = isAvailable;
         this.isActivated = isActivated;
         this.firstName = firstName;
@@ -112,7 +115,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = PASSWORD_ENCODER.encode(password);
     }
 
     public Boolean isAvailable() {

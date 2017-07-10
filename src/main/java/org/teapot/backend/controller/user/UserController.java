@@ -2,7 +2,6 @@ package org.teapot.backend.controller.user;
 
 import com.google.common.primitives.Longs;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -35,9 +34,6 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
@@ -114,10 +110,6 @@ public class UserController {
         user.setId(id);
         user.setRegistrationDate(existingUser.getRegistrationDate());
         user.setActivated(existingUser.isActivated());
-        // если пароль изменился
-        if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
 
         userRepository.save(user);
     }
@@ -169,7 +161,7 @@ public class UserController {
      * @param response объект, содержащий заголовки ответа
      * @return добавленный пользователь
      */
-    @PreAuthorize("isAnonymous() || hasRole('ADMIN')")
+    @PreAuthorize("isAnonymous() or hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User registerUser(@RequestBody User user,
@@ -181,7 +173,6 @@ public class UserController {
         }
 
         user.setRegistrationDate(LocalDate.now());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         boolean isVerificationEnabled = Arrays
                 .stream(env.getActiveProfiles())
@@ -249,7 +240,7 @@ public class UserController {
 
             if (username != null) user.setUsername(username);
             if (email != null) user.setEmail(email);
-            if (password != null) user.setPassword(passwordEncoder.encode(password));
+            if (password != null) user.setPassword(password);
             if (available != null) user.setAvailable(available);
             if (firstName != null) user.setFirstName(firstName);
             if (lastName != null) user.setLastName(lastName);

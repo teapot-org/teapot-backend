@@ -8,7 +8,6 @@ import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -47,9 +46,6 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
     @Autowired
     protected UserRepository userRepository;
-
-    @Autowired
-    protected PasswordEncoder passwordEncoder;
 
     protected User userWithAdminRole = new User();
     protected User userWithUserRole = new User();
@@ -98,7 +94,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
         userWithAdminRole.setEmail("admin@auth.com");
         userWithAdminRole.setUsername("admin");
-        userWithAdminRole.setPassword(passwordEncoder.encode("pass"));
+        userWithAdminRole.setPassword("pass");
         userWithAdminRole.setAuthority(UserAuthority.ADMIN);
         userWithAdminRole.setActivated(true);
         userRepository.save(userWithAdminRole);
@@ -106,7 +102,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
         userWithUserRole.setEmail("user@auth.com");
         userWithUserRole.setUsername("user");
-        userWithUserRole.setPassword(passwordEncoder.encode("pass"));
+        userWithUserRole.setPassword("pass");
         userWithUserRole.setAuthority(UserAuthority.USER);
         userWithUserRole.setActivated(true);
         userRepository.save(userWithUserRole);
