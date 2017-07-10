@@ -89,7 +89,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
     @Before
     public void obtainAccessTokens() throws Exception {
         userWithAdminRole.setEmail("admin@auth.com");
-        userWithAdminRole.setName("odmen");
+        userWithAdminRole.setName("administrator");
         userWithAdminRole.setPassword("pass");
         userWithAdminRole.setAuthority(UserAuthority.ADMIN);
         userWithAdminRole.setActivated(true);
