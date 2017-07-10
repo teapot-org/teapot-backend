@@ -14,8 +14,6 @@ import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.repository.organization.MemberRepository;
 
-import java.time.LocalDate;
-
 @RepositoryRestController
 public class MemberController extends AbstractController {
 
@@ -39,7 +37,6 @@ public class MemberController extends AbstractController {
             throw new DataIntegrityViolationException("Already exists");
         }
 
-        member.setAdmissionDate(LocalDate.now());
         if (member.getStatus().equals(MemberStatus.CREATOR)) {
             // нельзя добавить нового создателя организации
             member.setStatus(MemberStatus.OWNER);

@@ -1,9 +1,8 @@
 package org.teapot.backend.model.user;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
 import org.teapot.backend.model.AbstractPersistable;
 
 import javax.persistence.Column;
@@ -12,18 +11,21 @@ import javax.persistence.OneToOne;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
-@ToString(exclude = "user")
-@EqualsAndHashCode(callSuper = true, exclude = "user")
 @NoArgsConstructor
-public class VerificationToken extends AbstractPersistable<Long> {
+public class VerificationToken extends AbstractPersistable {
 
     @Column(nullable = false, unique = true, length = 32, updatable = false)
+    @Getter
+    @Setter
     private String token;
 
     @Column(nullable = false)
+    @Getter
+    @Setter
     private LocalDateTime expireDateTime = LocalDateTime.now().plusDays(1);
 
     @OneToOne(optional = false)
+    @Getter
+    @Setter
     private User user;
 }

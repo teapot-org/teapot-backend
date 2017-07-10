@@ -88,10 +88,8 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
     @Before
     public void obtainAccessTokens() throws Exception {
-        userRepository.deleteAllInBatch();
-
         userWithAdminRole.setEmail("admin@auth.com");
-        userWithAdminRole.setName("admin");
+        userWithAdminRole.setName("odmen");
         userWithAdminRole.setPassword("pass");
         userWithAdminRole.setAuthority(UserAuthority.ADMIN);
         userWithAdminRole.setActivated(true);

@@ -19,9 +19,6 @@ import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 @RepositoryRestController
 public class OrganizationController extends AbstractController {
 
@@ -50,11 +47,9 @@ public class OrganizationController extends AbstractController {
             throw new DataIntegrityViolationException("Already exists");
         }
 
-        organization.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.saveAndFlush(organization);
 
         Member creator = new Member();
-        creator.setAdmissionDate(LocalDate.now());
         creator.setOrganization(organization);
         creator.setStatus(MemberStatus.CREATOR);
         creator.setUser(userRepository.findByEmail(auth.getName()));

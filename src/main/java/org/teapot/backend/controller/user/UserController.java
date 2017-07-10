@@ -19,7 +19,6 @@ import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.VerificationMailSender;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @RepositoryRestController
@@ -50,8 +49,6 @@ public class UserController extends AbstractController {
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new DataIntegrityViolationException("Already exists");
         }
-
-        user.setRegistrationDateTime(LocalDateTime.now());
 
         boolean isVerificationEnabled = Arrays
                 .stream(env.getActiveProfiles())
@@ -88,7 +85,6 @@ public class UserController extends AbstractController {
         User user = requestResource.getContent();
 
         user.setId(id);
-        user.setRegistrationDateTime(existingUser.getRegistrationDateTime());
         user.setActivated(existingUser.getActivated());
 
         userRepository.save(user);

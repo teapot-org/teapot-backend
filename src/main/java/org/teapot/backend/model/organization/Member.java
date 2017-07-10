@@ -1,9 +1,9 @@
 package org.teapot.backend.model.organization;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.teapot.backend.model.AbstractPersistable;
 import org.teapot.backend.model.user.User;
 
@@ -11,24 +11,25 @@ import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "organization_member")
-@Data
-@EqualsAndHashCode(callSuper = true, exclude = {"user", "organization"})
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member extends AbstractPersistable<Long> {
+public class Member extends AbstractPersistable {
 
     @ManyToOne(optional = false)
+    @Getter
+    @Setter
     private User user;
 
     @Enumerated
+    @Getter
+    @Setter
     private MemberStatus status;
 
     @ManyToOne(optional = false)
+    @Getter
+    @Setter
     private Organization organization;
-
-    private LocalDate admissionDate;
 }

@@ -12,7 +12,6 @@ import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,7 +64,6 @@ public class MemberControllerIT extends AbstractControllerIT {
     @Before
     public void setUp() throws Exception {
         savedOrganization.setName("OrganizationControllerTest1");
-        savedOrganization.setRegistrationDateTime(LocalDateTime.now());
         organizationRepository.save(savedOrganization);
 
         notSavedOrganization.setName("OrganizationControllerTest2");
