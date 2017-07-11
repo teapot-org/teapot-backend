@@ -7,7 +7,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.teapot.backend.model.Board;
+import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.model.meta.TeapotResource;
@@ -16,7 +16,7 @@ import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
-import org.teapot.backend.repository.BoardRepository;
+import org.teapot.backend.repository.KanbanRepository;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
@@ -51,7 +51,7 @@ public class DevelopmentProfileConfig {
     private MemberRepository memberRepository;
 
     @Autowired
-    private BoardRepository boardRepository;
+    private KanbanRepository kanbanRepository;
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -77,7 +77,7 @@ public class DevelopmentProfileConfig {
             addActions();
             addOrganizations();
             addMembers();
-            addBoards();
+            addKanbans();
         };
     }
 
@@ -236,13 +236,13 @@ public class DevelopmentProfileConfig {
         memberRepository.save(member4);
     }
 
-    private void addBoards() {
-        boardRepository.save(new Board("board", userRepository.findByName("dr_watson")));
-        boardRepository.save(new Board("board", userRepository.findByName("admin")));
-        boardRepository.save(new Board("board", userRepository.findByName("admin")));
-        boardRepository.save(new Board("board1", organizationRepository.findByName("teapot")));
-        boardRepository.save(new Board("board2", organizationRepository.findByName("teapot")));
-        boardRepository.save(new Board("board3", organizationRepository.findByName("teapot")));
-        boardRepository.save(new Board("board2", organizationRepository.findByName("teapot")));
+    private void addKanbans() {
+        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("dr_watson")));
+        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
+        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
+        kanbanRepository.save(new Kanban("kanban1", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban3", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
     }
 }

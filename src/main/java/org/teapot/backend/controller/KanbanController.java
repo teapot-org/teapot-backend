@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RepositoryRestController
-public class BoardController extends AbstractController {
+public class KanbanController extends AbstractController {
 
-    public static final String BOARDS_ENDPOINT = "/boards";
+    public static final String BOARDS_ENDPOINT = "/kanbans";
     public static final String SINGLE_BOARD_ENDPOINT = BOARDS_ENDPOINT + "/{id}";
 
     @PostMapping(BOARDS_ENDPOINT)

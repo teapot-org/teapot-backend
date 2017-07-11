@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.teapot.backend.model.kanban.Kanban;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -27,10 +28,10 @@ public abstract class Owner extends AbstractPersistable {
     @OneToMany(mappedBy = "owner")
     @Getter
     @Setter
-    private Set<Board> boards = new HashSet<>();
+    private Set<Kanban> kanbans = new HashSet<>();
 
     @PreRemove
     private void detachBoards() {
-        boards.forEach(board -> board.setOwner(null));
+        kanbans.forEach(board -> board.setOwner(null));
     }
 }

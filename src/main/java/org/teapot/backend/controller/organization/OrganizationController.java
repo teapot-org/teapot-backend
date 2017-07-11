@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
-import org.teapot.backend.model.Board;
+import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -91,8 +91,8 @@ public class OrganizationController extends AbstractController {
             throw new ResourceNotFoundException();
         }
 
-        for (Board board : organization.getBoards()) {
-            board.setOwner(null);
+        for (Kanban kanban : organization.getKanbans()) {
+            kanban.setOwner(null);
         }
 
         organizationRepository.delete(id);
