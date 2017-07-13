@@ -1,14 +1,23 @@
 package org.teapot.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.teapot.backend.model.organization.Organization;
+import org.teapot.backend.model.user.User;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = User.class, name = "user"),
+        @JsonSubTypes.Type(value = Organization.class, name = "organization")
+})
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
@@ -33,4 +42,6 @@ public abstract class Owner extends AbstractPersistable {
     private void detachBoards() {
         boards.forEach(board -> board.setOwner(null));
     }
+
+    public abstract String getType();
 }

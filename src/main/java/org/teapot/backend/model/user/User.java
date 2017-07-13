@@ -76,4 +76,9 @@ public class User extends Owner {
     public void setPassword(String password) {
         this.password = PASSWORD_ENCODER.encode(password);
     }
+
+    @Override
+    public String getType() {
+        return "user";
+    }
 }
