@@ -70,10 +70,10 @@ public class UserControllerIT extends AbstractControllerIT {
         ResultActions result = mockMvc.perform(get(USERS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$._embedded.users", hasSize(allUsers.size())));
+                .andExpect(jsonPath("$._embedded.owners", hasSize(allUsers.size())));
 
         for (int i = 0; i < allUsers.size(); i++) {
-            result = isUserJsonAsExpected(result, format("$._embedded.users[%d]", i), allUsers.get(i));
+            result = isUserJsonAsExpected(result, format("$._embedded.owners[%d]", i), allUsers.get(i));
         }
     }
 

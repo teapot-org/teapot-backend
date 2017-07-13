@@ -97,10 +97,10 @@ public class OrganizationControllerIT extends AbstractControllerIT {
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$._embedded.organizations", hasSize(all.size())));
+                .andExpect(jsonPath("$._embedded.owners", hasSize(all.size())));
 
         for (int i = 0; i < all.size(); i++) {
-            isOrganizationJsonAsExpected(result, format("$._embedded.organizations[%d]", i), all.get(i));
+            isOrganizationJsonAsExpected(result, format("$._embedded.owners[%d]", i), all.get(i));
         }
     }
 
