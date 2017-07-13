@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.teapot.backend.controller.KanbanController.BOARDS_ENDPOINT;
-import static org.teapot.backend.controller.KanbanController.SINGLE_BOARD_ENDPOINT;
+import static org.teapot.backend.controller.KanbanController.KANBANS_ENDPOINT;
+import static org.teapot.backend.controller.KanbanController.SINGLE_KANBAN_ENDPOINT;
 
 public class KanbanControllerIT extends AbstractControllerIT {
 
@@ -50,7 +50,7 @@ public class KanbanControllerIT extends AbstractControllerIT {
     public void getBoardsTest() throws Exception {
         allKanbans = kanbanRepository.findAll();
 
-        ResultActions result = mockMvc.perform(get(BOARDS_ENDPOINT))
+        ResultActions result = mockMvc.perform(get(KANBANS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$._embedded.kanbans", hasSize(allKanbans.size())));
@@ -62,7 +62,7 @@ public class KanbanControllerIT extends AbstractControllerIT {
 
     @Test
     public void getSingleBoardByIdTest() throws Exception {
-        ResultActions result = mockMvc.perform(get(SINGLE_BOARD_ENDPOINT, savedKanban.getId()))
+        ResultActions result = mockMvc.perform(get(SINGLE_KANBAN_ENDPOINT, savedKanban.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType));
 
@@ -71,7 +71,7 @@ public class KanbanControllerIT extends AbstractControllerIT {
 
     @Test
     public void getNotExistsBoardByIdTest() throws Exception {
-        mockMvc.perform(get(SINGLE_BOARD_ENDPOINT, -1))
+        mockMvc.perform(get(SINGLE_KANBAN_ENDPOINT, -1))
                 .andExpect(status().isNotFound());
     }
 }
