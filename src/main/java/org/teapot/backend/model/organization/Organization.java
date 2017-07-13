@@ -27,4 +27,9 @@ public class Organization extends Owner {
     @Getter
     @Setter
     private Set<Member> members = new HashSet<>();
+
+    @Override
+    public String getType() {
+        return "organization";
+    }
 }
