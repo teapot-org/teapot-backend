@@ -1,4 +1,4 @@
-package org.teapot.backend.config.processors;
+package org.teapot.backend.config.data.processors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityLinks;

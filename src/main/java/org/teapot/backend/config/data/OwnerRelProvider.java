@@ -1,4 +1,4 @@
-package org.teapot.backend.config;
+package org.teapot.backend.config.data;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
