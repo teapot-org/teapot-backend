@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.ResultActions;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.organization.Organization;
-import org.teapot.backend.repository.KanbanRepository;
+import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 
 import java.util.List;
