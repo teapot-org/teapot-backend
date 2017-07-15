@@ -18,7 +18,6 @@ import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
-import org.teapot.backend.repository.OwnerRepository;
 import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.kanban.TicketListRepository;
 import org.teapot.backend.repository.kanban.TicketRepository;
@@ -36,9 +35,6 @@ import java.util.Arrays;
 @Configuration
 @Profile("development")
 public class DevelopmentProfileConfig {
-
-    @Autowired
-    private OwnerRepository ownerRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -253,13 +249,13 @@ public class DevelopmentProfileConfig {
     }
 
     private void addKanbans() {
-        kanbanRepository.save(new Kanban("kanban4", ownerRepository.findByName("dr_watson")));
-        kanbanRepository.save(new Kanban("kanban5", ownerRepository.findByName("admin")));
-        kanbanRepository.save(new Kanban("kanban6", ownerRepository.findByName("admin")));
-        kanbanRepository.save(new Kanban("kanban1", ownerRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban2", ownerRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban3", ownerRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban2", ownerRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("dr_watson")));
+        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
+        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
+        kanbanRepository.save(new Kanban("kanban1", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban3", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
     }
 
     private void addTicketLists() {
