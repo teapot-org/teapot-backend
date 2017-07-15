@@ -15,6 +15,7 @@ import java.util.List;
 @NoRepositoryBean
 public interface AbstractOwnerItemRepository<T extends OwnerItem> extends JpaRepository<T, Long> {
 
+    @RestResource(exported = false)
     List<T> findByOwner(Owner owner);
 
     @RestResource(path = "find-by-owner-id")
