@@ -4,13 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.ResultActions;
+import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
-import org.teapot.backend.repository.organization.OrganizationRepository;
+import org.teapot.backend.repository.OwnerRepository;
 
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.teapot.backend.controller.OwnerController.OWNERS_ENDPOINT;
 import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
 import static org.teapot.backend.test.controller.OrganizationControllerIT.isOrganizationJsonAsExpected;
@@ -20,11 +23,12 @@ public class OwnerControllerIT extends AbstractControllerIT {
     private static final String FIND_OWNER_BY_NAME_ENDPOINT = OWNERS_ENDPOINT + "/search/find-by-name";
 
     @Autowired
-    private OrganizationRepository organizationRepository;
+    private OwnerRepository ownerRepository;
 
     private User savedUser = new User();
     private Organization savedOrganization = new Organization();
     private Organization notSavedOrganization = new Organization();
+    private List<Owner> allOwners;
 
     @Before
     public void addTestUsers() {
@@ -37,9 +41,19 @@ public class OwnerControllerIT extends AbstractControllerIT {
 
         savedOrganization.setName("OwnerControllerTestOrg1");
         savedOrganization.setFullName("OwnerControllerTestOrg1");
-        organizationRepository.save(savedOrganization);
+        ownerRepository.save(savedOrganization);
 
         notSavedOrganization.setName("OwnerControllerTestOrg2");
+
+        allOwners = ownerRepository.findAll();
+    }
+
+    @Test
+    public void getOwnersTest() throws Exception {
+        mockMvc.perform(get(OWNERS_ENDPOINT))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$._embedded.owners", hasSize(allOwners.size())));
     }
 
     @Test

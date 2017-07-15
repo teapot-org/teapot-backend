@@ -7,17 +7,30 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
+import org.teapot.backend.model.organization.Organization;
+import org.teapot.backend.model.user.User;
+
+import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+    @RestResource(exported = false)
+    List<Member> findByStatus(MemberStatus status);
+
     @RestResource(path = "find-by-status")
     Page<Member> findByStatus(@Param("status") MemberStatus status, Pageable pageable);
+
+    @RestResource(exported = false)
+    List<Member> findByOrganizationAndStatus(Organization organization, MemberStatus status);
 
     @RestResource(path = "find-by-organization-id-and-status")
     Page<Member> findByOrganizationIdAndStatus(@Param("organizationId") Long organizationId, @Param("status") MemberStatus status, Pageable pageable);
 
     @RestResource(path = "find-by-organization-name-and-status")
     Page<Member> findByOrganizationNameAndStatus(@Param("organizationName") String organizationName, @Param("status") MemberStatus status, Pageable pageable);
+
+    @RestResource(exported = false)
+    List<Member> findByUserAndStatus(User user, MemberStatus status);
 
     @RestResource(path = "find-by-user-id-and-status")
     Page<Member> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") MemberStatus status, Pageable pageable);
@@ -28,11 +41,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @RestResource(path = "find-by-user-email-and-status")
     Page<Member> findByUserEmailAndStatus(@Param("userEmail") String userEmail, @Param("status") MemberStatus status, Pageable pageable);
 
+    @RestResource(exported = false)
+    List<Member> findByOrganization(Organization organization);
+
     @RestResource(path = "find-by-organization-id")
     Page<Member> findByOrganizationId(@Param("organizationId") Long organizationId, Pageable pageable);
 
     @RestResource(path = "find-by-organization-name")
     Page<Member> findByOrganizationName(@Param("organizationName") String organizationName, Pageable pageable);
+
+    @RestResource(exported = false)
+    List<Member> findByUser(User user);
 
     @RestResource(path = "find-by-user-id")
     Page<Member> findByUserId(@Param("userId") Long userId, Pageable pageable);
@@ -43,11 +62,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @RestResource(path = "find-by-user-email")
     Page<Member> findByUserEmail(@Param("userEmail") String userEmail, Pageable pageable);
 
+    @RestResource(exported = false)
+    Member findByIdAndOrganization(Long id, Organization organization);
+
     @RestResource(path = "find-by-id-and-organization-id")
     Member findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
 
     @RestResource(path = "find-by-id-and-organization-name")
     Member findByIdAndOrganizationName(@Param("id") Long id, @Param("organizationName") String organizationName);
+
+    @RestResource(exported = false)
+    Member findByOrganizationAndUser(Organization organization, User user);
 
     @RestResource(path = "find-by-organization-id-and-user-id")
     Member findByOrganizationIdAndUserId(@Param("organizationId") Long organizationId, @Param("userId") Long userId);

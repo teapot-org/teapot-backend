@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
-import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -47,14 +46,13 @@ public class OrganizationController extends AbstractController {
             throw new DataIntegrityViolationException("Already exists");
         }
 
-        organizationRepository.saveAndFlush(organization);
+        organizationRepository.save(organization);
 
         Member creator = new Member();
-        creator.setOrganization(organization);
         creator.setStatus(MemberStatus.CREATOR);
         creator.setUser(userRepository.findByEmail(auth.getName()));
+        creator.setOrganization(organization);
         memberRepository.save(creator);
-        organization.getMembers().add(creator);
 
         PersistentEntityResource responseResource = assembler.toResource(organization);
         HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
@@ -89,10 +87,6 @@ public class OrganizationController extends AbstractController {
         Organization organization = organizationRepository.findOne(id);
         if (organization == null) {
             throw new ResourceNotFoundException();
-        }
-
-        for (Kanban kanban : organization.getKanbans()) {
-            kanban.setOwner(null);
         }
 
         organizationRepository.delete(id);

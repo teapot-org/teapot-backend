@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.ResultActions;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.organization.Organization;
-import org.teapot.backend.repository.KanbanRepository;
+import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 
 import java.util.List;
@@ -31,24 +31,22 @@ public class KanbanControllerIT extends AbstractControllerIT {
 
     private Kanban savedKanban = new Kanban("savedKanban", savedKanbanOwner);
 
-    private List<Kanban> allKanbans;
-
-    static ResultActions isBoardJsonAsExpected(ResultActions resultActions, String jsonPath, Kanban kanban)
+    static ResultActions isKanbanJsonAsExpected(ResultActions resultActions, String jsonPath, Kanban kanban)
             throws Exception {
         return resultActions.andExpect(jsonPath(jsonPath + ".title", is(kanban.getTitle())));
     }
 
     @Before
     public void addTestUsers() {
-        savedKanbanOwner.setName("getBoard1Owner");
+        savedKanbanOwner.setName("getKanban1Owner");
         organizationRepository.save(savedKanbanOwner);
 
         kanbanRepository.save(savedKanban);
     }
 
     @Test
-    public void getBoardsTest() throws Exception {
-        allKanbans = kanbanRepository.findAll();
+    public void getKanbansTest() throws Exception {
+        List<Kanban> allKanbans = kanbanRepository.findAll();
 
         ResultActions result = mockMvc.perform(get(KANBANS_ENDPOINT))
                 .andExpect(status().isOk())
@@ -56,21 +54,21 @@ public class KanbanControllerIT extends AbstractControllerIT {
                 .andExpect(jsonPath("$._embedded.kanbans", hasSize(allKanbans.size())));
 
         for (int i = 0; i < allKanbans.size(); i++) {
-            isBoardJsonAsExpected(result, format("$._embedded.kanbans[%d]", i), allKanbans.get(i));
+            isKanbanJsonAsExpected(result, format("$._embedded.kanbans[%d]", i), allKanbans.get(i));
         }
     }
 
     @Test
-    public void getSingleBoardByIdTest() throws Exception {
+    public void getSingleKanbanByIdTest() throws Exception {
         ResultActions result = mockMvc.perform(get(SINGLE_KANBAN_ENDPOINT, savedKanban.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType));
 
-        isBoardJsonAsExpected(result, "$", savedKanban);
+        isKanbanJsonAsExpected(result, "$", savedKanban);
     }
 
     @Test
-    public void getNotExistsBoardByIdTest() throws Exception {
+    public void getNotExistsKanbanByIdTest() throws Exception {
         mockMvc.perform(get(SINGLE_KANBAN_ENDPOINT, -1))
                 .andExpect(status().isNotFound());
     }
