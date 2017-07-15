@@ -1,12 +1,10 @@
 package org.teapot.backend.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.Owner;
@@ -14,7 +12,6 @@ import org.teapot.backend.model.organization.Member;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -60,18 +57,12 @@ public class User extends Owner {
     @Setter
     private String description;
 
-    @OneToOne(mappedBy = "user")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    @Getter
-    @Setter
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private VerificationToken verificationToken;
 
-    @OneToMany(mappedBy = "user")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @Getter
-    @Setter
-    private Set<Member> members = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @RestResource(exported = false)
+    private Set<Member> members;
 
     public void setPassword(String password) {
         this.password = PASSWORD_ENCODER.encode(password);

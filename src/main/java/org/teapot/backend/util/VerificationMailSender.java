@@ -13,7 +13,6 @@ import org.teapot.backend.repository.user.VerificationTokenRepository;
 
 import java.util.Locale;
 
-
 @Component
 @Profile("verification")
 public class VerificationMailSender {
@@ -38,7 +37,6 @@ public class VerificationMailSender {
             VerificationToken verificationToken = generator.generateToken();
             verificationToken.setUser(user);
             tokenRepository.save(verificationToken);
-            user.setVerificationToken(verificationToken);
 
             String confirmUrl = "https://"
                     + propertyRepository.findByName("site-uri").getValue()

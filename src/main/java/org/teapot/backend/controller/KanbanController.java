@@ -10,20 +10,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RepositoryRestController
 public class KanbanController extends AbstractController {
 
-    public static final String BOARDS_ENDPOINT = "/kanbans";
-    public static final String SINGLE_BOARD_ENDPOINT = BOARDS_ENDPOINT + "/{id}";
+    public static final String KANBANS_ENDPOINT = "/kanbans";
+    public static final String SINGLE_KANBAN_ENDPOINT = KANBANS_ENDPOINT + "/{id}";
 
-    @PostMapping(BOARDS_ENDPOINT)
+    @PostMapping(KANBANS_ENDPOINT)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public void notAllowedPostBoard() {
     }
 
-    @PutMapping(SINGLE_BOARD_ENDPOINT)
+    @PutMapping(SINGLE_KANBAN_ENDPOINT)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public void notAllowedPutBoard() {
     }
 
-    @PatchMapping(SINGLE_BOARD_ENDPOINT)
+    @PatchMapping(SINGLE_KANBAN_ENDPOINT)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public void notAllowedPatchBoard() {
     }

@@ -25,7 +25,7 @@ public class KanbanRepositoryIT extends AbstractIT {
     private Kanban kanban = new Kanban("findByOwnerTestKanban", owner);
 
     @Before
-    public void setupBoard() {
+    public void setupKanban() {
         owner.setName("findByOwnerTest");
         organizationRepository.save(owner);
 
