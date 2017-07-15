@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.teapot.backend.model.kanban.Kanban;
+import org.teapot.backend.model.kanban.Ticket;
+import org.teapot.backend.model.kanban.TicketList;
 import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.model.meta.TeapotResource;
@@ -16,7 +18,10 @@ import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
-import org.teapot.backend.repository.KanbanRepository;
+import org.teapot.backend.repository.OwnerRepository;
+import org.teapot.backend.repository.kanban.KanbanRepository;
+import org.teapot.backend.repository.kanban.TicketListRepository;
+import org.teapot.backend.repository.kanban.TicketRepository;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
@@ -31,6 +36,9 @@ import java.util.Arrays;
 @Configuration
 @Profile("development")
 public class DevelopmentProfileConfig {
+
+    @Autowired
+    private OwnerRepository ownerRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -52,6 +60,12 @@ public class DevelopmentProfileConfig {
 
     @Autowired
     private KanbanRepository kanbanRepository;
+
+    @Autowired
+    private TicketListRepository ticketListRepository;
+
+    @Autowired
+    private TicketRepository ticketRepository;
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -78,6 +92,8 @@ public class DevelopmentProfileConfig {
             addOrganizations();
             addMembers();
             addKanbans();
+            addTicketLists();
+            addTickets();
         };
     }
 
@@ -237,12 +253,33 @@ public class DevelopmentProfileConfig {
     }
 
     private void addKanbans() {
-        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("dr_watson")));
-        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
-        kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
-        kanbanRepository.save(new Kanban("kanban1", organizationRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban3", organizationRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban4", ownerRepository.findByName("dr_watson")));
+        kanbanRepository.save(new Kanban("kanban5", ownerRepository.findByName("admin")));
+        kanbanRepository.save(new Kanban("kanban6", ownerRepository.findByName("admin")));
+        kanbanRepository.save(new Kanban("kanban1", ownerRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", ownerRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban3", ownerRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", ownerRepository.findByName("teapot")));
+    }
+
+    private void addTicketLists() {
+        ticketListRepository.save(new TicketList("ticketList1", kanbanRepository.findOne(1L)));
+        ticketListRepository.save(new TicketList("ticketList2", kanbanRepository.findOne(2L)));
+        ticketListRepository.save(new TicketList("ticketList3", kanbanRepository.findOne(1L)));
+        ticketListRepository.save(new TicketList("ticketList4", kanbanRepository.findOne(1L)));
+        ticketListRepository.save(new TicketList("ticketList4", kanbanRepository.findOne(2L)));
+        ticketListRepository.save(new TicketList("ticketList4", kanbanRepository.findOne(3L)));
+        ticketListRepository.save(new TicketList("ticketList2", kanbanRepository.findOne(3L)));
+        ticketListRepository.save(new TicketList("ticketList5", kanbanRepository.findOne(4L)));
+        ticketListRepository.save(new TicketList("ticketList6", kanbanRepository.findOne(5L)));
+    }
+
+    private void addTickets() {
+        for (long i = 1; i <= ticketListRepository.count(); i++) {
+            TicketList ticketList = ticketListRepository.getOne(i);
+            for (int j = 0; j < 5; j++) {
+                ticketRepository.save(new Ticket("ticket" + j, "lalalalal", ticketList));
+            }
+        }
     }
 }

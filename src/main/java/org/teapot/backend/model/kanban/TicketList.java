@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.teapot.backend.model.AbstractPersistable;
-import org.teapot.backend.model.Owner;
 
 import javax.persistence.*;
 import java.util.List;
@@ -13,23 +12,23 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Kanban extends AbstractPersistable {
+public class TicketList extends AbstractPersistable {
 
     @Getter
     @Setter
     private String title;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @Getter
     @Setter
-    private Owner owner;
+    private Kanban kanban;
 
-    @OneToMany(mappedBy = "kanban", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "ticketList", cascade = CascadeType.REMOVE)
     @OrderColumn
-    private List<TicketList> ticketLists;
+    private List<Ticket> tickets;
 
-    public Kanban(String title, Owner owner) {
+    public TicketList(String title, Kanban kanban) {
         setTitle(title);
-        setOwner(owner);
+        setKanban(kanban);
     }
 }
