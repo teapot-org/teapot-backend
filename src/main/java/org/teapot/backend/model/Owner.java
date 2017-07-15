@@ -3,7 +3,6 @@ package org.teapot.backend.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.teapot.backend.model.kanban.Kanban;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -23,12 +22,12 @@ public abstract class Owner extends AbstractPersistable {
     private Boolean available = true;
 
     @OneToMany(mappedBy = "owner")
-    private Set<Kanban> kanbans;
+    private Set<OwnerItem> ownerItems;
 
     @PreRemove
-    private void detachKanbans() {
-        if (kanbans != null) {
-            kanbans.forEach(kanban -> kanban.setOwner(null));
+    private void detachOwnerItems() {
+        if (ownerItems != null) {
+            ownerItems.forEach(item -> item.setOwner(null));
         }
     }
 

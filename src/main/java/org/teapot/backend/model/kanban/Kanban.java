@@ -4,23 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.teapot.backend.model.AbstractPersistable;
 import org.teapot.backend.model.Owner;
+import org.teapot.backend.model.OwnerItem;
 
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Kanban extends AbstractPersistable {
+public class Kanban extends OwnerItem {
 
     @Getter
     @Setter
     private String title;
 
-    @ManyToOne
-    @Getter
-    @Setter
-    private Owner owner;
+    public Kanban(String title, Owner owner) {
+        super(owner);
+        setTitle(title);
+    }
 }
