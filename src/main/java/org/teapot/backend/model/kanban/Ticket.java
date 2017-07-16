@@ -1,11 +1,10 @@
 package org.teapot.backend.model.kanban;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.teapot.backend.model.AbstractPersistable;
-import org.teapot.backend.model.organization.Member;
+import org.teapot.backend.model.user.User;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -15,7 +14,6 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class Ticket extends AbstractPersistable {
 
     @Getter
@@ -26,23 +24,25 @@ public class Ticket extends AbstractPersistable {
     @Setter
     private String description;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @Getter
     @Setter
     private TicketList ticketList;
 
     @ManyToMany
-    @Getter
-    @Setter
-    private Set<Member> contributors = new HashSet<>();
-
-    public Ticket(String title, String description) {
-        setTitle(title);
-        setDescription(description);
-    }
+    private Set<User> contributors = new HashSet<>();
 
     public Ticket(String title, String description, TicketList ticketList) {
-        this(title, description);
+        setTitle(title);
+        setDescription(description);
         setTicketList(ticketList);
+    }
+
+    public void addContributor(User user) {
+        contributors.add(user);
+    }
+
+    public void removeContributor(User user) {
+        contributors.remove(user);
     }
 }

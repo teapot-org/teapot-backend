@@ -1,21 +1,18 @@
 package org.teapot.backend.model.kanban;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.OwnerItem;
+import org.teapot.backend.model.user.User;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import java.util.List;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class Kanban extends OwnerItem {
 
     @Getter
@@ -24,7 +21,20 @@ public class Kanban extends OwnerItem {
 
     @OneToMany(mappedBy = "kanban", cascade = CascadeType.REMOVE)
     @OrderColumn
-    private List<TicketList> ticketLists;
+    private Set<TicketList> ticketLists;
+
+    @ManyToOne
+    @Getter
+    @Setter
+    private Project project;
+
+    @Enumerated
+    @Getter
+    @Setter
+    private KanbanAccess access = KanbanAccess.PUBLIC;
+
+    @ManyToMany
+    private Set<User> contributors = new HashSet<>();
 
     public Kanban(String title) {
         setTitle(title);
@@ -33,5 +43,18 @@ public class Kanban extends OwnerItem {
     public Kanban(String title, Owner owner) {
         super(owner);
         setTitle(title);
+    }
+
+    public Kanban(String title, Owner owner, Project project) {
+        this(title, owner);
+        setProject(project);
+    }
+
+    public void addContributor(User user) {
+        contributors.add(user);
+    }
+
+    public void removeContributor(User user) {
+        contributors.remove(user);
     }
 }

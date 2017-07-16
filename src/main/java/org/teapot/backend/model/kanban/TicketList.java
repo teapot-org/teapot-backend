@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.teapot.backend.model.AbstractPersistable;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -25,7 +25,7 @@ public class TicketList extends AbstractPersistable {
 
     @OneToMany(mappedBy = "ticketList", cascade = CascadeType.REMOVE)
     @OrderColumn
-    private List<Ticket> tickets;
+    private Set<Ticket> tickets;
 
     public TicketList(String title, Kanban kanban) {
         setTitle(title);
