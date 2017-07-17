@@ -1,4 +1,4 @@
-package org.teapot.backend.controller;
+package org.teapot.backend.controller.kanban;
 
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.teapot.backend.controller.AbstractController;
 
 @RepositoryRestController
 public class KanbanController extends AbstractController {

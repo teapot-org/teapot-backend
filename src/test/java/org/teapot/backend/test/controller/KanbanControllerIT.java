@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.teapot.backend.controller.KanbanController.KANBANS_ENDPOINT;
-import static org.teapot.backend.controller.KanbanController.SINGLE_KANBAN_ENDPOINT;
+import static org.teapot.backend.controller.kanban.KanbanController.KANBANS_ENDPOINT;
+import static org.teapot.backend.controller.kanban.KanbanController.SINGLE_KANBAN_ENDPOINT;
 
 public class KanbanControllerIT extends AbstractControllerIT {
 
