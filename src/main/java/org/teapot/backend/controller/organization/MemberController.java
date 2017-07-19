@@ -51,7 +51,7 @@ public class MemberController extends AbstractController {
     }
 
     @PreAuthorize("hasRole('ADMIN') " +
-            "or @memberService.isCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication?.name)")
+            "or @memberService.isUserCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication?.name)")
     @PatchMapping(SINGLE_MEMBER_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchMember(
@@ -72,20 +72,6 @@ public class MemberController extends AbstractController {
 
         member.setStatus(newStatus);
         memberRepository.save(member);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') " +
-            "or @memberService.isCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication.name)")
-    @DeleteMapping(SINGLE_MEMBER_ENDPOINT)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMember(@PathVariable Long id) {
-        Member member = memberRepository.findOne(id);
-
-        if (member.getStatus().equals(MemberStatus.CREATOR)) {
-            throw new DataIntegrityViolationException("Not allowed for 'CREATOR' status");
-        }
-
-        memberRepository.delete(member);
     }
 
     @PutMapping(SINGLE_MEMBER_ENDPOINT)

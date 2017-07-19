@@ -61,7 +61,7 @@ public class OrganizationController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication?.name)")
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isUserCreatorOrOwner(#id, authentication?.name)")
     @PatchMapping(SINGLE_ORGANIZATION_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchOrganization(
@@ -78,18 +78,6 @@ public class OrganizationController extends AbstractController {
         if (fullName != null) organization.setFullName(fullName);
 
         organizationRepository.save(organization);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreator(#id, authentication?.name)")
-    @DeleteMapping(SINGLE_ORGANIZATION_ENDPOINT)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteOrganization(@PathVariable Long id) {
-        Organization organization = organizationRepository.findOne(id);
-        if (organization == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        organizationRepository.delete(id);
     }
 
     @PutMapping(SINGLE_ORGANIZATION_ENDPOINT)

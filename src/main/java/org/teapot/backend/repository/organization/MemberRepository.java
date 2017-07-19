@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -13,6 +14,12 @@ import org.teapot.backend.model.user.User;
 import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN') " +
+            "or @memberService.isUserCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication.name) " +
+            "and !@memberService.isMemberCreator(#id)")
+    void delete(@Param("id") Long id);
 
     @RestResource(exported = false)
     List<Member> findByStatus(MemberStatus status);
