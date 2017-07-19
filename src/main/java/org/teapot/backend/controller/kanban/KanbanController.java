@@ -7,11 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.kanban.KanbanAccess;
 import org.teapot.backend.repository.kanban.KanbanRepository;
+import org.teapot.backend.repository.user.UserRepository;
 
 @RepositoryRestController
 public class KanbanController extends AbstractController {
@@ -22,13 +24,20 @@ public class KanbanController extends AbstractController {
     @Autowired
     private KanbanRepository kanbanRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PreAuthorize("@kanbanService.isUserOwner(#requestResource?.content?.owner, authentication?.name)")
     @PostMapping(KANBANS_ENDPOINT)
     public ResponseEntity<?> createKanban(
             @RequestBody Resource<Kanban> requestResource,
-            PersistentEntityResourceAssembler assembler
+            PersistentEntityResourceAssembler assembler,
+            Authentication auth
     ) {
-        Kanban kanban = kanbanRepository.save(requestResource.getContent());
+        Kanban kanban = requestResource.getContent();
+        kanban.getContributors().add(userRepository.findByEmail(auth.getName()));
+
+        kanbanRepository.save(kanban);
 
         PersistentEntityResource responseResource = assembler.toResource(kanban);
         HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
