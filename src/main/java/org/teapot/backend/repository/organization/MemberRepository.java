@@ -21,6 +21,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "and !@memberService.isMemberCreator(#id)")
     void delete(@Param("id") Long id);
 
+    @Override
+    @PreAuthorize("hasRole('ADMIN') " +
+            "or @memberService.isUserCreatorOrOwner(#member?.organization?.id, authentication.name) " +
+            "and !@memberService.isMemberCreator(#member?.id)")
+    void delete(@Param("member") Member member);
+
     @RestResource(exported = false)
     List<Member> findByStatus(MemberStatus status);
 

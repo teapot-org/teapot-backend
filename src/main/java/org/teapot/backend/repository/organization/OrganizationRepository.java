@@ -10,4 +10,8 @@ public interface OrganizationRepository extends AbstractOwnerRepository<Organiza
     @Override
     @PreAuthorize("hasRole('ADMIN') or @memberService.isUserCreator(#id, authentication?.name)")
     void delete(@Param("id") Long id);
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN') or @memberService.isUserCreator(#organization?.id, authentication?.name)")
+    void delete(@Param("organization") Organization organization);
 }

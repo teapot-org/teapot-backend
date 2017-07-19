@@ -14,9 +14,13 @@ import java.util.List;
 
 public interface KanbanRepository extends AbstractOwnerItemRepository<Kanban> {
 
-    @PreAuthorize("@kanbanService.isUserOwner(#id, authentication.name) or hasRole('ADMIN')")
     @Override
-    void delete(Long id);
+    @PreAuthorize("@kanbanService.isUserOwner(#id, authentication.name) or hasRole('ADMIN')")
+    void delete(@Param("id") Long id);
+
+    @Override
+    @PreAuthorize("@kanbanService.isUserOwner(#kanban?.id, authentication.name) or hasRole('ADMIN')")
+    void delete(@Param("kanban") Kanban kanban);
 
     @RestResource(exported = false)
     List<Kanban> findByProject(Project project);

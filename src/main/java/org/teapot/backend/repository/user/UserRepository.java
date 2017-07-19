@@ -12,6 +12,10 @@ public interface UserRepository extends AbstractOwnerRepository<User> {
     @Override
     void delete(Long id);
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    void delete(User user);
+
     @RestResource(path = "find-by-email")
     User findByEmail(@Param("email") String email);
 }
