@@ -34,6 +34,7 @@ public class Kanban extends OwnerItem {
     private KanbanAccess access = KanbanAccess.PUBLIC;
 
     @ManyToMany
+    @Getter
     private Set<User> contributors = new HashSet<>();
 
     public Kanban(String title) {
@@ -48,13 +49,5 @@ public class Kanban extends OwnerItem {
     public Kanban(String title, Owner owner, Project project) {
         this(title, owner);
         setProject(project);
-    }
-
-    public void addContributor(User user) {
-        contributors.add(user);
-    }
-
-    public void removeContributor(User user) {
-        contributors.remove(user);
     }
 }

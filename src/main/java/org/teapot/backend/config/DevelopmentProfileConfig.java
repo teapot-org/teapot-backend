@@ -263,7 +263,7 @@ public class DevelopmentProfileConfig {
         Kanban kanban = new Kanban("kanban123");
         kanban.setOwner(userRepository.findByName("admin"));
         kanban.setProject(projectRepository.findOne(1L));
-        kanban.addContributor(userRepository.findByName("dr_watson"));
+        kanban.getContributors().add(userRepository.findByName("dr_watson"));
         kanbanRepository.save(kanban);
 
         kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
@@ -287,7 +287,7 @@ public class DevelopmentProfileConfig {
 
     private void addTickets() {
         Ticket ticket = new Ticket("ticket1", "lalalalal", ticketListRepository.getOne(1L));
-        ticket.addContributor(userRepository.findByName("lora_palmer"));
+        ticket.getContributors().add(userRepository.findByName("lora_palmer"));
         ticketRepository.save(ticket);
     }
 }

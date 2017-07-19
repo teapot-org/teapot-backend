@@ -68,16 +68,20 @@ public class User extends Owner {
 
     @ManyToMany(mappedBy = "contributors")
     @RestResource(exported = false)
-    private Set<Kanban> kanbans;
+    private Set<Kanban> contributedKanbans;
 
     @ManyToMany(mappedBy = "contributors")
     @RestResource(exported = false)
-    private Set<Ticket> tickets;
+    private Set<Ticket> contributedTickets;
 
     @PreRemove
     private void detachKanbansAndTickets() {
-        kanbans.forEach(kanban -> kanban.removeContributor(this));
-        tickets.forEach(ticket -> ticket.removeContributor(this));
+        if (contributedKanbans != null) {
+            contributedKanbans.forEach(kanban -> kanban.getContributors().remove(this));
+        }
+        if (contributedTickets != null) {
+            contributedTickets.forEach(ticket -> ticket.getContributors().remove(this));
+        }
     }
 
     public void setPassword(String password) {

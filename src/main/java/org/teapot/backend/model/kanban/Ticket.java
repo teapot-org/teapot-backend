@@ -30,19 +30,12 @@ public class Ticket extends AbstractPersistable {
     private TicketList ticketList;
 
     @ManyToMany
+    @Getter
     private Set<User> contributors = new HashSet<>();
 
     public Ticket(String title, String description, TicketList ticketList) {
         setTitle(title);
         setDescription(description);
         setTicketList(ticketList);
-    }
-
-    public void addContributor(User user) {
-        contributors.add(user);
-    }
-
-    public void removeContributor(User user) {
-        contributors.remove(user);
     }
 }
