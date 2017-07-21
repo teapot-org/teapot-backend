@@ -311,8 +311,8 @@ public class DevelopmentProfileConfig {
     }
 
     private void addTickets() {
-        Ticket ticket = new Ticket("ticket1", "lalalalal", ticketListRepository.getOne(1L));
-        ticket.getContributors().add(userRepository.findByName("lora_palmer"));
+        Ticket ticket = new Ticket("ticket1", "lalalalal", ticketListRepository.findOne(1L));
+        ticket.getSubscribers().add(userRepository.findByName("lora_palmer"));
         ticketRepository.save(ticket);
     }
 }

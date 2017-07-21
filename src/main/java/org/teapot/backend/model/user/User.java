@@ -70,17 +70,17 @@ public class User extends Owner {
     @RestResource(exported = false)
     private Set<Kanban> contributedKanbans;
 
-    @ManyToMany(mappedBy = "contributors")
+    @ManyToMany(mappedBy = "subscribers")
     @RestResource(exported = false)
-    private Set<Ticket> contributedTickets;
+    private Set<Ticket> subscribedTickets;
 
     @PreRemove
     private void detachKanbansAndTickets() {
         if (contributedKanbans != null) {
             contributedKanbans.forEach(kanban -> kanban.getContributors().remove(this));
         }
-        if (contributedTickets != null) {
-            contributedTickets.forEach(ticket -> ticket.getContributors().remove(this));
+        if (subscribedTickets != null) {
+            subscribedTickets.forEach(ticket -> ticket.getSubscribers().remove(this));
         }
     }
 

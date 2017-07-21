@@ -33,7 +33,7 @@ public class Ticket extends AbstractPersistable {
 
     @ManyToMany
     @Getter
-    private Set<User> contributors = new HashSet<>();
+    private Set<User> subscribers = new HashSet<>();
 
     public Ticket(String title, String description, TicketList ticketList) {
         setTitle(title);
