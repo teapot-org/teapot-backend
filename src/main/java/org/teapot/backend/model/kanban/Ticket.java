@@ -3,6 +3,7 @@ package org.teapot.backend.model.kanban;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.AbstractPersistable;
 import org.teapot.backend.model.user.User;
 
@@ -27,6 +28,7 @@ public class Ticket extends AbstractPersistable {
     @ManyToOne(optional = false)
     @Getter
     @Setter
+    @RestResource(path = "ticket-list")
     private TicketList ticketList;
 
     @ManyToMany

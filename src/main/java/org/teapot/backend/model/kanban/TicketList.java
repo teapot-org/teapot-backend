@@ -1,6 +1,5 @@
 package org.teapot.backend.model.kanban;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +10,6 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 public class TicketList extends AbstractPersistable {
 
     @Getter
@@ -23,11 +21,13 @@ public class TicketList extends AbstractPersistable {
     @Setter
     private Kanban kanban;
 
+    private Integer position;
+
     @OneToMany(mappedBy = "ticketList", cascade = CascadeType.REMOVE)
-    @OrderColumn
+    @OrderColumn(name = "position")
     private Set<Ticket> tickets;
 
-    public TicketList(String title, Kanban kanban) {
+    public TicketList(String title) {
         setTitle(title);
         setKanban(kanban);
     }

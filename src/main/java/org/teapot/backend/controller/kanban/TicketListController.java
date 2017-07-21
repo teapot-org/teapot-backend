@@ -1,0 +1,76 @@
+package org.teapot.backend.controller.kanban;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.*;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.teapot.backend.controller.AbstractController;
+import org.teapot.backend.model.kanban.Kanban;
+import org.teapot.backend.model.kanban.TicketList;
+import org.teapot.backend.repository.kanban.KanbanRepository;
+import org.teapot.backend.repository.kanban.TicketListRepository;
+
+@RepositoryRestController
+public class TicketListController extends AbstractController {
+
+    public static final String TICKET_LISTS_ENDPOINT = "/ticket-lists";
+    public static final String SINGLE_TICKET_LIST_ENDPOINT = TICKET_LISTS_ENDPOINT + "/{id}";
+
+    @Autowired
+    private TicketListRepository ticketListRepository;
+
+    @Autowired
+    private KanbanRepository kanbanRepository;
+
+    // todo: чтение списка/списков: любой контрибутор
+
+    @PreAuthorize("@kanbanService.isUserContributor(#resource?.content?.kanban?.id, authentication?.name)")
+    @PostMapping(TICKET_LISTS_ENDPOINT)
+    public ResponseEntity<?> createTicketList(
+            @RequestBody Resource<TicketList> resource,
+            PersistentEntityResourceAssembler assembler
+
+    ) {
+        TicketList ticketList = ticketListRepository.save(resource.getContent());
+
+        PersistentEntityResource responseResource = assembler.toResource(ticketList);
+        HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
+        addLocationHeader(headers, assembler, ticketList);
+
+        return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
+    }
+
+    @PreAuthorize("@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)")
+    @PatchMapping(value = SINGLE_TICKET_LIST_ENDPOINT, params = "position")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changeTicketListPosition(@PathVariable Long id, @RequestParam Integer position) {
+        TicketList ticketList = ticketListRepository.findOne(id);
+        if (ticketList == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        Kanban kanban = ticketList.getKanban();
+        kanban.getTicketLists().remove(ticketList);
+        kanban.getTicketLists().add(position, ticketList);
+
+        kanbanRepository.save(kanban);
+    }
+
+    @PreAuthorize("@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)")
+    @PatchMapping(value = SINGLE_TICKET_LIST_ENDPOINT, params = "title")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changeTicketListTitle(@PathVariable Long id, @RequestParam String title) {
+        TicketList ticketList = ticketListRepository.findOne(id);
+        if (ticketList == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        ticketList.setTitle(title);
+
+        ticketListRepository.save(ticketList);
+    }
+}

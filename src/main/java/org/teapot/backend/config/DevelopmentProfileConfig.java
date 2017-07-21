@@ -33,7 +33,6 @@ import org.teapot.backend.repository.user.UserRepository;
 import java.time.LocalDate;
 import java.util.Arrays;
 
-
 @Configuration
 @Profile("development")
 public class DevelopmentProfileConfig {
@@ -274,15 +273,41 @@ public class DevelopmentProfileConfig {
     }
 
     private void addTicketLists() {
-        ticketListRepository.save(new TicketList("ticketList1", kanbanRepository.findOne(3L)));
-        ticketListRepository.save(new TicketList("ticketList2", kanbanRepository.findOne(4L)));
-        ticketListRepository.save(new TicketList("ticketList3", kanbanRepository.findOne(3L)));
-        ticketListRepository.save(new TicketList("ticketList4", kanbanRepository.findOne(3L)));
-        ticketListRepository.save(new TicketList("ticketList4", kanbanRepository.findOne(4L)));
-        ticketListRepository.save(new TicketList("ticketList4", kanbanRepository.findOne(5L)));
-        ticketListRepository.save(new TicketList("ticketList2", kanbanRepository.findOne(5L)));
-        ticketListRepository.save(new TicketList("ticketList5", kanbanRepository.findOne(6L)));
-        ticketListRepository.save(new TicketList("ticketList6", kanbanRepository.findOne(7L)));
+        Kanban kanban1 = kanbanRepository.findOne(3L);
+        kanban1.addTicketList(new TicketList("ticketList1"));
+        kanbanRepository.save(kanban1);
+
+        Kanban kanban2 = kanbanRepository.findOne(4L);
+        kanban2.addTicketList(new TicketList("ticketList2"));
+        kanbanRepository.save(kanban2);
+
+        Kanban kanban3 = kanbanRepository.findOne(3L);
+        kanban3.addTicketList(new TicketList("ticketList3"));
+        kanbanRepository.save(kanban3);
+
+        Kanban kanban4 = kanbanRepository.findOne(3L);
+        kanban4.addTicketList(new TicketList("ticketList4"));
+        kanbanRepository.save(kanban4);
+
+        Kanban kanban5 = kanbanRepository.findOne(4L);
+        kanban5.addTicketList(new TicketList("ticketList4"));
+        kanbanRepository.save(kanban5);
+
+        Kanban kanban6 = kanbanRepository.findOne(5L);
+        kanban6.addTicketList(new TicketList("ticketList4"));
+        kanbanRepository.save(kanban6);
+
+        Kanban kanban7 = kanbanRepository.findOne(5L);
+        kanban7.addTicketList(new TicketList("ticketList2"));
+        kanbanRepository.save(kanban7);
+
+        Kanban kanban8 = kanbanRepository.findOne(6L);
+        kanban8.addTicketList(new TicketList("ticketList5"));
+        kanbanRepository.save(kanban8);
+
+        Kanban kanban9 = kanbanRepository.findOne(7L);
+        kanban9.addTicketList(new TicketList("ticketList6"));
+        kanbanRepository.save(kanban9);
     }
 
     private void addTickets() {

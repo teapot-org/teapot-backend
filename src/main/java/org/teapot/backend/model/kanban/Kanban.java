@@ -3,12 +3,14 @@ package org.teapot.backend.model.kanban;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.OwnerItem;
 import org.teapot.backend.model.user.User;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -19,9 +21,11 @@ public class Kanban extends OwnerItem {
     @Setter
     private String title;
 
-    @OneToMany(mappedBy = "kanban", cascade = CascadeType.REMOVE)
-    @OrderColumn
-    private Set<TicketList> ticketLists;
+    @OneToMany(mappedBy = "kanban", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OrderColumn(name = "position")
+    @Getter
+    @RestResource(path = "ticket-lists")
+    private List<TicketList> ticketLists;
 
     @ManyToOne
     @Getter
@@ -49,5 +53,12 @@ public class Kanban extends OwnerItem {
     public Kanban(String title, Owner owner, Project project) {
         this(title, owner);
         setProject(project);
+    }
+
+    public void addTicketList(TicketList ticketList) {
+        if (!ticketLists.contains(ticketList)) {
+            ticketList.setKanban(this);
+            ticketLists.add(ticketList);
+        }
     }
 }
