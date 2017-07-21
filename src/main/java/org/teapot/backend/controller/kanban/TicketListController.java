@@ -1,7 +1,10 @@
 package org.teapot.backend.controller.kanban;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.*;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.kanban.TicketList;
 import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.kanban.TicketListRepository;
+import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
 @RepositoryRestController
 public class TicketListController extends AbstractController {
@@ -21,12 +25,42 @@ public class TicketListController extends AbstractController {
     public static final String SINGLE_TICKET_LIST_ENDPOINT = TICKET_LISTS_ENDPOINT + "/{id}";
 
     @Autowired
+    private PagedResourcesAssemblerHelper<TicketList> helper;
+
+    @Autowired
     private TicketListRepository ticketListRepository;
 
     @Autowired
     private KanbanRepository kanbanRepository;
 
-    // todo: чтение списка/списков: любой контрибутор
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(TICKET_LISTS_ENDPOINT)
+    public ResponseEntity<?> getTicketLists(
+            Pageable pageable,
+            PersistentEntityResourceAssembler assembler
+    ) {
+        Page<TicketList> page = ticketListRepository.findAll(pageable);
+        PagedResources resources = helper.toResource(TicketList.class, page, assembler);
+        return ResponseEntity.ok(resources);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') " +
+            "or @kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)")
+    @GetMapping(SINGLE_TICKET_LIST_ENDPOINT)
+    public ResponseEntity<?> getTicketList(
+            @PathVariable Long id,
+            PersistentEntityResourceAssembler assembler
+    ) {
+        TicketList ticketList = ticketListRepository.findOne(id);
+        if (ticketList == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        PersistentEntityResource responseResource = assembler.toResource(ticketList);
+        HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
+
+        return ControllerUtils.toResponseEntity(HttpStatus.OK, headers, responseResource);
+    }
 
     @PreAuthorize("@kanbanService.isUserContributor(#resource?.content?.kanban?.id, authentication?.name)")
     @PostMapping(TICKET_LISTS_ENDPOINT)
@@ -45,9 +79,12 @@ public class TicketListController extends AbstractController {
     }
 
     @PreAuthorize("@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)")
-    @PatchMapping(value = SINGLE_TICKET_LIST_ENDPOINT, params = "position")
+    @PatchMapping(TICKET_LISTS_ENDPOINT + "/shift")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changeTicketListPosition(@PathVariable Long id, @RequestParam Integer position) {
+    public void changeTicketListPosition(
+            @RequestParam("list") Long id,
+            @RequestParam Integer position
+    ) {
         TicketList ticketList = ticketListRepository.findOne(id);
         if (ticketList == null) {
             throw new ResourceNotFoundException();
@@ -61,7 +98,7 @@ public class TicketListController extends AbstractController {
     }
 
     @PreAuthorize("@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)")
-    @PatchMapping(value = SINGLE_TICKET_LIST_ENDPOINT, params = "title")
+    @PatchMapping(SINGLE_TICKET_LIST_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTicketListTitle(@PathVariable Long id, @RequestParam String title) {
         TicketList ticketList = ticketListRepository.findOne(id);
