@@ -14,13 +14,8 @@ import java.util.Collections;
 @Component
 public class PagedResourcesAssemblerHelper<T> {
 
-    private final PagedResourcesAssembler<T> pagedResourcesAssembler;
-
-    @SuppressWarnings("unchecked")
     @Autowired
-    public PagedResourcesAssemblerHelper(PagedResourcesAssembler<T> pagedResourcesAssembler) {
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
-    }
+    private PagedResourcesAssembler<T> pagedResourcesAssembler;
 
     public PagedResources toResource(Class<T> clazz, Page<T> page, PersistentEntityResourceAssembler assembler) {
         PagedResources resources = pagedResourcesAssembler.toResource(page, assembler::toResource);

@@ -50,7 +50,6 @@ public class KanbanController extends AbstractController {
         }
 
         Page<Kanban> page = kanbanRepository.findByOwnerId(id, pageable);
-
         return ResponseEntity.ok(helper.toResource(Kanban.class, page, assembler));
     }
 

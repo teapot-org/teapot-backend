@@ -42,7 +42,6 @@ public class ProjectController {
         }
 
         Page<Project> page = projectRepository.findByOwnerId(id, pageable);
-
         return ResponseEntity.ok(helper.toResource(Project.class, page, assembler));
     }
 }
