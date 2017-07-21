@@ -23,6 +23,7 @@ import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
 import static org.teapot.backend.controller.user.UserController.SINGLE_USER_ENDPOINT;
+import static org.teapot.backend.service.MemberService.USER_IS_CREATOR_OR_OWNER;
 
 @RepositoryRestController
 public class OrganizationController extends AbstractController {
@@ -80,7 +81,7 @@ public class OrganizationController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isUserCreatorOrOwner(#id, authentication?.name)")
+    @PreAuthorize(USER_IS_CREATOR_OR_OWNER + " or hasRole('ADMIN')")
     @PatchMapping(SINGLE_ORGANIZATION_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchOrganization(

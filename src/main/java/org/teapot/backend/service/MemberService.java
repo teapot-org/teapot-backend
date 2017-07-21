@@ -11,6 +11,27 @@ import java.util.Arrays;
 @Service
 public class MemberService {
 
+    public static final String USER_IS_CREATOR =
+            "@memberService.isUserCreator(#id, authentication?.name)";
+
+    public static final String USER_IS_CREATOR_BY_ORG =
+            "@memberService.isUserCreator(#organization?.id, authentication?.name)";
+
+    public static final String USER_IS_CREATOR_OR_OWNER_BY_MEMBER_ID =
+            "@memberService.isUserCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication.name)";
+
+    public static final String USER_IS_CREATOR_OR_OWNER_BY_MEMBER =
+            "@memberService.isUserCreatorOrOwner(#member?.organization?.id, authentication.name)";
+
+    public static final String MEMBER_IS_NOT_CREATOR_BY_ID =
+            "!@memberService.isMemberCreator(#id)";
+
+    public static final String MEMBER_IS_NOT_CREATOR =
+            "!@memberService.isMemberCreator(#member?.id)";
+
+    public static final String USER_IS_CREATOR_OR_OWNER =
+            "@memberService.isUserCreatorOrOwner(#id, authentication?.name)";
+
     @Autowired
     private MemberRepository memberRepository;
 

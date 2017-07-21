@@ -14,6 +14,24 @@ import org.teapot.backend.repository.user.UserRepository;
 @Service
 public class KanbanService {
 
+    public static final String USER_IS_KANBAN_OWNER =
+            "@kanbanService.isUserOwner(#id, authentication?.name)";
+
+    public static final String USER_IS_KANBAN_OWNER_BY_KANBAN =
+            "@kanbanService.isUserOwner(#kanban?.id, authentication?.name)";
+
+    public static final String USER_IS_KANBAN_OWNER_BY_RESOURCE =
+            "@kanbanService.isUserOwner(#resource?.content?.owner, authentication?.name)";
+
+    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR =
+            "@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)";
+
+    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_BY_LIST =
+            "@kanbanService.isUserContributor(#ticketList?.kanban?.id, authentication?.name)";
+
+    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_BY_RESOURCE =
+            "@kanbanService.isUserContributor(#resource?.content?.kanban?.id, authentication?.name)";
+
     @Autowired
     private UserRepository userRepository;
 

@@ -12,16 +12,19 @@ import org.teapot.backend.model.kanban.TicketList;
 
 import java.util.List;
 
+import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_LIST_CONTRIBUTOR;
+import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_LIST_CONTRIBUTOR_BY_LIST;
+
 @RepositoryRestResource(path = "ticket-lists")
 public interface TicketListRepository extends JpaRepository<TicketList, Long> {
 
     @Override
-    @PreAuthorize("@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)")
+    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR + "or hasRole('ADMIN')")
     void delete(Long id);
 
     @Override
-    @PreAuthorize("@kanbanService.isUserContributor(#entity?.kanban?.id, authentication?.name)")
-    void delete(TicketList entity);
+    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR_BY_LIST)
+    void delete(TicketList ticketList);
 
     @RestResource(exported = false)
     List<TicketList> findByKanbanOrderByPosition(Kanban kanban);

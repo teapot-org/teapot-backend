@@ -14,6 +14,8 @@ import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.repository.organization.MemberRepository;
 
+import static org.teapot.backend.service.MemberService.USER_IS_CREATOR_OR_OWNER_BY_MEMBER_ID;
+
 @RepositoryRestController
 public class MemberController extends AbstractController {
 
@@ -50,8 +52,7 @@ public class MemberController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN') " +
-            "or @memberService.isUserCreatorOrOwner(@memberRepository.findOne(#id)?.organization?.id, authentication?.name)")
+    @PreAuthorize(USER_IS_CREATOR_OR_OWNER_BY_MEMBER_ID + " or hasRole('ADMIN')")
     @PatchMapping(SINGLE_MEMBER_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchMember(

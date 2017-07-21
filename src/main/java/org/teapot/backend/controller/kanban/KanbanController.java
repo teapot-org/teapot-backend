@@ -20,6 +20,8 @@ import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
 import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
+import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER;
+import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER_BY_RESOURCE;
 
 @RepositoryRestController
 public class KanbanController extends AbstractController {
@@ -53,14 +55,14 @@ public class KanbanController extends AbstractController {
         return ResponseEntity.ok(helper.toResource(Kanban.class, page, assembler));
     }
 
-    @PreAuthorize("@kanbanService.isUserOwner(#requestResource?.content?.owner, authentication?.name)")
+    @PreAuthorize(USER_IS_KANBAN_OWNER_BY_RESOURCE)
     @PostMapping(KANBANS_ENDPOINT)
     public ResponseEntity<?> createKanban(
-            @RequestBody Resource<Kanban> requestResource,
+            @RequestBody Resource<Kanban> resource,
             PersistentEntityResourceAssembler assembler,
             Authentication auth
     ) {
-        Kanban kanban = requestResource.getContent();
+        Kanban kanban = resource.getContent();
         kanban.getContributors().add(userRepository.findByEmail(auth.getName()));
 
         kanbanRepository.save(kanban);
@@ -72,7 +74,7 @@ public class KanbanController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @kanbanService.isUserOwner(#id, authentication?.name)")
+    @PreAuthorize(USER_IS_KANBAN_OWNER + " or hasRole('ADMIN')")
     @PatchMapping(SINGLE_KANBAN_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeKanbanAccess(

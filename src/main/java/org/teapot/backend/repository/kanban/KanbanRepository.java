@@ -12,14 +12,17 @@ import org.teapot.backend.repository.AbstractOwnerItemRepository;
 
 import java.util.List;
 
+import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER;
+import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER_BY_KANBAN;
+
 public interface KanbanRepository extends AbstractOwnerItemRepository<Kanban> {
 
     @Override
-    @PreAuthorize("@kanbanService.isUserOwner(#id, authentication.name) or hasRole('ADMIN')")
+    @PreAuthorize(USER_IS_KANBAN_OWNER + " or hasRole('ADMIN')")
     void delete(@Param("id") Long id);
 
     @Override
-    @PreAuthorize("@kanbanService.isUserOwner(#kanban?.id, authentication.name) or hasRole('ADMIN')")
+    @PreAuthorize(USER_IS_KANBAN_OWNER_BY_KANBAN + " or hasRole('ADMIN')")
     void delete(@Param("kanban") Kanban kanban);
 
     @RestResource(exported = false)
