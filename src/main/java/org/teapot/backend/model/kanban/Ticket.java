@@ -1,5 +1,6 @@
 package org.teapot.backend.model.kanban;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,9 +28,11 @@ public class Ticket extends AbstractPersistable {
 
     @ManyToOne(optional = false)
     @Getter
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     @RestResource(path = "ticket-list")
     private TicketList ticketList;
+
+    private Integer position;
 
     @ManyToMany
     @Getter
