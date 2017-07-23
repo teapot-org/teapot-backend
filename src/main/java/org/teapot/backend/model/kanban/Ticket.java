@@ -38,9 +38,8 @@ public class Ticket extends AbstractPersistable {
     @Getter
     private Set<User> subscribers = new HashSet<>();
 
-    public Ticket(String title, String description, TicketList ticketList) {
+    public Ticket(String title, String description) {
         setTitle(title);
         setDescription(description);
-        setTicketList(ticketList);
     }
 }
