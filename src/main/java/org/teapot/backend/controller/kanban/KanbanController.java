@@ -24,14 +24,14 @@ import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 import java.util.Objects;
 
 import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
-import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER;
-import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER_BY_RESOURCE;
+import static org.teapot.backend.service.KanbanService.*;
 
 @RepositoryRestController
 public class KanbanController extends AbstractController {
 
     public static final String KANBANS_ENDPOINT = "/kanbans";
     public static final String SINGLE_KANBAN_ENDPOINT = KANBANS_ENDPOINT + "/{id}";
+    public static final String SINGLE_OWNER_KANBANS = SINGLE_OWNER_ENDPOINT + KANBANS_ENDPOINT;
 
     @Autowired
     private PagedResourcesAssemblerHelper<Kanban> helper;
@@ -45,7 +45,43 @@ public class KanbanController extends AbstractController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping(SINGLE_OWNER_ENDPOINT + KANBANS_ENDPOINT)
+    @PreAuthorize(USER_HAS_KANBAN_ACCESS)
+    @GetMapping(SINGLE_KANBAN_ENDPOINT)
+    public ResponseEntity<?> getKanban(
+            @PathVariable Long id,
+            PersistentEntityResourceAssembler assembler
+    ) {
+        Kanban kanban = kanbanRepository.findOne(id);
+        if (kanban == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        PersistentEntityResource responseResource = assembler.toResource(kanban);
+        HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
+
+        return ControllerUtils.toResponseEntity(HttpStatus.OK, headers, responseResource);
+    }
+
+    @GetMapping(KANBANS_ENDPOINT)
+    public ResponseEntity<?> getKanbans(
+            Pageable pageable,
+            PersistentEntityResourceAssembler assembler,
+            Authentication auth
+    ) {
+        User user = (auth != null) ? userRepository.findByEmail(auth.getName()) : null;
+        boolean userIsAdmin = (user != null) && user.getAuthority() == UserAuthority.ADMIN;
+
+        Page<Kanban> page;
+        if (userIsAdmin) {
+            page = kanbanRepository.findAll(pageable);
+        } else {
+            page = kanbanRepository.findByAccess(KanbanAccess.PUBLIC, pageable);
+        }
+
+        return ResponseEntity.ok(helper.toResource(Kanban.class, page, assembler));
+    }
+
+    @GetMapping(SINGLE_OWNER_KANBANS)
     public ResponseEntity<?> getOwnerKanbans(
             @PathVariable Long id,
             Pageable pageable,
