@@ -2,24 +2,32 @@ package org.teapot.backend.test.controller;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.teapot.backend.model.AbstractPersistable;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -42,6 +50,9 @@ public abstract class AbstractControllerIT extends AbstractIT {
     protected ObjectMapper mapper;
 
     @Autowired
+    protected EntityLinks entityLinks;
+
+    @Autowired
     protected UserRepository userRepository;
 
     protected User userWithAdminRole = new User();
@@ -49,6 +60,18 @@ public abstract class AbstractControllerIT extends AbstractIT {
 
     protected String adminAccessToken;
     protected String userAccessToken;
+
+    @BeforeClass
+    public static void setupRequestAttributes() {
+        HttpServletRequest mockRequest = new MockHttpServletRequest();
+        ServletRequestAttributes servletRequestAttributes = new ServletRequestAttributes(mockRequest);
+        RequestContextHolder.setRequestAttributes(servletRequestAttributes);
+    }
+
+    @AfterClass
+    public static void resetRequestAttributes() {
+        RequestContextHolder.resetRequestAttributes();
+    }
 
     @Autowired
     public void setMockMvcAndMapper(WebApplicationContext wac, FilterChainProxy filter) throws Exception {
@@ -103,5 +126,11 @@ public abstract class AbstractControllerIT extends AbstractIT {
         userWithUserRole.setActivated(true);
         userRepository.save(userWithUserRole);
         userAccessToken = obtainAccessToken(userWithUserRole.getEmail(), "pass");
+    }
+
+    protected String linkFor(AbstractPersistable object) {
+        return (object == null) || object.isNew()
+                ? null
+                : entityLinks.linkToSingleResource(object.getClass(), object.getId()).getHref();
     }
 }
