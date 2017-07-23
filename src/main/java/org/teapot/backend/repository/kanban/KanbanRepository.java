@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.kanban.KanbanAccess;
 import org.teapot.backend.model.kanban.Project;
@@ -28,12 +29,21 @@ public interface KanbanRepository extends AbstractOwnerItemRepository<Kanban> {
     @RestResource(exported = false)
     List<Kanban> findByProject(Project project);
 
-    @RestResource(path = "find-by-project-id")
-    Page<Kanban> findByProjectId(@Param("projectId") Long projectId, Pageable pageable);
+    @RestResource(exported = false)
+    Page<Kanban> findByProject(Project project, Pageable pageable);
 
     @RestResource(exported = false)
     List<Kanban> findByAccess(KanbanAccess access);
 
-    @RestResource(path = "find-by-access")
-    Page<Kanban> findByAccess(@Param("access") KanbanAccess access, Pageable pageable);
+    @RestResource(exported = false)
+    Page<Kanban> findByAccess(KanbanAccess access, Pageable pageable);
+
+    @RestResource(exported = false)
+    List<Kanban> findByOwnerAndAccess(Owner owner, KanbanAccess access);
+
+    @RestResource(exported = false)
+    Page<Kanban> findByOwnerAndAccess(Owner owner, KanbanAccess access, Pageable pageable);
+
+    @RestResource(exported = false)
+    Page<Kanban> findByOwnerIdAndAccess(Long ownerId, KanbanAccess access, Pageable pageable);
 }

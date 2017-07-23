@@ -72,4 +72,11 @@ public class KanbanControllerIT extends AbstractControllerIT {
         mockMvc.perform(get(SINGLE_KANBAN_ENDPOINT, -1))
                 .andExpect(status().isNotFound());
     }
+
+//    getOwnerKanbansByAnonymousTest
+//    getOwnerKanbansByAdminTest
+//    createKanbanByOwnerTest
+//            createKanbanNotByOwnerTest
+//    changeKanbanAccessByOwnerTest
+//            changeKanbanAccessByAnonymousTest
 }

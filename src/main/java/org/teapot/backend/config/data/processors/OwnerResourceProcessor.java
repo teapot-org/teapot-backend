@@ -16,7 +16,7 @@ public class OwnerResourceProcessor implements ResourceProcessor<Resource<? exte
     @Override
     public Resource<? extends Owner> process(Resource<? extends Owner> resource) {
         resource.add(linkTo(methodOn(KanbanController.class)
-                .getOwnerKanbans(resource.getContent().getId(), null, null))
+                .getOwnerKanbans(resource.getContent().getId(), null, null, null))
                 .withRel("kanbans"));
 
         resource.add(linkTo(methodOn(ProjectController.class)

@@ -14,10 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.kanban.KanbanAccess;
+import org.teapot.backend.model.user.User;
+import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.OwnerRepository;
 import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.PagedResourcesAssemblerHelper;
+
+import java.util.Objects;
 
 import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
 import static org.teapot.backend.service.KanbanService.USER_IS_KANBAN_OWNER;
@@ -45,13 +49,29 @@ public class KanbanController extends AbstractController {
     public ResponseEntity<?> getOwnerKanbans(
             @PathVariable Long id,
             Pageable pageable,
-            PersistentEntityResourceAssembler assembler
+            PersistentEntityResourceAssembler assembler,
+            Authentication auth
     ) {
         if (!ownerRepository.exists(id)) {
             throw new ResourceNotFoundException();
         }
 
-        Page<Kanban> page = kanbanRepository.findByOwnerId(id, pageable);
+        boolean userIsAdmin = false;
+        boolean userIsOwner = false;
+
+        User user = (auth != null) ? userRepository.findByEmail(auth.getName()) : null;
+        if (user != null) {
+            userIsAdmin = user.getAuthority() == UserAuthority.ADMIN;
+            userIsOwner = Objects.equals(user.getId(), id);
+        }
+
+        Page<Kanban> page;
+        if (userIsAdmin || userIsOwner) {
+            page = kanbanRepository.findByOwnerId(id, pageable);
+        } else {
+            page = kanbanRepository.findByOwnerIdAndAccess(id, KanbanAccess.PUBLIC, pageable);
+        }
+
         return ResponseEntity.ok(helper.toResource(Kanban.class, page, assembler));
     }
 
