@@ -26,14 +26,17 @@ public class KanbanService {
     public static final String USER_IS_KANBAN_OWNER_BY_RESOURCE =
             "@kanbanService.isUserOwner(#resource?.content, authentication?.name)";
 
-    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR =
-            "@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name)";
+    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER =
+            "@kanbanService.isUserContributor(@ticketListRepository.findOne(#id)?.kanban?.id, authentication?.name) or " +
+                    "@kanbanService.isUserOwner(@ticketListRepository.findOne(#id)?.kanban, authentication?.name)";
 
-    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_BY_LIST =
-            "@kanbanService.isUserContributor(#ticketList?.kanban?.id, authentication?.name)";
+    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER_BY_LIST =
+            "@kanbanService.isUserContributor(#ticketList?.kanban?.id, authentication?.name) or " +
+                    "@kanbanService.isUserOwner(#ticketList?.kanban, authentication?.name)";
 
-    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_BY_RESOURCE =
-            "@kanbanService.isUserContributor(#resource?.content?.kanban?.id, authentication?.name)";
+    public static final String USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER_BY_RESOURCE =
+            "@kanbanService.isUserContributor(#resource?.content?.kanban?.id, authentication?.name) or " +
+                    "@kanbanService.isUserOwner(#resource?.content?.kanban, authentication?.name)";
 
     public static final String USER_IS_TICKET_CONTRIBUTOR =
             "@kanbanService.isUserContributor(@ticketRepository.findOne(#id)?.ticketList?.kanban?.id, authentication?.name)";

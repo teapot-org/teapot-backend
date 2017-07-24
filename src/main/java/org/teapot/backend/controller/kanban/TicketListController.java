@@ -18,8 +18,8 @@ import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.kanban.TicketListRepository;
 import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
-import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_LIST_CONTRIBUTOR;
-import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_LIST_CONTRIBUTOR_BY_RESOURCE;
+import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER;
+import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER_BY_RESOURCE;
 
 @RepositoryRestController
 public class TicketListController extends AbstractController {
@@ -47,7 +47,7 @@ public class TicketListController extends AbstractController {
         return ResponseEntity.ok(resources);
     }
 
-    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR + " or hasRole('ADMIN')")
+    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER + " or hasRole('ADMIN')")
     @GetMapping(SINGLE_TICKET_LIST_ENDPOINT)
     public ResponseEntity<?> getTicketList(
             @PathVariable Long id,
@@ -64,7 +64,7 @@ public class TicketListController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.OK, headers, responseResource);
     }
 
-    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR_BY_RESOURCE)
+    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER_BY_RESOURCE + " or hasRole('ADMIN')")
     @PostMapping(TICKET_LISTS_ENDPOINT)
     public ResponseEntity<?> createTicketList(
             @RequestBody Resource<TicketList> resource,
@@ -80,7 +80,7 @@ public class TicketListController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR)
+    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER + " or hasRole('ADMIN')")
     @PatchMapping(TICKET_LISTS_ENDPOINT + "/shift")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTicketListPosition(
@@ -99,7 +99,7 @@ public class TicketListController extends AbstractController {
         kanbanRepository.save(kanban);
     }
 
-    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR)
+    @PreAuthorize(USER_IS_TICKET_LIST_CONTRIBUTOR_OR_OWNER + " or hasRole('ADMIN')")
     @PatchMapping(SINGLE_TICKET_LIST_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTicketListTitle(@PathVariable Long id, @RequestParam String title) {

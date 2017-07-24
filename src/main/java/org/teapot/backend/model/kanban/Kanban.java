@@ -9,6 +9,7 @@ import org.teapot.backend.model.OwnerItem;
 import org.teapot.backend.model.user.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,7 @@ public class Kanban extends OwnerItem {
     @OrderColumn(name = "position")
     @Getter
     @RestResource(path = "ticket-lists")
-    private List<TicketList> ticketLists;
+    private List<TicketList> ticketLists = new ArrayList<>();
 
     @ManyToOne
     @Getter
