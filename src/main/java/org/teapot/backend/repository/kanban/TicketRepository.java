@@ -14,11 +14,11 @@ import java.util.List;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Override
-    @PreAuthorize("@tickets.isContributor(#id) or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isOwner(#id) or @tickets.isContributor(#id) or hasRole('ADMIN')")
     void delete(@Param("id") Long id);
 
     @Override
-    @PreAuthorize("tickets.isContributor(#ticket) or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isOwner(#ticket) or @tickets.isContributor(#ticket) or hasRole('ADMIN')")
     void delete(@Param("ticket") Ticket ticket);
 
     @RestResource(exported = false)

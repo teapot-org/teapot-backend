@@ -5,7 +5,9 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Service;
 import org.teapot.backend.model.kanban.Ticket;
+import org.teapot.backend.model.kanban.TicketList;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.repository.kanban.TicketListRepository;
 import org.teapot.backend.repository.kanban.TicketRepository;
 import org.teapot.backend.repository.user.UserRepository;
 
@@ -17,6 +19,9 @@ public class TicketSecurityService extends AbstractSecurityService<Ticket> {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TicketListRepository ticketListRepository;
 
     @Autowired
     private TicketListSecurityService ticketListSecurityService;
@@ -72,9 +77,13 @@ public class TicketSecurityService extends AbstractSecurityService<Ticket> {
         return ticket.getSubscribers().contains(user);
     }
 
-    public boolean inSameList(Long kanbanId, Long ticketListId) {
-        assertExists(kanbanId);
+    public boolean inSameKanban(Long ticketId, Long ticketListId) {
+        assertExists(ticketId);
         ticketListSecurityService.assertExists(ticketListId);
-        return ticketRepository.findOne(kanbanId).getTicketList().getId().equals(ticketListId);
+        Ticket ticket = ticketRepository.findOne(ticketId);
+        TicketList ticketList = ticketListRepository.findOne(ticketListId);
+
+        return ticketList.getKanban().equals(
+                ticket.getTicketList().getKanban());
     }
 }

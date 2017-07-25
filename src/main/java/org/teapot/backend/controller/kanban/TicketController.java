@@ -23,8 +23,6 @@ import org.teapot.backend.repository.kanban.TicketRepository;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
-import javax.transaction.Transactional;
-
 @RepositoryRestController
 public class TicketController extends AbstractController {
 
@@ -113,11 +111,10 @@ public class TicketController extends AbstractController {
         ticketListRepository.save(ticketList);
     }
 
-    @PreAuthorize("@tickets.inSameList(#id, #listId) " +
+    @PreAuthorize("@tickets.inSameKanban(#id, #listId) " +
             "and (@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
     @PatchMapping(TICKETS_ENDPOINT + "/move")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Transactional
     public void moveTicketToAnotherList(
             @RequestParam("ticket") Long id,
             @RequestParam("list") Long listId,
@@ -138,7 +135,7 @@ public class TicketController extends AbstractController {
     }
 
     @PreAuthorize("@tickets.isContributor(#id, #userId) " +
-            "and (@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
+            "and (@users.isLoggedUser(#userId) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
     @PatchMapping(TICKETS_ENDPOINT + "/subscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void subscribe(@RequestParam("ticket") Long id, @RequestParam("user") Long userId) {
@@ -150,7 +147,7 @@ public class TicketController extends AbstractController {
     }
 
     @PreAuthorize("@tickets.isSubscriber(#id, #userId) " +
-            "and (@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
+            "and (@users.isLoggedUser(#userId) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
     @PatchMapping(TICKETS_ENDPOINT + "/unsubscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unsubscribe(@RequestParam("ticket") Long id, @RequestParam("user") Long userId) {
