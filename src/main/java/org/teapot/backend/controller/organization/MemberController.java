@@ -2,7 +2,10 @@ package org.teapot.backend.controller.organization;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.rest.webmvc.*;
+import org.springframework.data.rest.webmvc.ControllerUtils;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,8 +16,6 @@ import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.repository.organization.MemberRepository;
-
-import static org.teapot.backend.service.MemberService.USER_IS_CREATOR_OR_OWNER_BY_MEMBER_ID;
 
 @RepositoryRestController
 public class MemberController extends AbstractController {
@@ -52,7 +53,7 @@ public class MemberController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize(USER_IS_CREATOR_OR_OWNER_BY_MEMBER_ID + " or hasRole('ADMIN')")
+    @PreAuthorize("@members.hasAnyStatus(#id, 'CREATOR', 'OWNER') or hasRole('ADMIN')")
     @PatchMapping(SINGLE_MEMBER_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchMember(
@@ -60,9 +61,6 @@ public class MemberController extends AbstractController {
             @RequestParam("status") MemberStatus newStatus
     ) {
         Member member = memberRepository.findOne(id);
-        if (member == null) {
-            throw new ResourceNotFoundException();
-        }
 
         boolean memberIsCreator = member.getStatus().equals(MemberStatus.CREATOR);
         boolean newStatusIsCreator = newStatus.equals(MemberStatus.CREATOR);

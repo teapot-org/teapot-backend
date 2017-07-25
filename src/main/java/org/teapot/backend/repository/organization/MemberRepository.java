@@ -13,16 +13,18 @@ import org.teapot.backend.model.user.User;
 
 import java.util.List;
 
-import static org.teapot.backend.service.MemberService.*;
-
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Override
-    @PreAuthorize("hasRole('ADMIN') " + "or " + USER_IS_CREATOR_OR_OWNER_BY_MEMBER_ID + " and " + MEMBER_IS_NOT_CREATOR_BY_ID)
+    @PreAuthorize("@members.hasAnyStatus(#id, 'CREATOR', 'OWNER') " +
+            "and !@members.memberHasStatus(#id, 'CREATOR') " +
+            "or hasRole('ADMIN')")
     void delete(@Param("id") Long id);
 
     @Override
-    @PreAuthorize("hasRole('ADMIN') " + "or " + USER_IS_CREATOR_OR_OWNER_BY_MEMBER + " and " + MEMBER_IS_NOT_CREATOR)
+    @PreAuthorize("@members.hasAnyStatus(#member, 'CREATOR', 'OWNER') " +
+            "and !@members.memberHasStatus(#member, 'CREATOR') " +
+            "or hasRole('ADMIN')")
     void delete(@Param("member") Member member);
 
     @RestResource(exported = false)

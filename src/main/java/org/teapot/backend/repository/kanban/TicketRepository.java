@@ -11,17 +11,14 @@ import org.teapot.backend.model.kanban.TicketList;
 
 import java.util.List;
 
-import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_CONTRIBUTOR;
-import static org.teapot.backend.service.KanbanService.USER_IS_TICKET_CONTRIBUTOR_BY_TICKET;
-
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Override
-    @PreAuthorize(USER_IS_TICKET_CONTRIBUTOR + " or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isContributor(#id) or hasRole('ADMIN')")
     void delete(@Param("id") Long id);
 
     @Override
-    @PreAuthorize(USER_IS_TICKET_CONTRIBUTOR_BY_TICKET + " or hasRole('ADMIN')")
+    @PreAuthorize("tickets.isContributor(#ticket) or hasRole('ADMIN')")
     void delete(@Param("ticket") Ticket ticket);
 
     @RestResource(exported = false)

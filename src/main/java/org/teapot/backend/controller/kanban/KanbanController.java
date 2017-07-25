@@ -24,7 +24,6 @@ import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 import java.util.Objects;
 
 import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
-import static org.teapot.backend.service.KanbanService.*;
 
 @RepositoryRestController
 public class KanbanController extends AbstractController {
@@ -45,16 +44,13 @@ public class KanbanController extends AbstractController {
     @Autowired
     private UserRepository userRepository;
 
-    @PreAuthorize(USER_HAS_KANBAN_ACCESS)
+    @PreAuthorize("@kanbans.isPublic(#id) or @kanbans.isOwner(#id) or @kanbans.isContributor(#id) or hasRole('ADMIN')")
     @GetMapping(SINGLE_KANBAN_ENDPOINT)
     public ResponseEntity<?> getKanban(
             @PathVariable Long id,
             PersistentEntityResourceAssembler assembler
     ) {
         Kanban kanban = kanbanRepository.findOne(id);
-        if (kanban == null) {
-            throw new ResourceNotFoundException();
-        }
 
         PersistentEntityResource responseResource = assembler.toResource(kanban);
         HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
@@ -111,15 +107,13 @@ public class KanbanController extends AbstractController {
         return ResponseEntity.ok(helper.toResource(Kanban.class, page, assembler));
     }
 
-    @PreAuthorize(USER_IS_KANBAN_OWNER_BY_RESOURCE)
+    @PreAuthorize("@kanbans.isOwner(#resource)")
     @PostMapping(KANBANS_ENDPOINT)
     public ResponseEntity<?> createKanban(
             @RequestBody Resource<Kanban> resource,
-            PersistentEntityResourceAssembler assembler,
-            Authentication auth
+            PersistentEntityResourceAssembler assembler
     ) {
         Kanban kanban = resource.getContent();
-        kanban.getContributors().add(userRepository.findByEmail(auth.getName()));
 
         kanbanRepository.save(kanban);
 
@@ -130,7 +124,7 @@ public class KanbanController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize(USER_IS_KANBAN_OWNER + " or hasRole('ADMIN')")
+    @PreAuthorize("@kanbans.isOwner(#id) or hasRole('ADMIN')")
     @PatchMapping(SINGLE_KANBAN_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeKanbanAccess(
@@ -138,12 +132,7 @@ public class KanbanController extends AbstractController {
             @RequestParam KanbanAccess access
     ) {
         Kanban kanban = kanbanRepository.findOne(id);
-        if (kanban == null) {
-            throw new ResourceNotFoundException();
-        }
-
         kanban.setAccess(access);
-
         kanbanRepository.save(kanban);
     }
 

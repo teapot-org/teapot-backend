@@ -3,7 +3,10 @@ package org.teapot.backend.controller.kanban;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.*;
+import org.springframework.data.rest.webmvc.ControllerUtils;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +24,6 @@ import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
 import javax.transaction.Transactional;
-
-import static org.teapot.backend.service.KanbanService.*;
 
 @RepositoryRestController
 public class TicketController extends AbstractController {
@@ -53,16 +54,13 @@ public class TicketController extends AbstractController {
         return ResponseEntity.ok(resources);
     }
 
-    @PreAuthorize(USER_IS_TICKET_CONTRIBUTOR + " or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN')")
     @GetMapping(SINGLE_TICKET_ENDPOINT)
     public ResponseEntity<?> getTicket(
             @PathVariable Long id,
             PersistentEntityResourceAssembler assembler
     ) {
         Ticket ticket = ticketRepository.findOne(id);
-        if (ticket == null) {
-            throw new ResourceNotFoundException();
-        }
 
         PersistentEntityResource responseResource = assembler.toResource(ticket);
         HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
@@ -70,7 +68,7 @@ public class TicketController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.OK, headers, responseResource);
     }
 
-    @PreAuthorize(USER_IS_TICKET_CONTRIBUTOR_BY_RESOURCE + " or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isContributor(#resource) or @tickets.isOwner(#resource) or hasRole('ADMIN')")
     @PostMapping(TICKETS_ENDPOINT)
     public ResponseEntity<?> createTicket(
             @RequestBody Resource<Ticket> resource,
@@ -86,7 +84,7 @@ public class TicketController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize(USER_IS_TICKET_CONTRIBUTOR + " or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN')")
     @PatchMapping(SINGLE_TICKET_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void renameTicket(
@@ -95,9 +93,6 @@ public class TicketController extends AbstractController {
             @RequestParam(required = false) String description
     ) {
         Ticket ticket = ticketRepository.findOne(id);
-        if (ticket == null) {
-            throw new ResourceNotFoundException();
-        }
 
         if (title != null) ticket.setTitle(title);
         if (description != null) ticket.setDescription(description);
@@ -105,14 +100,11 @@ public class TicketController extends AbstractController {
         ticketRepository.save(ticket);
     }
 
-    @PreAuthorize(USER_IS_TICKET_CONTRIBUTOR + " or hasRole('ADMIN')")
+    @PreAuthorize("@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN')")
     @PatchMapping(TICKETS_ENDPOINT + "/shift")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeTicketPosition(@RequestParam("ticket") Long id, @RequestParam Integer position) {
         Ticket ticket = ticketRepository.findOne(id);
-        if (ticket == null) {
-            throw new ResourceNotFoundException();
-        }
 
         TicketList ticketList = ticket.getTicketList();
         ticketList.getTickets().remove(ticket);
@@ -121,7 +113,8 @@ public class TicketController extends AbstractController {
         ticketListRepository.save(ticketList);
     }
 
-    @PreAuthorize(TICKET_IN_SAME_LIST + " and (" + USER_IS_TICKET_CONTRIBUTOR + " or hasRole('ADMIN'))")
+    @PreAuthorize("@tickets.inSameList(#id, #listId) " +
+            "and (@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
     @PatchMapping(TICKETS_ENDPOINT + "/move")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
@@ -132,10 +125,6 @@ public class TicketController extends AbstractController {
     ) {
         Ticket ticket = ticketRepository.findOne(id);
         TicketList ticketList = ticketListRepository.findOne(listId);
-
-        if ((ticket == null) || (ticketList == null)) {
-            throw new ResourceNotFoundException();
-        }
 
         ticket.getTicketList().getTickets().remove(ticket);
 
@@ -148,31 +137,25 @@ public class TicketController extends AbstractController {
         ticketListRepository.save(ticketList);
     }
 
-    @PreAuthorize(MAY_SUBSCRIBE)
+    @PreAuthorize("@tickets.isContributor(#id, #userId) " +
+            "and (@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
     @PatchMapping(TICKETS_ENDPOINT + "/subscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void subscribe(@RequestParam("ticket") Long id, @RequestParam("user") Long userId) {
         Ticket ticket = ticketRepository.findOne(id);
         User user = userRepository.findOne(userId);
 
-        if ((ticket == null) || (user == null)) {
-            throw new ResourceNotFoundException();
-        }
-
         ticket.getSubscribers().add(user);
         ticketRepository.save(ticket);
     }
 
-    @PreAuthorize(MAY_SUBSCRIBE)
+    @PreAuthorize("@tickets.isContributor(#id, #userId) " +
+            "and (@tickets.isContributor(#id) or @tickets.isOwner(#id) or hasRole('ADMIN'))")
     @PatchMapping(TICKETS_ENDPOINT + "/unsubscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unsubscribe(@RequestParam("ticket") Long id, @RequestParam("user") Long userId) {
         Ticket ticket = ticketRepository.findOne(id);
         User user = userRepository.findOne(userId);
-
-        if ((ticket == null) || (user == null)) {
-            throw new ResourceNotFoundException();
-        }
 
         ticket.getSubscribers().remove(user);
         ticketRepository.save(ticket);
