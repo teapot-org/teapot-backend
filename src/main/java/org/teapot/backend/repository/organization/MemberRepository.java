@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
@@ -13,6 +14,18 @@ import org.teapot.backend.model.user.User;
 import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    @Override
+    @PreAuthorize("@members.hasAnyStatus(#id, 'CREATOR', 'OWNER') " +
+            "and !@members.memberHasStatus(#id, 'CREATOR') " +
+            "or hasRole('ADMIN')")
+    void delete(@Param("id") Long id);
+
+    @Override
+    @PreAuthorize("@members.hasAnyStatus(#member, 'CREATOR', 'OWNER') " +
+            "and !@members.memberHasStatus(#member, 'CREATOR') " +
+            "or hasRole('ADMIN')")
+    void delete(@Param("member") Member member);
 
     @RestResource(exported = false)
     List<Member> findByStatus(MemberStatus status);
@@ -24,22 +37,32 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByOrganizationAndStatus(Organization organization, MemberStatus status);
 
     @RestResource(path = "find-by-organization-id-and-status")
-    Page<Member> findByOrganizationIdAndStatus(@Param("organizationId") Long organizationId, @Param("status") MemberStatus status, Pageable pageable);
+    Page<Member> findByOrganizationIdAndStatus(@Param("organizationId") Long organizationId,
+                                               @Param("status") MemberStatus status,
+                                               Pageable pageable);
 
     @RestResource(path = "find-by-organization-name-and-status")
-    Page<Member> findByOrganizationNameAndStatus(@Param("organizationName") String organizationName, @Param("status") MemberStatus status, Pageable pageable);
+    Page<Member> findByOrganizationNameAndStatus(@Param("organizationName") String organizationName,
+                                                 @Param("status") MemberStatus status,
+                                                 Pageable pageable);
 
     @RestResource(exported = false)
     List<Member> findByUserAndStatus(User user, MemberStatus status);
 
     @RestResource(path = "find-by-user-id-and-status")
-    Page<Member> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") MemberStatus status, Pageable pageable);
+    Page<Member> findByUserIdAndStatus(@Param("userId") Long userId,
+                                       @Param("status") MemberStatus status,
+                                       Pageable pageable);
 
     @RestResource(path = "find-by-user-name-and-status")
-    Page<Member> findByUserNameAndStatus(@Param("userName") String userName, @Param("status") MemberStatus status, Pageable pageable);
+    Page<Member> findByUserNameAndStatus(@Param("userName") String userName,
+                                         @Param("status") MemberStatus status,
+                                         Pageable pageable);
 
     @RestResource(path = "find-by-user-email-and-status")
-    Page<Member> findByUserEmailAndStatus(@Param("userEmail") String userEmail, @Param("status") MemberStatus status, Pageable pageable);
+    Page<Member> findByUserEmailAndStatus(@Param("userEmail") String userEmail,
+                                          @Param("status") MemberStatus status,
+                                          Pageable pageable);
 
     @RestResource(exported = false)
     List<Member> findByOrganization(Organization organization);
@@ -78,17 +101,22 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Member findByOrganizationIdAndUserId(@Param("organizationId") Long organizationId, @Param("userId") Long userId);
 
     @RestResource(path = "find-by-organization-name-and-user-id")
-    Member findByOrganizationNameAndUserId(@Param("organizationName") String organizationName, @Param("userId") Long userId);
+    Member findByOrganizationNameAndUserId(@Param("organizationName") String organizationName,
+                                           @Param("userId") Long userId);
 
     @RestResource(path = "find-by-organization-id-and-user-name")
-    Member findByOrganizationIdAndUserName(@Param("organizationId") Long organizationId, @Param("userName") String userName);
+    Member findByOrganizationIdAndUserName(@Param("organizationId") Long organizationId,
+                                           @Param("userName") String userName);
 
     @RestResource(path = "find-by-organization-id-and-user-email")
-    Member findByOrganizationIdAndUserEmail(@Param("organizationId") Long organizationId, @Param("userEmail") String userEmail);
+    Member findByOrganizationIdAndUserEmail(@Param("organizationId") Long organizationId,
+                                            @Param("userEmail") String userEmail);
 
     @RestResource(path = "find-by-organization-name-and-user-name")
-    Member findByOrganizationNameAndUserName(@Param("organizationName") String organizationName, @Param("userName") String userName);
+    Member findByOrganizationNameAndUserName(@Param("organizationName") String organizationName,
+                                             @Param("userName") String userName);
 
     @RestResource(path = "find-by-organization-name-and-user-email")
-    Member findByOrganizationNameAndUserEmail(@Param("organizationName") String organizationName, @Param("userEmail") String userEmail);
+    Member findByOrganizationNameAndUserEmail(@Param("organizationName") String organizationName,
+                                              @Param("userEmail") String userEmail);
 }

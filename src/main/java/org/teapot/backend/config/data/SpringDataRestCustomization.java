@@ -1,4 +1,4 @@
-package org.teapot.backend.config;
+package org.teapot.backend.config.data;
 
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;

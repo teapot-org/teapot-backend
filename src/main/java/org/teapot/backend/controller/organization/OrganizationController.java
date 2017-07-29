@@ -2,7 +2,10 @@ package org.teapot.backend.controller.organization;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.*;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,12 +20,18 @@ import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
+import org.teapot.backend.util.PagedResourcesAssemblerHelper;
+
+import static org.teapot.backend.controller.user.UserController.SINGLE_USER_ENDPOINT;
 
 @RepositoryRestController
 public class OrganizationController extends AbstractController {
 
     public static final String ORGANIZATIONS_ENDPOINT = "/organizations";
     public static final String SINGLE_ORGANIZATION_ENDPOINT = ORGANIZATIONS_ENDPOINT + "/{id}";
+
+    @Autowired
+    private PagedResourcesAssemblerHelper<Organization> helper;
 
     @Autowired
     private UserRepository userRepository;
@@ -32,6 +41,16 @@ public class OrganizationController extends AbstractController {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @GetMapping(SINGLE_USER_ENDPOINT + ORGANIZATIONS_ENDPOINT)
+    public ResponseEntity<PagedResources> getUserOrganizations(
+            @PathVariable Long id,
+            Pageable pageable,
+            PersistentEntityResourceAssembler assembler
+    ) {
+        Page<Organization> page = memberRepository.findByUserId(id, pageable).map(Member::getOrganization);
+        return ResponseEntity.ok(helper.toResource(Organization.class, page, assembler));
+    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(ORGANIZATIONS_ENDPOINT)
@@ -61,7 +80,7 @@ public class OrganizationController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication?.name)")
+    @PreAuthorize("@organizations.hasAnyStatus(#id, 'CREATOR', 'OWNER') or hasRole('ADMIN')")
     @PatchMapping(SINGLE_ORGANIZATION_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchOrganization(
@@ -78,18 +97,6 @@ public class OrganizationController extends AbstractController {
         if (fullName != null) organization.setFullName(fullName);
 
         organizationRepository.save(organization);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreator(#id, authentication?.name)")
-    @DeleteMapping(SINGLE_ORGANIZATION_ENDPOINT)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteOrganization(@PathVariable Long id) {
-        Organization organization = organizationRepository.findOne(id);
-        if (organization == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        organizationRepository.delete(id);
     }
 
     @PutMapping(SINGLE_ORGANIZATION_ENDPOINT)

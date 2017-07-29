@@ -64,6 +64,9 @@ public abstract class AbstractPersistable implements Persistable<Long> {
             return false;
         }
         final AbstractPersistable other = (AbstractPersistable) obj;
+        if (this.isNew() || other.isNew()) {
+            return false;
+        }
         return Objects.equals(this.id, other.id);
     }
 

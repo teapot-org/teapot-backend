@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.OwnerItem;
-import org.teapot.backend.model.kanban.Kanban;
 
 import java.util.List;
 
@@ -19,8 +18,8 @@ public interface AbstractOwnerItemRepository<T extends OwnerItem> extends JpaRep
     List<T> findByOwner(Owner owner);
 
     @RestResource(path = "find-by-owner-id")
-    Page<Kanban> findByOwnerId(@Param("ownerId") Long ownerId, Pageable pageable);
+    Page<T> findByOwnerId(@Param("ownerId") Long ownerId, Pageable pageable);
 
     @RestResource(path = "find-by-owner-name")
-    Page<Kanban> findByOwnerName(@Param("ownerName") String ownerName, Pageable pageable);
+    Page<T> findByOwnerName(@Param("ownerName") String ownerName, Pageable pageable);
 }

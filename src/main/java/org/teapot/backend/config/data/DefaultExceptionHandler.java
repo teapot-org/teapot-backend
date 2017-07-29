@@ -1,4 +1,4 @@
-package org.teapot.backend.config;
+package org.teapot.backend.config.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;

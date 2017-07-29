@@ -8,6 +8,8 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.teapot.backend.model.Owner;
+import org.teapot.backend.model.kanban.Kanban;
+import org.teapot.backend.model.kanban.Ticket;
 import org.teapot.backend.model.organization.Member;
 
 import javax.persistence.*;
@@ -63,6 +65,24 @@ public class User extends Owner {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     @RestResource(exported = false)
     private Set<Member> members;
+
+    @ManyToMany(mappedBy = "contributors")
+    @RestResource(exported = false)
+    private Set<Kanban> contributedKanbans;
+
+    @ManyToMany(mappedBy = "subscribers")
+    @RestResource(exported = false)
+    private Set<Ticket> subscribedTickets;
+
+    @PreRemove
+    private void detachKanbansAndTickets() {
+        if (contributedKanbans != null) {
+            contributedKanbans.forEach(kanban -> kanban.getContributors().remove(this));
+        }
+        if (subscribedTickets != null) {
+            subscribedTickets.forEach(ticket -> ticket.getSubscribers().remove(this));
+        }
+    }
 
     public void setPassword(String password) {
         this.password = PASSWORD_ENCODER.encode(password);

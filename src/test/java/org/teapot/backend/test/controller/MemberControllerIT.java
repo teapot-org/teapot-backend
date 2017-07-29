@@ -165,7 +165,7 @@ public class MemberControllerIT extends AbstractControllerIT {
     public void deleteCreatorTestByOwner() throws Exception {
         mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, creator.getId())
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, owner1AccessToken)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isForbidden());
     }
 
     @Test
