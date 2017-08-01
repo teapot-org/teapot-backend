@@ -7,7 +7,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @MappedSuperclass
@@ -20,12 +20,12 @@ public abstract class AbstractPersistable implements Persistable<Long> {
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    private LocalDateTime creationDateTime;
+    private OffsetDateTime creationDateTime;
 
     @Column(nullable = false)
     @LastModifiedDate
     @JsonIgnore
-    private LocalDateTime lastModifiedDateTime;
+    private OffsetDateTime lastModifiedDateTime;
 
     @Override
     public Long getId() {
@@ -36,11 +36,11 @@ public abstract class AbstractPersistable implements Persistable<Long> {
         this.id = id;
     }
 
-    public LocalDateTime getCreationDateTime() {
+    public OffsetDateTime getCreationDateTime() {
         return creationDateTime;
     }
 
-    public LocalDateTime getLastModifiedDateTime() {
+    public OffsetDateTime getLastModifiedDateTime() {
         return lastModifiedDateTime;
     }
 
