@@ -18,12 +18,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Override
     @PreAuthorize("@members.hasAnyStatus(#id, 'CREATOR', 'OWNER') " +
             "and !@members.memberHasStatus(#id, 'CREATOR') " +
+            "or @users.isLoggedUser(@memberRepository.findOne(#id)?.user?.id) and !@members.memberHasStatus(#id, 'CREATOR') " +
             "or hasRole('ADMIN')")
     void delete(@Param("id") Long id);
 
     @Override
     @PreAuthorize("@members.hasAnyStatus(#member, 'CREATOR', 'OWNER') " +
             "and !@members.memberHasStatus(#member, 'CREATOR') " +
+            "or @users.isLoggedUser(#member?.user?.id)  and !@members.memberHasStatus(#member, 'CREATOR') " +
             "or hasRole('ADMIN')")
     void delete(@Param("member") Member member);
 
