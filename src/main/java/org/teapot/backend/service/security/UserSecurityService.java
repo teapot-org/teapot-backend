@@ -13,9 +13,12 @@ public class UserSecurityService extends AbstractSecurityService<User> {
     @Autowired
     private UserRepository userRepository;
 
-    public final boolean isLoggedUser(Long userId) {
+    public boolean isLoggedUser(Long userId) {
         assertExists(userId);
-        User user = userRepository.findOne(userId);
+        return isLoggedUser(userRepository.findOne(userId));
+    }
+
+    public boolean isLoggedUser(User user) {
         User loggedUser = userRepository.findByEmail(getLoggedUserEmail());
         return Objects.equals(user, loggedUser);
     }

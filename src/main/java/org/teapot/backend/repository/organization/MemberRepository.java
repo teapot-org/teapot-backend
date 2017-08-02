@@ -97,6 +97,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @RestResource(exported = false)
     Member findByOrganizationAndUser(Organization organization, User user);
 
+    @RestResource(exported = false)
+    Member findByOrganizationAndUserEmail(Organization organization, String userEmail);
+
     @RestResource(path = "find-by-organization-id-and-user-id")
     Member findByOrganizationIdAndUserId(@Param("organizationId") Long organizationId, @Param("userId") Long userId);
 
