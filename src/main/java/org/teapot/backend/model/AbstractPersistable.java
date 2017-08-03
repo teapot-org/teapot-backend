@@ -1,53 +1,44 @@
 package org.teapot.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@Getter
 public abstract class AbstractPersistable implements Persistable<Long> {
 
     @Id
     @GeneratedValue
+    @Setter
     private Long id;
 
     @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private OffsetDateTime creationDateTime;
+    private LocalDateTime creationDateTime;
 
     @Column(nullable = false)
     @LastModifiedDate
     @JsonIgnore
-    private OffsetDateTime lastModifiedDateTime;
+    private LocalDateTime lastModifiedDateTime;
 
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public OffsetDateTime getCreationDateTime() {
-        return creationDateTime;
-    }
-
-    public OffsetDateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+    @PrePersist
+    private void setCreationDateTime() {
+        creationDateTime = LocalDateTime.now(ZoneId.of("UTC"));
     }
 
     @JsonIgnore
     @Transient
     public boolean isNew() {
-        return id == null;
+        return getId() == null;
     }
 
     @Override
