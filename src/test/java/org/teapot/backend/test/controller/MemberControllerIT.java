@@ -55,6 +55,7 @@ public class MemberControllerIT extends AbstractControllerIT {
     private String creatorAccessToken;
     private String owner1AccessToken;
     private String worker1AccessToken;
+    private String notSavedMemberUserAccessToken;
 
     static ResultActions isMemberJsonAsExpected(ResultActions resultActions, String jsonPath, Member member)
             throws Exception {
@@ -130,6 +131,7 @@ public class MemberControllerIT extends AbstractControllerIT {
         creatorAccessToken = obtainAccessToken(creatorUser.getEmail(), "pass");
         worker1AccessToken = obtainAccessToken(worker1User.getEmail(), "pass");
         owner1AccessToken = obtainAccessToken(owner1User.getEmail(), "pass");
+        notSavedMemberUserAccessToken = obtainAccessToken(notSavedMemberUser.getEmail(), "pass");
     }
 
     // GET MEMBERS
@@ -258,7 +260,44 @@ public class MemberControllerIT extends AbstractControllerIT {
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
                 .content(json(creator))
                 .contentType(contentType))
-                .andExpect(status().isConflict());
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void createOrganizationInviteByOwner() throws Exception {
+        mockMvc.perform(post(MEMBERS_ENDPOINT)
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, owner1AccessToken))
+                .content(json(notSavedMember))
+                .contentType(contentType))
+                .andExpect(status().isCreated());
+
+        Member createdMember = memberRepository.findByOrganizationIdAndUserName(
+                savedOrganization.getId(), notSavedMemberUser.getName());
+        assertNotNull(createdMember);
+        assertEquals(MemberStatus.INVITEE, createdMember.getStatus());
+    }
+
+    @Test
+    public void createOrganizationAppicationByUser() throws Exception {
+        mockMvc.perform(post(MEMBERS_ENDPOINT)
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, notSavedMemberUserAccessToken))
+                .content(json(notSavedMember))
+                .contentType(contentType))
+                .andExpect(status().isCreated());
+
+        Member createdMember = memberRepository.findByOrganizationIdAndUserName(
+                savedOrganization.getId(), notSavedMemberUser.getName());
+        assertNotNull(createdMember);
+        assertEquals(MemberStatus.APPLICANT, createdMember.getStatus());
+    }
+
+    @Test
+    public void createOrganizationAppicationByAnotherUser() throws Exception {
+        mockMvc.perform(post(MEMBERS_ENDPOINT)
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
+                .content(json(notSavedMember))
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
     }
 
     // PATCH MEMBERS
@@ -268,7 +307,7 @@ public class MemberControllerIT extends AbstractControllerIT {
         mockMvc.perform(patch(SINGLE_MEMBER_ENDPOINT, creator.getId())
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
                 .param("status", "WORKER"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -276,7 +315,7 @@ public class MemberControllerIT extends AbstractControllerIT {
         mockMvc.perform(patch(SINGLE_MEMBER_ENDPOINT, owner2.getId())
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
                 .param("status", "CREATOR"))
-                .andExpect(status().isConflict());
+                .andExpect(status().isForbidden());
     }
 
     @Test

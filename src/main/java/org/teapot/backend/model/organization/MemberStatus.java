@@ -4,5 +4,6 @@ public enum MemberStatus {
     CREATOR,
     OWNER,
     WORKER,
-    APPLICANT;
+    APPLICANT,
+    INVITEE
 }
