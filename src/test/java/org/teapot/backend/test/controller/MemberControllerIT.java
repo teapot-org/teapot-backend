@@ -164,6 +164,13 @@ public class MemberControllerIT extends AbstractControllerIT {
     // DELETE MEMBERS
 
     @Test
+    public void deleteCreatorTestByHimself() throws Exception {
+        mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, creator.getId())
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, creatorAccessToken)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     public void deleteCreatorTestByOwner() throws Exception {
         mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, creator.getId())
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, owner1AccessToken)))
@@ -192,14 +199,28 @@ public class MemberControllerIT extends AbstractControllerIT {
     }
 
     @Test
-    public void deleteOwnerTestByOwner() throws Exception {
+    public void deleteOwnerTestByHimself() throws Exception {
+        mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, owner1.getId())
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, owner1AccessToken)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deleteOwnerTestByAnotherOwner() throws Exception {
         mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, owner2.getId())
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, owner1AccessToken)))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    public void deleteWorkerTestByWorker() throws Exception {
+    public void deleteWorkerTestByHimself() throws Exception {
+        mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, worker1.getId())
+                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, worker1AccessToken)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deleteWorkerTestByAnotherWorker() throws Exception {
         mockMvc.perform(delete(SINGLE_MEMBER_ENDPOINT, worker2.getId())
                 .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, worker1AccessToken)))
                 .andExpect(status().isForbidden());
