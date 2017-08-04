@@ -27,7 +27,7 @@ import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 public class TicketController extends AbstractController {
 
     public static final String TICKETS_ENDPOINT = "/tickets";
-    public static final String SINGLE_TICKET_ENDPOINT = TICKETS_ENDPOINT + "/{id}";
+    public static final String SINGLE_TICKET_ENDPOINT = TICKETS_ENDPOINT + "/{id:\\d+}";
 
     @Autowired
     private PagedResourcesAssemblerHelper<Ticket> helper;

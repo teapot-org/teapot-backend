@@ -28,7 +28,7 @@ import static org.teapot.backend.controller.user.UserController.SINGLE_USER_ENDP
 public class OrganizationController extends AbstractController {
 
     public static final String ORGANIZATIONS_ENDPOINT = "/organizations";
-    public static final String SINGLE_ORGANIZATION_ENDPOINT = ORGANIZATIONS_ENDPOINT + "/{id}";
+    public static final String SINGLE_ORGANIZATION_ENDPOINT = ORGANIZATIONS_ENDPOINT + "/{id:\\d+}";
 
     @Autowired
     private PagedResourcesAssemblerHelper<Organization> helper;

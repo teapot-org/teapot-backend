@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 public class OwnerController extends AbstractController {
 
     public static final String OWNERS_ENDPOINT = "/owners";
-    public static final String SINGLE_OWNER_ENDPOINT = OWNERS_ENDPOINT + "/{id}";
+    public static final String SINGLE_OWNER_ENDPOINT = OWNERS_ENDPOINT + "/{id:\\d+}";
 
     @PostMapping(OWNERS_ENDPOINT)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)

@@ -20,7 +20,7 @@ import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOIN
 public class ProjectController {
 
     public static final String PROJECTS_ENDPOINT = "/projects";
-    public static final String SINGLE_PROJECT_ENDPOINT = PROJECTS_ENDPOINT + "/{id}";
+    public static final String SINGLE_PROJECT_ENDPOINT = PROJECTS_ENDPOINT + "/{id:\\d+}";
 
     @Autowired
     private PagedResourcesAssemblerHelper<Project> helper;

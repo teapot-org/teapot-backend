@@ -29,7 +29,7 @@ import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOIN
 public class KanbanController extends AbstractController {
 
     public static final String KANBANS_ENDPOINT = "/kanbans";
-    public static final String SINGLE_KANBAN_ENDPOINT = KANBANS_ENDPOINT + "/{id}";
+    public static final String SINGLE_KANBAN_ENDPOINT = KANBANS_ENDPOINT + "/{id:\\d+}";
     public static final String SINGLE_OWNER_KANBANS = SINGLE_OWNER_ENDPOINT + KANBANS_ENDPOINT;
 
     @Autowired

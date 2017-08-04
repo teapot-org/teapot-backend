@@ -24,7 +24,7 @@ import org.teapot.backend.service.security.UserSecurityService;
 public class MemberController extends AbstractController {
 
     public static final String MEMBERS_ENDPOINT = "/members";
-    public static final String SINGLE_MEMBER_ENDPOINT = MEMBERS_ENDPOINT + "/{id}";
+    public static final String SINGLE_MEMBER_ENDPOINT = MEMBERS_ENDPOINT + "/{id:\\d+}";
 
     @Autowired
     private MemberRepository memberRepository;

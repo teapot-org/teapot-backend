@@ -14,7 +14,7 @@ import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 public class TeapotPropertyController extends AbstractController {
 
     public static final String PROPERTIES_ENDPOINT = "/props";
-    public static final String SINGLE_PROPERTY_ENDPOINT = PROPERTIES_ENDPOINT + "/{id}";
+    public static final String SINGLE_PROPERTY_ENDPOINT = PROPERTIES_ENDPOINT + "/{id:\\d+}";
 
     @Autowired
     private TeapotPropertyRepository propertyRepository;

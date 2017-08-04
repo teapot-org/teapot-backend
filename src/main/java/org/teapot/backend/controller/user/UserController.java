@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class UserController extends AbstractController {
 
     public static final String USERS_ENDPOINT = "/users";
-    public static final String SINGLE_USER_ENDPOINT = USERS_ENDPOINT + "/{id}";
+    public static final String SINGLE_USER_ENDPOINT = USERS_ENDPOINT + "/{id:\\d+}";
 
     @Autowired
     private Environment env;
