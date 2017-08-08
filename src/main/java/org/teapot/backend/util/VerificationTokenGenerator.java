@@ -1,5 +1,6 @@
 package org.teapot.backend.util;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -11,16 +12,12 @@ import java.time.LocalDateTime;
 
 @Component
 @Profile("verification")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public final class VerificationTokenGenerator {
 
-    @Autowired
-    private TeapotPropertyRepository propertyRepository;
-
-    @Autowired
-    private VerificationTokenRepository tokenRepository;
-
-    @Autowired
-    private RandomSequenceGenerator sequenceGenerator;
+    private final TeapotPropertyRepository propertyRepository;
+    private final VerificationTokenRepository tokenRepository;
+    private final RandomSequenceGenerator sequenceGenerator;
 
     public VerificationToken generateToken() {
         VerificationToken token = new VerificationToken();

@@ -90,7 +90,9 @@ public class OwnerControllerIT extends AbstractControllerIT {
 
     @Test
     public void createOwnerTest() throws Exception {
-        mockMvc.perform(post(OWNERS_ENDPOINT))
+        mockMvc.perform(post(OWNERS_ENDPOINT)
+                .contentType(contentType)
+                .content(json(savedOrganization)))
                 .andExpect(status().isMethodNotAllowed());
     }
 

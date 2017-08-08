@@ -1,5 +1,6 @@
 package org.teapot.backend.config;
 
+import lombok.RequiredArgsConstructor;
 import org.h2.server.web.WebServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -7,10 +8,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.teapot.backend.model.kanban.Kanban;
-import org.teapot.backend.model.kanban.Project;
-import org.teapot.backend.model.kanban.Ticket;
-import org.teapot.backend.model.kanban.TicketList;
+import org.teapot.backend.model.kanban.*;
 import org.teapot.backend.model.meta.TeapotAction;
 import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.model.meta.TeapotResource;
@@ -22,7 +20,6 @@ import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.kanban.KanbanRepository;
 import org.teapot.backend.repository.kanban.ProjectRepository;
 import org.teapot.backend.repository.kanban.TicketListRepository;
-import org.teapot.backend.repository.kanban.TicketRepository;
 import org.teapot.backend.repository.meta.TeapotActionRepository;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 import org.teapot.backend.repository.meta.TeapotResourceRepository;
@@ -35,37 +32,18 @@ import java.util.Arrays;
 
 @Configuration
 @Profile("development")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DevelopmentProfileConfig {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TeapotPropertyRepository propertyRepository;
-
-    @Autowired
-    private TeapotActionRepository actionRepository;
-
-    @Autowired
-    private TeapotResourceRepository resourceRepository;
-
-    @Autowired
-    private OrganizationRepository organizationRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private KanbanRepository kanbanRepository;
-
-    @Autowired
-    private TicketListRepository ticketListRepository;
-
-    @Autowired
-    private TicketRepository ticketRepository;
+    private final UserRepository userRepository;
+    private final TeapotPropertyRepository propertyRepository;
+    private final TeapotActionRepository actionRepository;
+    private final TeapotResourceRepository resourceRepository;
+    private final OrganizationRepository organizationRepository;
+    private final MemberRepository memberRepository;
+    private final ProjectRepository projectRepository;
+    private final KanbanRepository kanbanRepository;
+    private final TicketListRepository ticketListRepository;
 
     @Bean
     ServletRegistrationBean h2ServletRegistrationBean() {
@@ -267,7 +245,7 @@ public class DevelopmentProfileConfig {
 
         kanbanRepository.save(new Kanban("kanban", userRepository.findByName("admin")));
         kanbanRepository.save(new Kanban("kanban1", organizationRepository.findByName("teapot")));
-        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
+        kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot"), KanbanAccess.PRIVATE));
         kanbanRepository.save(new Kanban("kanban3", organizationRepository.findByName("teapot")));
         kanbanRepository.save(new Kanban("kanban2", organizationRepository.findByName("teapot")));
     }

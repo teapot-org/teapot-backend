@@ -51,6 +51,12 @@ public class Kanban extends OwnerItem {
         setTitle(title);
     }
 
+    public Kanban(String title, Owner owner, KanbanAccess access) {
+        super(owner);
+        setTitle(title);
+        setAccess(access);
+    }
+
     public Kanban(String title, Owner owner, Project project) {
         this(title, owner);
         setProject(project);

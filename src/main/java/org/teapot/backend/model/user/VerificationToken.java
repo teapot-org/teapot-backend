@@ -3,7 +3,7 @@ package org.teapot.backend.model.user;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.teapot.backend.model.AbstractPersistable;
+import org.teapot.backend.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
-public class VerificationToken extends AbstractPersistable {
+public class VerificationToken extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 32, updatable = false)
     @Getter

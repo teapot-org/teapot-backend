@@ -1,4 +1,4 @@
-package org.teapot.backend.config.security;
+package org.teapot.backend.config.security.oauth2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

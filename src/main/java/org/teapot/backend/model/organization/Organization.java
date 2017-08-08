@@ -8,21 +8,17 @@ import org.teapot.backend.model.Owner;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @NoArgsConstructor
 public class Organization extends Owner {
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private String fullName;
 
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.REMOVE)
-    private Set<Member> members;
-
-    @Override
-    public String getType() {
-        return "organization";
-    }
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    @Getter @Setter
+    private Set<Member> members = new HashSet<>();
 }

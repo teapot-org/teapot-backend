@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class OwnerItem extends AbstractPersistable {
+public abstract class OwnerItem extends BaseEntity {
 
     @ManyToOne
     @Getter

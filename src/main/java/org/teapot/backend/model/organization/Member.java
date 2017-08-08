@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.teapot.backend.model.AbstractPersistable;
+import org.teapot.backend.model.BaseEntity;
 import org.teapot.backend.model.user.User;
 
 import javax.persistence.Entity;
@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Table(name = "organization_member")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member extends AbstractPersistable {
+public class Member extends BaseEntity {
 
     @ManyToOne(optional = false)
     @Getter

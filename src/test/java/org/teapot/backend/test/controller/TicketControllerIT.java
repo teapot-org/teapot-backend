@@ -129,13 +129,13 @@ public class TicketControllerIT extends AbstractControllerIT {
     public void getTicketByUser() throws Exception {
         mockMvc.perform(get(SINGLE_TICKET_ENDPOINT, savedTicket.getId())
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void getTicketByAnonymous() throws Exception {
         mockMvc.perform(get(SINGLE_TICKET_ENDPOINT, savedTicket.getId()))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk());
     }
 
     // POST

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.ResultActions;
 import org.teapot.backend.model.kanban.Kanban;
+import org.teapot.backend.model.kanban.KanbanAccess;
 import org.teapot.backend.model.kanban.TicketList;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
@@ -18,8 +19,10 @@ import org.teapot.backend.repository.organization.MemberRepository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -56,7 +59,7 @@ public class TicketListControllerIT extends AbstractControllerIT {
     private TicketList notSavedOrganizationTicketList = new TicketList("notsaved");
     private TicketListDto notSavedOrganizationTicketListDto;
 
-    private Kanban userKanban = new Kanban("testKanban2", owner);
+    private Kanban userKanban = new Kanban("testKanban2", owner, KanbanAccess.PRIVATE);
     private TicketList savedUserTicketList = new TicketList("teeest");
     private TicketList notSavedUserTicketList = new TicketList("teeest_notsaved");
     private TicketListDto notSavedUserTicketListDto;
@@ -93,7 +96,7 @@ public class TicketListControllerIT extends AbstractControllerIT {
         organizationKanban.addTicketList(savedOrganizationTicketList);
 
         userKanban.getContributors().add(kanbanContributor);
-        organizationKanban.addTicketList(savedUserTicketList);
+        userKanban.addTicketList(savedUserTicketList);
 
         kanbanRepository.save(Arrays.asList(organizationKanban, userKanban));
 
@@ -127,15 +130,27 @@ public class TicketListControllerIT extends AbstractControllerIT {
 
     @Test
     public void getTicketListsByUser() throws Exception {
+        List<TicketList> publicTicketLists = ticketListRepository.findAll().stream()
+                .filter(ticketList -> ticketList.getKanban().getAccess().equals(KanbanAccess.PUBLIC))
+                .collect(Collectors.toList());
+
         mockMvc.perform(get(TICKET_LISTS_ENDPOINT)
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$._embedded.ticketLists", hasSize(publicTicketLists.size())));
     }
 
     @Test
     public void getTicketListsByAnonymousTest() throws Exception {
+        List<TicketList> publicTicketLists = ticketListRepository.findAll().stream()
+                .filter(ticketList -> ticketList.getKanban().getAccess().equals(KanbanAccess.PUBLIC))
+                .collect(Collectors.toList());
+
         mockMvc.perform(get(TICKET_LISTS_ENDPOINT))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$._embedded.ticketLists", hasSize(publicTicketLists.size())));
     }
 
     @Test
@@ -162,7 +177,7 @@ public class TicketListControllerIT extends AbstractControllerIT {
     public void getOrganizationTicketListByWorker() throws Exception {
         mockMvc.perform(get(SINGLE_TICKET_LIST_ENDPOINT, savedOrganizationTicketList.getId())
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, workerAccessToken)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -179,13 +194,13 @@ public class TicketListControllerIT extends AbstractControllerIT {
     public void getOrganizationTicketListByUser() throws Exception {
         mockMvc.perform(get(SINGLE_TICKET_LIST_ENDPOINT, savedOrganizationTicketList.getId())
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void getOrganizationTicketListByAnonymous() throws Exception {
         mockMvc.perform(get(SINGLE_TICKET_LIST_ENDPOINT, savedOrganizationTicketList.getId()))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk());
     }
 
     @Test

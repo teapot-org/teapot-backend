@@ -1,5 +1,6 @@
 package org.teapot.backend.controller.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.teapot.backend.controller.AbstractController;
@@ -21,30 +21,30 @@ import org.teapot.backend.util.VerificationMailSender;
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import static org.teapot.backend.model.user.UserAuthority.ADMIN;
+import static org.teapot.backend.util.SecurityUtils.getAuthenticatedUser;
+
 @RepositoryRestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserController extends AbstractController {
 
     public static final String USERS_ENDPOINT = "/users";
     public static final String SINGLE_USER_ENDPOINT = USERS_ENDPOINT + "/{id:\\d+}";
 
-    @Autowired
-    private Environment env;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final Environment env;
+    private final UserRepository userRepository;
 
     @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
 
-    @PreAuthorize("isAnonymous() or hasRole('ADMIN')")
+    @PreAuthorize("canCreate(#resource?.content)")
     @PostMapping(USERS_ENDPOINT)
     public ResponseEntity<?> registerUser(
-            @RequestBody Resource<User> requestResource,
+            @RequestBody Resource<User> resource,
             PersistentEntityResourceAssembler assembler,
-            WebRequest request,
-            Authentication auth
+            WebRequest request
     ) {
-        User user = requestResource.getContent();
+        User user = resource.getContent();
 
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new DataIntegrityViolationException("Already exists");
@@ -54,7 +54,8 @@ public class UserController extends AbstractController {
                 .stream(env.getActiveProfiles())
                 .anyMatch("verification"::equalsIgnoreCase);
 
-        if ((auth == null) && isVerificationEnabled) {
+        User authenticatedUser = getAuthenticatedUser();
+        if ((authenticatedUser == null) && isVerificationEnabled) {
             user.setActivated(false);
             user = userRepository.save(user);
             verificationMailSender.createTokenAndSend(user, request.getLocale());
@@ -70,27 +71,7 @@ public class UserController extends AbstractController {
         return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(SINGLE_USER_ENDPOINT)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateUser(
-            @PathVariable Long id,
-            @RequestBody Resource<User> requestResource
-    ) {
-        User existingUser = userRepository.findOne(id);
-        if (existingUser == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        User user = requestResource.getContent();
-
-        user.setId(id);
-        user.setActivated(existingUser.getActivated());
-
-        userRepository.save(user);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @userRepository.findByEmail(authentication?.name)?.id == #id")
+    @PreAuthorize("canEdit(#id, 'User')")
     @PatchMapping(SINGLE_USER_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchUser(
@@ -103,15 +84,14 @@ public class UserController extends AbstractController {
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) UserAuthority authority,
             @RequestParam(required = false) LocalDate birthday,
-            @RequestParam(required = false) String description,
-            Authentication auth
+            @RequestParam(required = false) String description
     ) {
         User user = userRepository.findOne(id);
         if (user == null) {
             throw new ResourceNotFoundException();
         }
 
-        if (auth.getAuthorities().contains(UserAuthority.ADMIN)) {
+        if (ADMIN.equals(getAuthenticatedUser().getAuthority())) {
             if (name != null) user.setName(name);
             if (email != null) user.setEmail(email);
             if (password != null) user.setPassword(password);

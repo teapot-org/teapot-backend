@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.rest.core.annotation.RestResource;
-import org.teapot.backend.model.AbstractPersistable;
+import org.teapot.backend.model.BaseEntity;
 import org.teapot.backend.model.user.User;
 
 import javax.persistence.Entity;
@@ -16,7 +16,7 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
-public class Ticket extends AbstractPersistable {
+public class Ticket extends BaseEntity {
 
     @Getter
     @Setter

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.teapot.backend.model.AbstractPersistable;
+import org.teapot.backend.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Table(name = "property")
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeapotProperty extends AbstractPersistable {
+public class TeapotProperty extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     @Getter

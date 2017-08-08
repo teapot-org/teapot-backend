@@ -15,7 +15,7 @@ import java.util.Objects;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter
-public abstract class AbstractPersistable implements Persistable<Long> {
+public abstract class BaseEntity implements Persistable<Long> {
 
     @Id
     @GeneratedValue
@@ -54,7 +54,7 @@ public abstract class AbstractPersistable implements Persistable<Long> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final AbstractPersistable other = (AbstractPersistable) obj;
+        final BaseEntity other = (BaseEntity) obj;
         if (this.isNew() || other.isNew()) {
             return false;
         }

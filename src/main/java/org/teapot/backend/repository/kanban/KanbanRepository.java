@@ -2,9 +2,8 @@ package org.teapot.backend.repository.kanban;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RestResource;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.kanban.KanbanAccess;
@@ -15,13 +14,11 @@ import java.util.List;
 
 public interface KanbanRepository extends AbstractOwnerItemRepository<Kanban> {
 
+    String KANBAN_IS_PUBLIC = "resource.access = ?#{T(org.teapot.backend.model.kanban.KanbanAccess).PUBLIC}";
+    
     @Override
-    @PreAuthorize("@kanbans.isOwner(#id) or hasRole('ADMIN')")
-    void delete(@Param("id") Long id);
-
-    @Override
-    @PreAuthorize("@kanbans.isOwner(#entity) or hasRole('ADMIN')")
-    void delete(@Param("entity") Kanban entity);
+    @Query("select resource from Kanban resource where (" + KANBAN_IS_PUBLIC + " or " + HAS_ADMIN_ROLE + ")")
+    Page<Kanban> findAll(Pageable pageable);
 
     @RestResource(exported = false)
     List<Kanban> findByProject(Project project);

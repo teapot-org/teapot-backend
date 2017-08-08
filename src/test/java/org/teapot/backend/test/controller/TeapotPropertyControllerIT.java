@@ -105,14 +105,14 @@ public class TeapotPropertyControllerIT extends AbstractControllerIT {
     public void updateExistentPropertyTest() throws Exception {
         mockMvc.perform(put(SINGLE_PROPERTY_ENDPOINT, updateExistentProperty.getId())
                 .content(json(updateExistentProperty)).contentType(contentType))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
     public void updateNonexistentPropertyTest() throws Exception {
         mockMvc.perform(put(SINGLE_PROPERTY_ENDPOINT, 666)
                 .content(json(updateNonexistentProperty)).contentType(contentType))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test

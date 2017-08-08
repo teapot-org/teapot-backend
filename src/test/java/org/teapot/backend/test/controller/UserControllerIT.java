@@ -175,41 +175,13 @@ public class UserControllerIT extends AbstractControllerIT {
     // PUT
 
     @Test
-    public void updateUserTestByAnonymous() throws Exception {
-        mockMvc.perform(put(SINGLE_USER_ENDPOINT, savedUser.getId())
-                .content(json(savedUser))
-                .contentType(contentType))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void updateUserTestByUser() throws Exception {
-        mockMvc.perform(put(SINGLE_USER_ENDPOINT, savedUser.getId())
-                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken))
-                .content(json(savedUser))
-                .contentType(contentType))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     public void updateUserTestByAdmin() throws Exception {
         savedUser.setBirthday(LocalDate.now());
         mockMvc.perform(put(SINGLE_USER_ENDPOINT, savedUser.getId())
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken))
                 .content(json(savedUser))
                 .contentType(contentType))
-                .andExpect(status().isNoContent());
-
-        assertEquals(savedUser, userRepository.getOne(savedUser.getId()));
-    }
-
-    @Test
-    public void updateNotExistsUserTestByAdmin() throws Exception {
-        mockMvc.perform(put(SINGLE_USER_ENDPOINT, -1)
-                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken))
-                .content(json(notSavedUser))
-                .contentType(contentType))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMethodNotAllowed());
     }
 
     // DELETE
@@ -229,7 +201,7 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void deleteUserTestByAdmin() throws Exception {
-        assertNotNull(userRepository.getOne(savedUser.getId()));
+        assertNotNull(userRepository.findOne(savedUser.getId()));
 
         mockMvc.perform(delete(SINGLE_USER_ENDPOINT, savedUser.getId())
                 .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken)))
