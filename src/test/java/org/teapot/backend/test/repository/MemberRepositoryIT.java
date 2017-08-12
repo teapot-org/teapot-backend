@@ -32,7 +32,7 @@ public class MemberRepositoryIT extends AbstractIT {
 
     @Before
     public void setup() {
-        memberRepository.deleteAllInBatch();
+        memberRepository.deleteAll();
 
         testOrganization.setName("memberRepositoryTestOrg");
         organizationRepository.save(testOrganization);
@@ -50,10 +50,7 @@ public class MemberRepositoryIT extends AbstractIT {
 
     @Test
     public void findByStatusTest() {
-        assertEquals(asList(testMember), memberRepository.findByStatus(
-                MemberStatus.CREATOR,
-                null
-        ).getContent());
+        assertEquals(asList(testMember), memberRepository.findByStatus(MemberStatus.CREATOR));
     }
 
     @Test

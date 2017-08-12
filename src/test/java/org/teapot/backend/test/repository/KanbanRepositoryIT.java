@@ -37,10 +37,4 @@ public class KanbanRepositoryIT extends AbstractIT {
         assertEquals(Arrays.asList(kanban),
                 kanbanRepository.findByOwnerId(owner.getId(), null).getContent());
     }
-
-    @Test
-    public void findByOwnerNameTest() {
-        assertEquals(Arrays.asList(kanban),
-                kanbanRepository.findByOwnerName(owner.getName(), null).getContent());
-    }
 }

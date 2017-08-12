@@ -54,8 +54,7 @@ public class OrganizationControllerIT extends AbstractControllerIT {
     }
 
     @Before
-    public void addTestDate() throws Exception {
-
+    public void addTestData() throws Exception {
         savedOrganization.setName("OrganizationControllerTest1");
         organizationRepository.save(savedOrganization);
 

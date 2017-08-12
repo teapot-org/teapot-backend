@@ -10,7 +10,7 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
-public abstract class Owner extends AbstractPersistable {
+public abstract class Owner extends BaseEntity {
 
     @Column(unique = true, nullable = false, length = 32)
     @Getter
@@ -31,5 +31,7 @@ public abstract class Owner extends AbstractPersistable {
         }
     }
 
-    public abstract String getType();
+    public final String getType() {
+        return getClass().getSimpleName();
+    }
 }

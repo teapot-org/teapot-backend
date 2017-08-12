@@ -1,5 +1,6 @@
 package org.teapot.backend.controller.meta;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -19,16 +20,12 @@ import java.util.Arrays;
 
 @Controller
 @RequestMapping("/actions")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TeapotActionController {
 
-    @Autowired
-    private Environment env;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private VerificationTokenRepository tokenRepository;
+    private final Environment env;
+    private final UserRepository userRepository;
+    private final VerificationTokenRepository tokenRepository;
 
     @Autowired(required = false)
     private VerificationMailSender verificationMailSender;

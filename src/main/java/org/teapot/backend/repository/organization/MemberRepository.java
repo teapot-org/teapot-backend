@@ -2,38 +2,20 @@ package org.teapot.backend.repository.organization;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.teapot.backend.model.organization.Member;
 import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
+import org.teapot.backend.repository.BaseEntityRepository;
 
 import java.util.List;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
-
-    @Override
-    @PreAuthorize("@members.hasAnyStatus(#id, 'CREATOR', 'OWNER') " +
-            "and !@members.memberHasStatus(#id, 'CREATOR') " +
-            "or @users.isLoggedUser(@memberRepository.findOne(#id)?.user?.id) and !@members.memberHasStatus(#id, 'CREATOR') " +
-            "or hasRole('ADMIN')")
-    void delete(@Param("id") Long id);
-
-    @Override
-    @PreAuthorize("@members.hasAnyStatus(#member, 'CREATOR', 'OWNER') " +
-            "and !@members.memberHasStatus(#member, 'CREATOR') " +
-            "or @users.isLoggedUser(#member?.user?.id)  and !@members.memberHasStatus(#member, 'CREATOR') " +
-            "or hasRole('ADMIN')")
-    void delete(@Param("member") Member member);
+public interface MemberRepository extends BaseEntityRepository<Member> {
 
     @RestResource(exported = false)
     List<Member> findByStatus(MemberStatus status);
-
-    @RestResource(path = "find-by-status")
-    Page<Member> findByStatus(@Param("status") MemberStatus status, Pageable pageable);
 
     @RestResource(exported = false)
     List<Member> findByOrganizationAndStatus(Organization organization, MemberStatus status);

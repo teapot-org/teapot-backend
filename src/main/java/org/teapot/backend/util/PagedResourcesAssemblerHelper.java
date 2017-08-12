@@ -1,5 +1,6 @@
 package org.teapot.backend.util;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
@@ -12,10 +13,10 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PagedResourcesAssemblerHelper<T> {
 
-    @Autowired
-    private PagedResourcesAssembler<T> pagedResourcesAssembler;
+    private final PagedResourcesAssembler<T> pagedResourcesAssembler;
 
     public PagedResources toResource(Class<T> clazz, Page<T> page, PersistentEntityResourceAssembler assembler) {
         PagedResources resources = pagedResourcesAssembler.toResource(page, assembler::toResource);

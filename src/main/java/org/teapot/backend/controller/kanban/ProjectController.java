@@ -1,5 +1,6 @@
 package org.teapot.backend.controller.kanban;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,19 +18,15 @@ import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
 
 @RepositoryRestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ProjectController {
 
     public static final String PROJECTS_ENDPOINT = "/projects";
-    public static final String SINGLE_PROJECT_ENDPOINT = PROJECTS_ENDPOINT + "/{id}";
+    public static final String SINGLE_PROJECT_ENDPOINT = PROJECTS_ENDPOINT + "/{id:\\d+}";
 
-    @Autowired
-    private PagedResourcesAssemblerHelper<Project> helper;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private OwnerRepository ownerRepository;
+    private final PagedResourcesAssemblerHelper<Project> helper;
+    private final ProjectRepository projectRepository;
+    private final OwnerRepository ownerRepository;
 
     @GetMapping(SINGLE_OWNER_ENDPOINT + PROJECTS_ENDPOINT)
     public ResponseEntity<?> getOwnerProjects(

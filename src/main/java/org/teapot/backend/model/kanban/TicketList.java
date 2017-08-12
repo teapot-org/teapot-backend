@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.teapot.backend.model.AbstractPersistable;
+import org.teapot.backend.model.BaseEntity;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Entity
 @NoArgsConstructor
-public class TicketList extends AbstractPersistable {
+public class TicketList extends BaseEntity {
 
     @Getter
     @Setter

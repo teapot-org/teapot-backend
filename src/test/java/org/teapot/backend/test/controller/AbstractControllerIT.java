@@ -21,7 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.teapot.backend.model.AbstractPersistable;
+import org.teapot.backend.model.BaseEntity;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.user.UserRepository;
@@ -128,7 +128,7 @@ public abstract class AbstractControllerIT extends AbstractIT {
         userAccessToken = obtainAccessToken(userWithUserRole.getEmail(), "pass");
     }
 
-    protected String linkFor(AbstractPersistable object) {
+    protected String linkFor(BaseEntity object) {
         return (object == null) || object.isNew()
                 ? null
                 : entityLinks.linkToSingleResource(object.getClass(), object.getId()).getHref();
