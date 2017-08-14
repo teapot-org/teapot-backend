@@ -37,7 +37,6 @@ public class VerificationMailSender {
             VerificationToken verificationToken = generator.generateToken();
             verificationToken.setUser(user);
             tokenRepository.save(verificationToken);
-            user.setVerificationToken(verificationToken);
 
             String confirmUrl = "https://"
                     + propertyRepository.findByName("site-uri").getValue()

@@ -1,392 +1,63 @@
 package org.teapot.backend.controller.organization;
 
-import com.google.common.primitives.Longs;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.teapot.backend.controller.exception.BadRequestException;
-import org.teapot.backend.controller.exception.ForbiddenException;
-import org.teapot.backend.controller.exception.ResourceNotFoundException;
+import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.organization.Member;
-import org.teapot.backend.model.organization.MemberStatus;
 import org.teapot.backend.model.organization.Organization;
-import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.organization.MemberRepository;
 import org.teapot.backend.repository.organization.OrganizationRepository;
-import org.teapot.backend.repository.user.UserRepository;
-import org.teapot.backend.service.MemberService;
+import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 
-import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import static org.teapot.backend.controller.user.UserController.SINGLE_USER_ENDPOINT;
 
-import static java.util.Optional.ofNullable;
+@RepositoryRestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class OrganizationController extends AbstractController {
 
-@RestController
-@RequestMapping("/organizations")
-public class OrganizationController {
+    public static final String ORGANIZATIONS_ENDPOINT = "/organizations";
+    public static final String SINGLE_ORGANIZATION_ENDPOINT = ORGANIZATIONS_ENDPOINT + "/{id:\\d+}";
 
-    @Autowired
-    private UserRepository userRepository;
+    private final PagedResourcesAssemblerHelper<Organization> helper;
+    private final OrganizationRepository organizationRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private OrganizationRepository organizationRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private MemberService memberService;
-
-    private Organization findOrganizationByIdOrName(String idOrName) {
-        Long id = Longs.tryParse(idOrName);
-        return ofNullable((id != null)
-                ? organizationRepository.findOne(id)
-                : organizationRepository.findByName(idOrName))
-                .orElseThrow(ResourceNotFoundException::new);
-    }
-
-    /**
-     * GET /organizations
-     * ?[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
-     * <p>
-     * Доступен всем пользователям.
-     * Возвращает список всех организаций (или не всех, при указании параметров в запросе).
-     * <p>
-     * Возможные коды состояний:
-     * 200 OK
-     */
-    @GetMapping
-    public List<Organization> getOrganizations(Pageable pageable) {
-        return organizationRepository.findAll(pageable).getContent();
-    }
-
-    /**
-     * GET /organizations
-     * ?user(number|string)&[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
-     * <p>
-     * Доступен всем пользователям
-     * Возвращает список организаций, в которых состоит пользователь с указанным id или username.
-     * <p>
-     * Возможные коды состояний:
-     * 200 OK
-     * 404 Not Found
-     */
-    @GetMapping(params = "user")
-    public List<Organization> getOrganizationsOfUser(
-            @RequestParam("user") String idOrUsername,
-            Pageable pageable
+    @GetMapping(SINGLE_USER_ENDPOINT + ORGANIZATIONS_ENDPOINT)
+    public ResponseEntity<PagedResources> getUserOrganizations(
+            @PathVariable Long id,
+            Pageable pageable,
+            PersistentEntityResourceAssembler assembler
     ) {
-        Long id = Longs.tryParse(idOrUsername);
-        User user = ofNullable((id != null)
-                ? userRepository.findOne(id)
-                : userRepository.findByName(idOrUsername))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        return memberRepository.findByUser(user, pageable)
-                .stream()
-                .map(Member::getOrganization)
-                .collect(Collectors.toList());
+        Page<Organization> page = memberRepository.findByUserId(id, pageable).map(Member::getOrganization);
+        return ResponseEntity.ok(helper.toResource(Organization.class, page, assembler));
     }
 
-    /**
-     * GET /organizations/{idOrName}
-     * <p>
-     * Доступен всем пользователям.
-     * Возвращает организацию с указанным id или name.
-     * <p>
-     * Возможные коды состояний:
-     * 200 OK
-     * 404 Not Found
-     */
-    @GetMapping("/{idOrName:.+}")
-    public Organization getOrganization(
-            @PathVariable String idOrName
-    ) {
-        Organization organization = findOrganizationByIdOrName(idOrName);
-        if (organization == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        return organization;
-    }
-
-    /**
-     * DELETE /organizations/{id}
-     * <p>
-     * Доступен администраторам или создателю организации.
-     * Удаляет организацию с указанным id.
-     * <p>
-     * Возможные коды состояний:
-     * 204 No Content
-     * 401 Unauthorized
-     * 403 Forbidden
-     * 404 Not Found
-     */
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreator(#organizationId, authentication?.name)")
-    @DeleteMapping("/{organizationId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteOrganization(
-            @PathVariable Long organizationId
-    ) {
-        Organization organization = ofNullable(organizationRepository.findOne(organizationId))
-                .orElseThrow(ResourceNotFoundException::new);
-        organizationRepository.delete(organization);
-    }
-
-    /**
-     * POST /organizations
-     * Тело запроса:
-     * {
-     * "name": "название",
-     * "fillName": "полное название" (не обязательно)
-     * }
-     * <p>
-     * Метод доступен всем авторизованным пользователям.
-     * Создает новую организацию с указанными данными. Устаналивает пользователя, выполнившего запрос, создателем
-     * организации. Устаналивает заголовок Location и возвращает созданную организацию.
-     * <p>
-     * Возможные коды состояний:
-     * 201 Created
-     * 400 Bad Request
-     * 401 Unauthorized
-     */
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Organization createOrganization(
-            @RequestBody Organization organization,
-            HttpServletResponse response,
-            Authentication auth
-    ) {
-        if (organizationRepository.findByName(organization.getName()) != null) {
-            throw new BadRequestException();
-        }
-
-        organization.setRegistrationDateTime(LocalDateTime.now());
-        organizationRepository.saveAndFlush(organization);
-
-        Member creator = new Member();
-        creator.setAdmissionDate(LocalDate.now());
-        creator.setOrganization(organization);
-        creator.setStatus(MemberStatus.CREATOR);
-        creator.setUser(userRepository.findByEmail(auth.getName()));
-        memberRepository.save(creator);
-        organization.getMembers().add(creator);
-
-        response.setHeader(HttpHeaders.LOCATION,
-                "/organizations/" + organization.getId());
-        return organization;
-    }
-
-    /**
-     * PATCH /organizations/{id}
-     * ?[name(string)]&[fullName(string)]
-     * <p>
-     * Доступен администраторам, создателю организации и владельцам организации.
-     * Изменяет name и fullName организации, если соответсвующие параметры указаны.
-     * <p>
-     * Возможные коды состояний:
-     * 204 No Content
-     * 401 Unauthorized
-     * 403 Forbidden
-     * 404 Not Found
-     */
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#id, authentication?.name)")
-    @PatchMapping("/{id}")
+    @PreAuthorize("canEdit(#id, 'Organization')")
+    @PatchMapping(SINGLE_ORGANIZATION_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void patchOrganization(
             @PathVariable Long id,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String fullName,
-            Authentication auth
+            @RequestParam(required = false) String fullName
     ) {
-        Organization organization = ofNullable(organizationRepository.findOne(id))
-                .orElseThrow(ResourceNotFoundException::new);
+        Organization organization = organizationRepository.findOne(id);
+        if (organization == null) {
+            throw new ResourceNotFoundException();
+        }
 
         if (name != null) organization.setName(name);
         if (fullName != null) organization.setFullName(fullName);
 
         organizationRepository.save(organization);
-    }
-
-    /**
-     * GET /organizations/{organizationId}/members
-     * ?[pageNumber(number)]&[pageSize(number)]&[offset(number)]&[sort(string)]
-     * <p>
-     * Доступен всем пользователям.
-     * Возвращает список всех участников организации (или не всех, при указании параметров в запросе).
-     * <p>
-     * Возможные коды состояний:
-     * 200 OK
-     * 404 Not Found
-     */
-    @GetMapping("/{organizationIdOrName}/members")
-    public List<Member> getOrganizationMembers(
-            @PathVariable String organizationIdOrName,
-            Pageable pageable
-    ) {
-        Organization organization = ofNullable(
-                findOrganizationByIdOrName(organizationIdOrName))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        return memberRepository
-                .findAllByOrganization(organization, pageable)
-                .getContent();
-    }
-
-    /**
-     * GET /organizations/{organizationId}/members/{memberId}
-     * <p>
-     * <p>
-     * Доступен администраторам, создателю и владельцам организации.
-     * Возвращает участника memberId организации organizationId.
-     * <p>
-     * Возможные коды состояний:
-     * 200 OK
-     * 404 Not Found
-     */
-    @GetMapping("/{organizationIdOrName}/members/{memberId}")
-    public Member getOrganizationMember(
-            @PathVariable String organizationIdOrName,
-            @PathVariable Long memberId,
-            Authentication auth
-    ) {
-
-        Organization organization = ofNullable(
-                findOrganizationByIdOrName(organizationIdOrName))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        return ofNullable(memberRepository
-                .findByOrganizationAndId(organization, memberId))
-                .orElseThrow(ResourceNotFoundException::new);
-    }
-
-    /**
-     * POST /organizations/{organizationId}/members
-     * Тело запроса:
-     * {
-     * "status": "статус",
-     * "userId": 123
-     * }
-     * <p>
-     * Доступен только администраторам.
-     * Добавляет в организацию участника с полученными данными. Нельзя добавить участника со статусом создателя, так
-     * как создатель может быть только один.
-     * <p>
-     * Возможные коды состояний:
-     * 201 Created
-     * 400 Bad Request
-     * 401 Unauthorized
-     * 403 Forbidden
-     * 404 Not Found
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{organizationId}/members")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Member addMember(
-            @PathVariable Long organizationId,
-            @RequestBody Member member,
-            HttpServletResponse response
-    ) {
-        Organization organization = ofNullable(
-                organizationRepository.findOne(organizationId))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        if (memberRepository.findByOrganizationAndUser(organization,
-                member.getUser()) != null) {
-            throw new BadRequestException();
-        }
-
-        member.setAdmissionDate(LocalDate.now());
-        member.setOrganization(organization);
-        if (member.getStatus().equals(MemberStatus.CREATOR)) {
-            // нельзя добавить нового создателя организации
-            member.setStatus(MemberStatus.OWNER);
-        }
-        memberRepository.save(member);
-
-        response.setHeader(HttpHeaders.LOCATION,
-                String.format("/organizations/%d/members/%d",
-                        organizationId, member.getId()));
-        return member;
-    }
-
-    /**
-     * PATCH /organizations/{organizationId}/members/{memberId}
-     * ?status(string)
-     * <p>
-     * Доступен администраторам, создателю и владельцам организации.
-     * Изменяет статус участника. Нельзя изменить статус создателя и статус другого участника на статус создателя.
-     * <p>
-     * Возможные коды состояний:
-     * 204 No Content
-     * 401 Unauthorized
-     * 403 Forbidden
-     * 404 Not Found
-     */
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#organizationId, authentication?.name)")
-    @PatchMapping("/{organizationId}/members/{memberId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void patchMember(
-            @PathVariable Long organizationId,
-            @PathVariable Long memberId,
-            @RequestParam("status") MemberStatus newStatus
-    ) {
-        Organization organization = ofNullable(
-                organizationRepository.findOne(organizationId))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        Member member = ofNullable(memberRepository
-                .findByOrganizationAndId(organization, memberId))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        if (member.getStatus().equals(MemberStatus.CREATOR)
-                || newStatus.equals(MemberStatus.CREATOR)) {
-            throw new ForbiddenException();
-        }
-
-        member.setStatus(newStatus);
-        memberRepository.save(member);
-    }
-
-    /**
-     * DELETE /organizations/{organizationId}/members/{memberId}
-     * <p>
-     * Доступен администраторам, создателю и владельцам организации.
-     * Удаляет участника memberId из организации organizationId.
-     * <p>
-     * Возможные коды состояний:
-     * 204 No Content
-     * 401 Unauthorized
-     * 403 Forbidden
-     * 404 Not Found
-     */
-    @PreAuthorize("hasRole('ADMIN') or @memberService.isCreatorOrOwner(#organizationId, authentication.name)")
-    @DeleteMapping("/{organizationId}/members/{memberId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteMember(
-            @PathVariable Long organizationId,
-            @PathVariable Long memberId
-    ) {
-        Organization organization = ofNullable(
-                organizationRepository.findOne(organizationId))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        Member member = ofNullable(memberRepository
-                .findByOrganizationAndId(organization, memberId))
-                .orElseThrow(ResourceNotFoundException::new);
-
-        if (member.getStatus().equals(MemberStatus.CREATOR)) {
-            throw new ForbiddenException();
-        }
-
-        memberRepository.delete(member);
     }
 }

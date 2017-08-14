@@ -1,75 +1,41 @@
 package org.teapot.backend.controller.meta;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.teapot.backend.controller.exception.BadRequestException;
-import org.teapot.backend.controller.exception.ResourceNotFoundException;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.meta.TeapotProperty;
 import org.teapot.backend.repository.meta.TeapotPropertyRepository;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+@RepositoryRestController
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class TeapotPropertyController extends AbstractController {
 
-@RestController
-@RequestMapping("/props")
-public class TeapotPropertyController {
+    public static final String PROPERTIES_ENDPOINT = "/props";
+    public static final String SINGLE_PROPERTY_ENDPOINT = PROPERTIES_ENDPOINT + "/{id:\\d+}";
 
-    @Autowired
-    private TeapotPropertyRepository propertyRepository;
+    private final TeapotPropertyRepository propertyRepository;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TeapotProperty addProperty(@RequestBody TeapotProperty property,
-                                      HttpServletResponse response) {
-
-        if (propertyRepository.findByName(property.getName()) != null) {
-            throw new BadRequestException();
-        }
-
-        property = propertyRepository.save(property);
-        response.setHeader("Location", "/props/" + property.getId());
-
-        return property;
-    }
-
-    @GetMapping("/{propertyId}")
-    public TeapotProperty getPropertyById(@PathVariable Long propertyId) {
-        TeapotProperty property = propertyRepository.findOne(propertyId);
-
-        if (property == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        return property;
-    }
-
-    @GetMapping
-    public List<TeapotProperty> getProperties(Pageable pageable) {
-        return propertyRepository.findAll(pageable).getContent();
-    }
-
-    @PutMapping("/{propertyId}")
+    @PutMapping(SINGLE_PROPERTY_ENDPOINT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateUser(@PathVariable Long propertyId,
-                           @RequestBody TeapotProperty property) {
-
-        if (!propertyRepository.exists(propertyId)) {
+    public void updateProperty(
+            @PathVariable Long id,
+            @RequestBody Resource<TeapotProperty> requestResource
+    ) {
+        if (!propertyRepository.exists(id)) {
             throw new ResourceNotFoundException();
         }
 
-        property.setId(propertyId);
+        TeapotProperty property = requestResource.getContent();
+
+        property.setId(id);
         propertyRepository.save(property);
-    }
-
-    @DeleteMapping("/{propertyId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long propertyId) {
-        if (!propertyRepository.exists(propertyId)) {
-            throw new ResourceNotFoundException();
-        }
-
-        propertyRepository.delete(propertyId);
     }
 }

@@ -1,12 +1,13 @@
 package org.teapot.backend.repository.user;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.AbstractOwnerRepository;
 
-import javax.transaction.Transactional;
+public interface UserRepository extends AbstractOwnerRepository<User>, JpaSpecificationExecutor<User> {
 
-@Transactional
-public interface UserRepository extends AbstractOwnerRepository<User> {
-
-    User findByEmail(String email);
+    @RestResource(path = "find-by-email")
+    User findByEmail(@Param("email") String email);
 }

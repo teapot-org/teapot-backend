@@ -1,6 +1,10 @@
 package org.teapot.backend.model.meta;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.teapot.backend.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,47 +13,23 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "resource")
-public class TeapotResource extends AbstractPersistable<Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+public class TeapotResource extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 32)
+    @Getter
+    @Setter
     private String name;
 
     @Column(nullable = false, unique = true)
+    @Getter
+    @Setter
     private String uri;
 
     @Lob
     @Column(length = 512)
+    @Getter
+    @Setter
     private String description;
-
-    public TeapotResource() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @Override
-    public void setId(Long id) {
-        super.setId(id);
-    }
 }

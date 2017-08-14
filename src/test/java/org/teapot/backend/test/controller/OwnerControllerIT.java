@@ -3,96 +3,114 @@ package org.teapot.backend.test.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.ResultActions;
 import org.teapot.backend.model.Owner;
 import org.teapot.backend.model.organization.Organization;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.repository.OwnerRepository;
-import org.teapot.backend.repository.organization.OrganizationRepository;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.teapot.backend.controller.OwnerController.OWNERS_ENDPOINT;
+import static org.teapot.backend.controller.OwnerController.SINGLE_OWNER_ENDPOINT;
+import static org.teapot.backend.test.controller.OrganizationControllerIT.isOrganizationJsonAsExpected;
 
 public class OwnerControllerIT extends AbstractControllerIT {
 
-    private static final String API_URL = "/owners";
+    private static final String FIND_OWNER_BY_NAME_ENDPOINT = OWNERS_ENDPOINT + "/search/find-by-name";
 
     @Autowired
     private OwnerRepository ownerRepository;
 
-    @Autowired
-    private OrganizationRepository organizationRepository;
-
-    private User getOwnerUser = new User();
-    private Organization getOwnerOrganization = new Organization();
+    private User savedUser = new User();
+    private Organization savedOrganization = new Organization();
+    private Organization notSavedOrganization = new Organization();
+    private List<Owner> allOwners;
 
     @Before
     public void addTestUsers() {
-        getOwnerUser.setName("getOwnerUser");
-        getOwnerUser.setEmail("getOwnerUser@mail.com");
-        getOwnerUser.setPassword("pass");
-        userRepository.save(getOwnerUser);
+        savedUser.setName("OwnerControllerTestUser");
+        savedUser.setEmail("OwnerControllerTestUser@mail");
+        savedUser.setPassword("pass");
+        savedUser.setFirstName("OwnerControllerTestUser");
+        savedUser.setLastName("OwnerControllerTestUser");
+        savedUser.setDescription("OwnerControllerTestUser");
 
-        getOwnerOrganization.setName("getUserTwo");
-        organizationRepository.save(getOwnerOrganization);
+        savedOrganization.setName("OwnerControllerTestOrg1");
+        savedOrganization.setFullName("OwnerControllerTestOrg1");
+        ownerRepository.save(savedOrganization);
+
+        notSavedOrganization.setName("OwnerControllerTestOrg2");
+
+        allOwners = ownerRepository.findAll();
     }
-
-    // GET
 
     @Test
     public void getOwnersTest() throws Exception {
-        List<Owner> all = ownerRepository.findAll();
-        mockMvc.perform(get(API_URL))
+        mockMvc.perform(get(OWNERS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(all.size())))
-                .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
-//                .andExpect(jsonPath("$[0].name", is(all.get(0).getName())))
-                .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())));
-//                .andExpect(jsonPath("$[1].name", is(all.get(1).getName())));
+                .andExpect(jsonPath("$._embedded.owners", hasSize(allOwners.size())));
     }
 
     @Test
-    public void getSingleOwnerUserByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%d", API_URL, getOwnerUser.getId())))
+    public void getSingleOwnerByIdTest() throws Exception {
+        ResultActions result = mockMvc.perform(get(SINGLE_OWNER_ENDPOINT, savedOrganization.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getOwnerUser.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getOwnerUser.getName())))
-                .andExpect(jsonPath("$.email", is(getOwnerUser.getEmail())));
-    }
+                .andExpect(content().contentType(contentType));
 
-    @Test
-    public void getSingleOwnerOrganizationByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%d", API_URL, getOwnerOrganization.getId())))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getOwnerOrganization.getId().intValue())))
-                .andExpect(jsonPath("$.name", is(getOwnerOrganization.getName())));
+        isOrganizationJsonAsExpected(result, "$", savedOrganization);
     }
 
     @Test
     public void getNotExistsOwnerByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/-1", API_URL)))
+        mockMvc.perform(get(SINGLE_OWNER_ENDPOINT, -1))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void getSingleOwnerByNameTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, getOwnerUser.getName())))
+        ResultActions result = mockMvc.perform(get(FIND_OWNER_BY_NAME_ENDPOINT)
+                .param("name", savedOrganization.getName()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getOwnerUser.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getOwnerUser.getName())))
-                .andExpect(jsonPath("$.email", is(getOwnerUser.getEmail())));
+                .andExpect(content().contentType(contentType));
+
+        isOrganizationJsonAsExpected(result, "$", savedOrganization);
     }
 
     @Test
     public void getNotExistsOwnerByNameTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, "not_exists")))
+        mockMvc.perform(get(FIND_OWNER_BY_NAME_ENDPOINT)
+                .param("name", notSavedOrganization.getName()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void createOwnerTest() throws Exception {
+        mockMvc.perform(post(OWNERS_ENDPOINT)
+                .contentType(contentType)
+                .content(json(savedOrganization)))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void updateOwnerTest() throws Exception {
+        mockMvc.perform(put(SINGLE_OWNER_ENDPOINT, savedOrganization.getId()))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void deleteOwnerTest() throws Exception {
+        mockMvc.perform(delete(SINGLE_OWNER_ENDPOINT, savedOrganization.getId()))
+                .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void patchOwnerTest() throws Exception {
+        mockMvc.perform(patch(SINGLE_OWNER_ENDPOINT, savedOrganization.getId()))
+                .andExpect(status().isMethodNotAllowed());
     }
 }

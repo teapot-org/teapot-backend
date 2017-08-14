@@ -1,91 +1,35 @@
 package org.teapot.backend.model.organization;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.teapot.backend.model.AbstractPersistable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.teapot.backend.model.BaseEntity;
 import org.teapot.backend.model.user.User;
-import org.teapot.backend.util.deser.MemberDeserializer;
-import org.teapot.backend.util.ser.MemberSerializer;
 
-import javax.persistence.*;
-import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "organization_member")
-@JsonSerialize(using = MemberSerializer.class)
-@JsonDeserialize(using = MemberDeserializer.class)
-public class Member extends AbstractPersistable<Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Member extends BaseEntity {
 
     @ManyToOne(optional = false)
+    @Getter
+    @Setter
     private User user;
 
     @Enumerated
+    @Getter
+    @Setter
     private MemberStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
+    @Getter
+    @Setter
     private Organization organization;
-
-    private LocalDate admissionDate;
-
-    public Member() {
-    }
-
-    public Member(User user,
-                  MemberStatus status,
-                  Organization organization,
-                  LocalDate admissionDate) {
-        setUser(user);
-        setStatus(status);
-        setOrganization(organization);
-        setAdmissionDate(admissionDate);
-    }
-
-    public Member(Long id,
-                  User user,
-                  MemberStatus status,
-                  Organization organization,
-                  LocalDate admissionDate) {
-        setId(id);
-        setUser(user);
-        setStatus(status);
-        setOrganization(organization);
-        setAdmissionDate(admissionDate);
-    }
-
-    @Override
-    public void setId(Long id) {
-        super.setId(id);
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public MemberStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(MemberStatus status) {
-        this.status = status;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
-    }
-
-    public LocalDate getAdmissionDate() {
-        return admissionDate;
-    }
-
-    public void setAdmissionDate(LocalDate admissionDate) {
-        this.admissionDate = admissionDate;
-    }
 }

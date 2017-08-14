@@ -1,7 +1,5 @@
 package org.teapot.backend.test.repository;
 
-import org.assertj.core.util.Lists;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +12,8 @@ import org.teapot.backend.repository.organization.OrganizationRepository;
 import org.teapot.backend.repository.user.UserRepository;
 import org.teapot.backend.test.AbstractIT;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
 
 public class MemberRepositoryIT extends AbstractIT {
 
@@ -29,97 +26,169 @@ public class MemberRepositoryIT extends AbstractIT {
     @Autowired
     private UserRepository userRepository;
 
-    private Organization memberRepositoryTestOrg = new Organization();
-    private Organization findByUserTestOrg = new Organization();
-    private User user1;
-    private User user2;
-    private Member member1;
-    private Member member2;
-    private Member member3;
+    private Organization testOrganization = new Organization();
+    private User testUser = new User();
+    private Member testMember = new Member();
 
     @Before
     public void setup() {
-        memberRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
-        organizationRepository.deleteAllInBatch();
+        memberRepository.deleteAll();
 
-        memberRepositoryTestOrg.setName("memberRepositoryTestOrg");
-        memberRepositoryTestOrg.setRegistrationDateTime(LocalDateTime.now());
-        organizationRepository.save(memberRepositoryTestOrg);
+        testOrganization.setName("memberRepositoryTestOrg");
+        organizationRepository.save(testOrganization);
 
-        findByUserTestOrg.setName("findByUserTestOrg");
-        organizationRepository.save(findByUserTestOrg);
+        testUser.setName("memberRepositoryTestOrgUser");
+        testUser.setEmail("memberRepositoryTestOrgUser@mail");
+        testUser.setPassword("pass");
+        userRepository.save(testUser);
 
-        user1 = new User();
-        user1.setName("u1");
-        user1.setEmail("u1@email.com");
-        user1.setPassword("pass");
-        userRepository.save(user1);
-
-        member1 = new Member();
-        member1.setOrganization(memberRepositoryTestOrg);
-        member1.setAdmissionDate(LocalDate.now());
-        member1.setStatus(MemberStatus.CREATOR);
-        member1.setUser(user1);
-        memberRepository.save(member1);
-
-        user2 = new User();
-        user2.setName("u2");
-        user2.setEmail("u2@email.com");
-        user2.setPassword("pass");
-        userRepository.save(user2);
-
-        member2 = new Member();
-        member2.setOrganization(memberRepositoryTestOrg);
-        member2.setAdmissionDate(LocalDate.now());
-        member2.setStatus(MemberStatus.WORKER);
-        member2.setUser(user2);
-        memberRepository.save(member2);
-
-        member3 = new Member();
-        member3.setOrganization(findByUserTestOrg);
-        member3.setAdmissionDate(LocalDate.now());
-        member3.setStatus(MemberStatus.CREATOR);
-        member3.setUser(user1);
-        memberRepository.save(member3);
+        testMember.setUser(testUser);
+        testMember.setStatus(MemberStatus.CREATOR);
+        testMember.setOrganization(testOrganization);
+        memberRepository.save(testMember);
     }
 
     @Test
-    public void findAllByOrganizationTest() {
-        Assert.assertEquals(Arrays.asList(member1, member2),
-                memberRepository.findAllByOrganization(memberRepositoryTestOrg));
+    public void findByStatusTest() {
+        assertEquals(asList(testMember), memberRepository.findByStatus(MemberStatus.CREATOR));
     }
 
     @Test
-    public void findByOrganizationAndIdTest() {
-        Assert.assertEquals(member1, memberRepository
-                .findByOrganizationAndId(memberRepositoryTestOrg, member1.getId()));
+    public void findByOrganizationIdAndStatusTest() {
+        assertEquals(asList(testMember), memberRepository.findByOrganizationIdAndStatus(
+                testOrganization.getId(),
+                MemberStatus.CREATOR,
+                null
+        ).getContent());
     }
 
     @Test
-    public void findByOrganizationAndUserTest() {
-        Assert.assertEquals(member2, memberRepository
-                .findByOrganizationAndUser(memberRepositoryTestOrg, user2));
+    public void findByOrganizationNameAndStatusTest() {
+        assertEquals(asList(testMember), memberRepository.findByOrganizationNameAndStatus(
+                testOrganization.getName(),
+                MemberStatus.CREATOR,
+                null
+        ).getContent());
     }
 
     @Test
-    public void findByUserTest() {
-        Assert.assertEquals(Lists.newArrayList(member1, member3),
-                memberRepository.findByUser(user1)
-        );
+    public void findByUserIdAndStatusTest() {
+        assertEquals(asList(testMember), memberRepository.findByUserIdAndStatus(
+                testUser.getId(),
+                MemberStatus.CREATOR,
+                null
+        ).getContent());
     }
 
     @Test
+    public void findByUserNameAndStatusTest() {
+        assertEquals(asList(testMember), memberRepository.findByUserNameAndStatus(
+                testUser.getName(),
+                MemberStatus.CREATOR,
+                null
+        ).getContent());
+    }
+
+    @Test
+    public void findByUserEmailAndStatusTest() {
+        assertEquals(asList(testMember), memberRepository.findByUserEmailAndStatus(
+                testUser.getEmail(),
+                MemberStatus.CREATOR,
+                null
+        ).getContent());
+    }
+
+    @Test
+    public void findByOrganizationIdTest() {
+        assertEquals(asList(testMember), memberRepository.findByOrganizationId(
+                testOrganization.getId(),
+                null
+        ).getContent());
+    }
+
+    public void findByOrganizationNameTest() {
+        assertEquals(asList(testMember), memberRepository.findByOrganizationName(
+                testOrganization.getName(),
+                null
+        ).getContent());
+    }
+
+    public void findByUserIdTest() {
+        assertEquals(asList(testMember), memberRepository.findByUserId(
+                testUser.getId(),
+                null
+        ).getContent());
+    }
+
+    public void findByUserNameTest() {
+        assertEquals(asList(testMember), memberRepository.findByUserName(
+                testUser.getName(),
+                null
+        ).getContent());
+    }
+
+    public void findByUserEmailTest() {
+        assertEquals(asList(testMember), memberRepository.findByUserEmail(
+                testUser.getEmail(),
+                null
+        ).getContent());
+    }
+
+    public void findByIdAndOrganizationIdTest() {
+        assertEquals(testMember, memberRepository.findByIdAndOrganizationId(
+                testMember.getId(),
+                testOrganization.getId()
+        ));
+    }
+
+    public void findByIdAndOrganizationNameTest() {
+        assertEquals(testMember, memberRepository.findByIdAndOrganizationName(
+                testMember.getId(),
+                testOrganization.getName()
+        ));
+    }
+
     public void findByOrganizationIdAndUserIdTest() {
-        Assert.assertEquals(member3,
-                memberRepository.findByOrganizationIdAndUserId(findByUserTestOrg.getId(),
-                        user1.getId()));
+        assertEquals(testMember, memberRepository.findByOrganizationIdAndUserId(
+                testOrganization.getId(),
+                testUser.getId()
+        ));
     }
 
-    @Test
-    public void findByOrganizationIdAndUserEmailTest() {
-        Assert.assertEquals(member3,
-                memberRepository.findByOrganizationIdAndUserEmail(findByUserTestOrg.getId(),
-                        user1.getEmail()));
+    public void findByOrganizationNameAndUserIdTest() {
+        assertEquals(testMember, memberRepository.findByOrganizationNameAndUserId(
+                testOrganization.getName(),
+                testUser.getId()
+        ));
     }
+
+    public void findByOrganizationIdAndUserNameTest() {
+        assertEquals(testMember, memberRepository.findByOrganizationIdAndUserName(
+                testOrganization.getId(),
+                testUser.getName()
+        ));
+    }
+
+    public void findByOrganizationIdAndUserEmailTest() {
+        assertEquals(testMember, memberRepository.findByOrganizationIdAndUserEmail(
+                testOrganization.getId(),
+                testUser.getEmail()
+        ));
+    }
+
+    public void findByOrganizationNameAndUserNameTest() {
+        assertEquals(testMember, memberRepository.findByOrganizationNameAndUserName(
+                testOrganization.getName(),
+                testUser.getName()
+        ));
+
+    }
+
+    public void findByOrganizationNameAndUserEmailTest() {
+        assertEquals(testMember, memberRepository.findByOrganizationNameAndUserEmail(
+                testOrganization.getName(),
+                testUser.getEmail()
+        ));
+    }
+
 }

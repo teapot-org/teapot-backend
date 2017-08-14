@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.teapot.backend.model.user.User;
@@ -12,128 +13,116 @@ import org.teapot.backend.model.user.UserAuthority;
 import java.time.LocalDate;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARER_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.teapot.backend.controller.user.UserController.SINGLE_USER_ENDPOINT;
+import static org.teapot.backend.controller.user.UserController.USERS_ENDPOINT;
 
 public class UserControllerIT extends AbstractControllerIT {
 
-    private static final String API_URL = "/users";
+    private static final String FIND_USER_BY_NAME_ENDPOINT = USERS_ENDPOINT + "/search/find-by-name";
+    private static final String FIND_USER_BY_EMAIL_ENDPOINT = USERS_ENDPOINT + "/search/find-by-email";
 
-    private User getUserOne = new User();
-    private User getUserTwo = new User();
-    private User postUserOne = new User();
-    private User postUserTwo = new User();
-    private User repeatedPostUser = new User();
-    private User updateUser = new User();
-    private User deleteUser = new User();
-    private User patchUser = new User();
+    private User notSavedUser = new User();
+    private User savedUser = new User();
+
+    static ResultActions isUserJsonAsExpected(ResultActions resultActions, String jsonPath, User user)
+            throws Exception {
+        return resultActions
+                .andExpect(jsonPath(jsonPath + ".name", is(user.getName())))
+                .andExpect(jsonPath(jsonPath + ".available", is(user.getAvailable())))
+                .andExpect(jsonPath(jsonPath + ".email", is(user.getEmail())))
+                .andExpect(jsonPath(jsonPath + ".activated", is(user.getActivated())))
+                .andExpect(jsonPath(jsonPath + ".firstName", is(user.getFirstName())))
+                .andExpect(jsonPath(jsonPath + ".lastName", is(user.getLastName())))
+                .andExpect(jsonPath(jsonPath + ".lastName", is(user.getLastName())))
+                .andExpect(jsonPath(jsonPath + ".authority", is(user.getAuthority().name())))
+                .andExpect(jsonPath(jsonPath + ".description", is(user.getDescription())));
+    }
 
     @Before
     public void addTestUsers() {
-        getUserOne.setName("getUserOne");
-        getUserOne.setEmail("getUserOne@mail.com");
-        getUserOne.setPassword("pass");
-        userRepository.save(getUserOne);
+        savedUser.setName("savedUser");
+        savedUser.setEmail("savedUser@mail.com");
+        savedUser.setPassword("pass");
+        savedUser.setFirstName("savedUser");
+        savedUser.setLastName("savedUser");
+        savedUser.setDescription("savedUser");
 
-        getUserTwo.setName("getUserTwo");
-        getUserTwo.setEmail("getUserTwo@mail.com");
-        getUserTwo.setPassword("pass");
-        userRepository.save(getUserTwo);
+        userRepository.save(savedUser);
 
-        postUserOne.setName("postUser");
-        postUserOne.setEmail("postUser@mail.com");
-        postUserOne.setPassword("pass");
-
-        postUserTwo.setName("postUser");
-        postUserTwo.setEmail("postUser@mail.com");
-        postUserTwo.setPassword("pass");
-
-        repeatedPostUser.setName("repeatedPostUser");
-        repeatedPostUser.setEmail("repeatedPostUser@mail.com");
-        repeatedPostUser.setPassword("pass");
-        userRepository.save(repeatedPostUser);
-
-        updateUser.setName("updateUser");
-        updateUser.setEmail("updateUser@mail.com");
-        updateUser.setPassword("pass");
-        userRepository.save(updateUser);
-
-        deleteUser.setName("deleteUser");
-        deleteUser.setEmail("deleteUser@mail.com");
-        deleteUser.setPassword("pass");
-        userRepository.save(deleteUser);
-
-        patchUser.setName("patchUser");
-        patchUser.setEmail("patchUser@mail.com");
-        patchUser.setPassword("pass");
-        userRepository.save(patchUser);
+        notSavedUser.setName("notSavedUser");
+        notSavedUser.setEmail("notSavedUser@mail.com");
+        notSavedUser.setPassword("pass");
     }
 
     // GET
 
     @Test
     public void getUsersTest() throws Exception {
-        List<User> all = userRepository.findAll();
-        mockMvc.perform(get(API_URL))
+        List<User> allUsers = userRepository.findAll();
+
+        ResultActions result = mockMvc.perform(get(USERS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(all.size())))
-                .andExpect(jsonPath("$[0].id", is(all.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].username", is(all.get(0).getName())))
-                .andExpect(jsonPath("$[0].email", is(all.get(0).getEmail())))
-                .andExpect(jsonPath("$[1].id", is(all.get(1).getId().intValue())))
-                .andExpect(jsonPath("$[1].username", is(all.get(1).getName())))
-                .andExpect(jsonPath("$[1].email", is(all.get(1).getEmail())));
+                .andExpect(jsonPath("$._embedded.owners", hasSize(allUsers.size())));
+
+        for (int i = 0; i < allUsers.size(); i++) {
+            result = isUserJsonAsExpected(result, format("$._embedded.owners[%d]", i), allUsers.get(i));
+        }
     }
 
     @Test
     public void getSingleUserByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%d", API_URL, getUserOne.getId())))
+        ResultActions result = mockMvc.perform(get(SINGLE_USER_ENDPOINT, savedUser.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
-                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
+                .andExpect(content().contentType(contentType));
+
+        isUserJsonAsExpected(result, "$", savedUser);
     }
 
     @Test
     public void getNotExistsUserByIdTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/-1", API_URL)))
+        mockMvc.perform(get(SINGLE_USER_ENDPOINT, -1))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void getSingleUserByUsernameTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, getUserOne.getName())))
+    public void getSingleUserByNameTest() throws Exception {
+        ResultActions result = mockMvc.perform(get(FIND_USER_BY_NAME_ENDPOINT)
+                .param("name", savedUser.getName()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
-                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
+                .andExpect(content().contentType(contentType));
+
+        isUserJsonAsExpected(result, "$", savedUser);
     }
 
     @Test
-    public void getNotExistsUserByUsernameTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, "not_exists")))
+    public void getNotExistsUserByNameTest() throws Exception {
+        mockMvc.perform(get(FIND_USER_BY_NAME_ENDPOINT)
+                .param("name", notSavedUser.getName()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void getSingleUserByEmailTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, getUserOne.getEmail())))
+        ResultActions result = mockMvc.perform(get(FIND_USER_BY_EMAIL_ENDPOINT)
+                .param("email", savedUser.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(getUserOne.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(getUserOne.getName())))
-                .andExpect(jsonPath("$.email", is(getUserOne.getEmail())));
+                .andExpect(content().contentType(contentType));
+
+        isUserJsonAsExpected(result, "$", savedUser);
     }
 
     @Test
-    public void getNotExistsUserByIEmailTest() throws Exception {
-        mockMvc.perform(get(String.format("%s/%s", API_URL, "not_exists@email.com")))
+    public void getNotExistsUserByEmailTest() throws Exception {
+        mockMvc.perform(get(FIND_USER_BY_EMAIL_ENDPOINT)
+                .param("email", notSavedUser.getName()))
                 .andExpect(status().isNotFound());
     }
 
@@ -141,108 +130,90 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void registerUserTestByAnonymous() throws Exception {
-        mockMvc.perform(post(API_URL)
-                .content(json(postUserOne))
+        ResultActions result = mockMvc.perform(post(USERS_ENDPOINT)
+                .content(json(notSavedUser))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, containsString(API_URL)));
+                .andExpect(content().contentType(contentType))
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString(USERS_ENDPOINT)));
+
+        isUserJsonAsExpected(result, "$", userRepository.findByName(notSavedUser.getName()));
     }
 
     @Test
     public void registerUserTestByUser() throws Exception {
-        mockMvc.perform(post(API_URL)
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
-                .content(json(postUserTwo))
+        mockMvc.perform(post(USERS_ENDPOINT)
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken))
+                .content(json(notSavedUser))
                 .contentType(contentType))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void registerUserTestByAdmin() throws Exception {
-        mockMvc.perform(post(API_URL)
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
-                .content(json(postUserTwo))
+        ResultActions result = mockMvc.perform(post(USERS_ENDPOINT)
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken))
+                .content(json(notSavedUser))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, containsString(API_URL)));
+                .andExpect(content().contentType(contentType))
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString(USERS_ENDPOINT)));
+
+        isUserJsonAsExpected(result, "$", userRepository.findByName(notSavedUser.getName()));
     }
 
     @Test
     public void repeatRegisterUserTestByAdmin() throws Exception {
-        mockMvc.perform(post(API_URL)
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
-                .content(json(repeatedPostUser))
+        mockMvc.perform(post(USERS_ENDPOINT)
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken))
+                .content(json(savedUser))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
     }
 
     // PUT
 
     @Test
-    public void updateUserTestByAnonymous() throws Exception {
-        updateUser.setBirthday(LocalDate.now());
-        mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
-                .content(json(updateUser))
-                .contentType(contentType))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void updateUserTestByUser() throws Exception {
-        updateUser.setBirthday(LocalDate.now());
-        mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
-                .content(json(updateUser))
-                .contentType(contentType))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     public void updateUserTestByAdmin() throws Exception {
-        updateUser.setBirthday(LocalDate.now());
-        mockMvc.perform(put(String.format("%s/%d", API_URL, updateUser.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
-                .content(json(updateUser))
+        savedUser.setBirthday(LocalDate.now());
+        mockMvc.perform(put(SINGLE_USER_ENDPOINT, savedUser.getId())
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken))
+                .content(json(savedUser))
                 .contentType(contentType))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    public void updateNotExistsUserTestByAdmin() throws Exception {
-        mockMvc.perform(put(String.format("%s/-1", API_URL))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
-                .content(json(updateUser))
-                .contentType(contentType))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMethodNotAllowed());
     }
 
     // DELETE
 
     @Test
     public void deleteUserTestByAnonymous() throws Exception {
-        mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId())))
+        mockMvc.perform(delete(SINGLE_USER_ENDPOINT, savedUser.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void deleteUserTestByUser() throws Exception {
-        mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
+        mockMvc.perform(delete(SINGLE_USER_ENDPOINT, savedUser.getId())
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void deleteUserTestByAdmin() throws Exception {
-        mockMvc.perform(delete(String.format("%s/%d", API_URL, deleteUser.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
+        assertNotNull(userRepository.findOne(savedUser.getId()));
+
+        mockMvc.perform(delete(SINGLE_USER_ENDPOINT, savedUser.getId())
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken)))
                 .andExpect(status().isNoContent());
+
+        assertNull(userRepository.findOne(savedUser.getId()));
     }
 
     @Test
     public void deleteNotExistsUserTestByAdmin() throws Exception {
-        mockMvc.perform(delete(String.format("%s/-1", API_URL))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
+        mockMvc.perform(delete(SINGLE_USER_ENDPOINT, -1)
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken)))
                 .andExpect(status().isNotFound());
     }
 
@@ -250,67 +221,67 @@ public class UserControllerIT extends AbstractControllerIT {
 
     @Test
     public void patchUserTestByAnonymous() throws Exception {
-        mockMvc.perform(patch(String.format("%s/%d", API_URL, patchUser.getId())))
+        mockMvc.perform(patch(SINGLE_USER_ENDPOINT, savedUser.getId()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void patchUserTestByUserSameId() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("username", "newUserWithUserRole");
+        params.add("name", "newUserWithUserRole");
         params.add("firstName", "Bob");
         params.add("lastName", "Brown");
 
-        mockMvc.perform(patch(String.format("%s/%d", API_URL, userWithUserRole.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken))
+        mockMvc.perform(patch(SINGLE_USER_ENDPOINT, userWithUserRole.getId())
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken))
                 .params(params))
                 .andExpect(status().isNoContent());
 
         User newUserWithUserRole = userRepository.findOne(userWithUserRole.getId());
-        Assert.assertEquals("newUserWithUserRole", newUserWithUserRole.getName());
-        Assert.assertEquals("Bob", newUserWithUserRole.getFirstName());
-        Assert.assertEquals("Brown", newUserWithUserRole.getLastName());
+        assertEquals("newUserWithUserRole", newUserWithUserRole.getName());
+        assertEquals("Bob", newUserWithUserRole.getFirstName());
+        assertEquals("Brown", newUserWithUserRole.getLastName());
     }
 
     @Test
     public void patchUserTestByUserNotSameId() throws Exception {
-        mockMvc.perform(patch(String.format("%s/%d", API_URL, patchUser.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, userAccessToken)))
+        mockMvc.perform(patch(SINGLE_USER_ENDPOINT, savedUser.getId())
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, userAccessToken)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void patchUserTestByAdmin() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("username", "newPatchUser");
-        params.add("email", "newPatchUser@test.org");
+        params.add("name", "newName");
+        params.add("email", "newName@test.org");
         params.add("password", "123456");
         params.add("available", "false");
         params.add("firstName", "Bob");
         params.add("lastName", "Brown");
         params.add("authority", "ADMIN");
-        params.add("description", "newPatchUser");
+        params.add("description", "newName");
 
-        mockMvc.perform(patch(String.format("%s/%d", API_URL, patchUser.getId()))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken))
+        mockMvc.perform(patch(SINGLE_USER_ENDPOINT, savedUser.getId())
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken))
                 .params(params))
                 .andExpect(status().isNoContent());
 
-        User newPatchUser = userRepository.findOne(patchUser.getId());
-        Assert.assertEquals("newPatchUser", newPatchUser.getName());
-        Assert.assertEquals("newPatchUser@test.org", newPatchUser.getEmail());
+        User newPatchUser = userRepository.findOne(savedUser.getId());
+        assertEquals("newName", newPatchUser.getName());
+        assertEquals("newName@test.org", newPatchUser.getEmail());
         Assert.assertTrue(User.PASSWORD_ENCODER.matches("123456", newPatchUser.getPassword()));
-        Assert.assertFalse(newPatchUser.isAvailable());
-        Assert.assertEquals("Bob", newPatchUser.getFirstName());
-        Assert.assertEquals("Brown", newPatchUser.getLastName());
-        Assert.assertEquals(UserAuthority.ADMIN, newPatchUser.getAuthority());
-        Assert.assertEquals("newPatchUser", newPatchUser.getDescription());
+        Assert.assertFalse(newPatchUser.getAvailable());
+        assertEquals("Bob", newPatchUser.getFirstName());
+        assertEquals("Brown", newPatchUser.getLastName());
+        assertEquals(UserAuthority.ADMIN, newPatchUser.getAuthority());
+        assertEquals("newName", newPatchUser.getDescription());
     }
 
     @Test
     public void patchNotExistsUserTestByAdmin() throws Exception {
-        mockMvc.perform(patch(String.format("%s/-1", API_URL))
-                .header(AUTHORIZATION, String.format("%s %s", BEARER_TYPE, adminAccessToken)))
+        mockMvc.perform(patch(SINGLE_USER_ENDPOINT, -1)
+                .header(AUTHORIZATION, format("%s %s", BEARER_TYPE, adminAccessToken)))
                 .andExpect(status().isNotFound());
     }
 }

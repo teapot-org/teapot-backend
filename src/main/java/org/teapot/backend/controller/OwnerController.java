@@ -1,38 +1,24 @@
 package org.teapot.backend.controller;
 
-import com.google.common.primitives.Longs;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.teapot.backend.controller.exception.ResourceNotFoundException;
-import org.teapot.backend.model.Owner;
-import org.teapot.backend.repository.OwnerRepository;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
-
-import static java.util.Optional.ofNullable;
-
-@RestController
-@RequestMapping("/owners")
+@RepositoryRestController
 public class OwnerController {
 
-    @Autowired
-    private OwnerRepository ownerRepository;
+    public static final String OWNERS_ENDPOINT = "/owners";
+    public static final String SINGLE_OWNER_ENDPOINT = OWNERS_ENDPOINT + "/{id:\\d+}";
 
-    @GetMapping
-    public List<Owner> getOwners(Pageable pageable) {
-        return ownerRepository.findAll(pageable).getContent();
+    @PostMapping(OWNERS_ENDPOINT)
+    public ResponseEntity<?> notAllowedPost() {
+        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @GetMapping("/{idOrName}")
-    public Owner getOwner(@PathVariable String idOrName) {
-        Long id = Longs.tryParse(idOrName);
-        return ofNullable((id != null)
-                ? ownerRepository.findOne(id)
-                : ownerRepository.findByName(idOrName))
-                .orElseThrow(ResourceNotFoundException::new);
+    @PatchMapping(SINGLE_OWNER_ENDPOINT)
+    public ResponseEntity<?> notAllowedPatch() {
+        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

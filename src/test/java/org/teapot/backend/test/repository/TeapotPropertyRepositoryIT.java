@@ -15,23 +15,17 @@ public class TeapotPropertyRepositoryIT extends AbstractIT {
 
     @Before
     public void setUp() {
-        TeapotProperty property = new TeapotProperty();
-
-        property.setName("property-name");
-        property.setValue("property-value");
-
-        propertyRepository.save(property);
+        propertyRepository.save(new TeapotProperty("property-name", "property-value"));
     }
 
     @Test
-    public void findByNameTest1() {
+    public void findByNameExistsPropertyTest() {
         TeapotProperty property = propertyRepository.findByName("property-name");
-        Assert.assertNotNull(property);
         Assert.assertEquals("property-value", property.getValue());
     }
 
     @Test
-    public void findByNameTest2() {
+    public void findByNameNotExistsPropertyTest() {
         TeapotProperty property = propertyRepository.findByName("test");
         Assert.assertNull(property);
     }
