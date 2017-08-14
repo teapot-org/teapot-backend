@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.*;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,10 +18,14 @@ import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.user.User;
 import org.teapot.backend.model.user.UserAuthority;
 import org.teapot.backend.repository.user.UserRepository;
+import org.teapot.backend.util.PagedResourcesAssemblerHelper;
 import org.teapot.backend.util.VerificationMailSender;
 
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.teapot.backend.model.user.UserAuthority.ADMIN;
 import static org.teapot.backend.util.SecurityUtils.getAuthenticatedUser;
@@ -33,6 +39,7 @@ public class UserController extends AbstractController {
 
     private final Environment env;
     private final UserRepository userRepository;
+    private final PagedResourcesAssemblerHelper<User> helper;
 
     @Autowired(required = false)
     private VerificationMailSender verificationMailSender;
@@ -110,5 +117,38 @@ public class UserController extends AbstractController {
         }
 
         userRepository.save(user);
+    }
+
+    @GetMapping(USERS_ENDPOINT + "/search/find-by")
+    public ResponseEntity<?> search(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam String q,
+            Pageable pageable,
+            PersistentEntityResourceAssembler assembler
+    ) {
+        Page<User> searchResult = userRepository.findAll((root, qr, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            String query = "%" + q.toLowerCase() + "%";
+            
+            if (firstName != null) {
+                predicates.add(cb.like(cb.lower(root.get("firstName")), query));
+            }
+            if (lastName != null) {
+                predicates.add(cb.like(cb.lower(root.get("lastName")), query));
+            }
+            if (name != null) {
+                predicates.add(cb.like(cb.lower(root.get("name")), query));
+            }
+            if (email != null) {
+                predicates.add(cb.like(cb.lower(root.get("email")), query));
+            }
+
+            return cb.or(predicates.toArray(new Predicate[predicates.size()]));
+        }, pageable);
+
+        return ResponseEntity.ok(helper.toResource(User.class, searchResult, assembler));
     }
 }
