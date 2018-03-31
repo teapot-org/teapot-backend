@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: development, verification
+    active: development
 
   data:
     rest:
