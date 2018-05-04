@@ -29,6 +29,8 @@ import org.teapot.backend.repository.user.UserRepository;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 
 @Configuration
 @Profile("development")
@@ -289,10 +291,41 @@ public class DevelopmentProfileConfig {
     }
 
     private void addTickets() {
-        TicketList ticketList = ticketListRepository.findOne(1L);
-        Ticket ticket = new Ticket("ticket1", "lalalalal");
-        ticket.getSubscribers().add(userRepository.findByName("lora_palmer"));
-        ticketList.addTicket(ticket);
-        ticketListRepository.save(ticketList);
+        TicketList ticketList1 = ticketListRepository.findOne(1L);
+        Arrays.asList(
+                new Ticket("ticket1", "lalalalal"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sd fsdfsd fsdf2"),
+                new Ticket("ticket2", "sdfsdff sdf1")
+        ).forEach(ticket -> {
+            ticket.getSubscribers().add(userRepository.findByName("lora_palmer"));
+            ticketList1.addTicket(ticket);
+        });
+        ticketListRepository.save(ticketList1);
+
+        TicketList ticketList4 = ticketListRepository.findOne(4L);
+        Arrays.asList(
+                new Ticket("ticketsd1", "lalalsdgf sdfalal"),
+                new Ticket("ticasket2", "sdfsdsd  sff sdf1")
+        ).forEach(ticket -> {
+            ticket.getSubscribers().add(userRepository.findByName("lora_palmer"));
+            ticketList4.addTicket(ticket);
+        });
+        ticketListRepository.save(ticketList4);
     }
 }
