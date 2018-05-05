@@ -20,9 +20,10 @@ public class TicketList extends BaseEntity {
 
     @ManyToOne(optional = false)
     @Getter
-    @Setter(AccessLevel.PACKAGE)
+    @Setter
     private Kanban kanban;
 
+    @Setter
     private Integer position;
 
     @OneToMany(mappedBy = "ticketList", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
