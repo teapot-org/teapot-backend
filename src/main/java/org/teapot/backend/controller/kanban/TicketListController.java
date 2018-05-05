@@ -2,13 +2,16 @@ package org.teapot.backend.controller.kanban;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ControllerUtils;
+import org.springframework.data.rest.webmvc.PersistentEntityResource;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.teapot.backend.controller.AbstractController;
 import org.teapot.backend.model.kanban.Kanban;
 import org.teapot.backend.model.kanban.TicketList;
@@ -24,6 +27,23 @@ public class TicketListController extends AbstractController {
 
     private final TicketListRepository ticketListRepository;
     private final KanbanRepository kanbanRepository;
+
+    @PreAuthorize("canCreate(#resource?.content)")
+    @PostMapping(TICKET_LISTS_ENDPOINT)
+    public ResponseEntity<?> createTicketList(
+            @RequestBody Resource<TicketList> resource,
+            PersistentEntityResourceAssembler assembler
+    ) {
+        TicketList ticketList = resource.getContent();
+        ticketList.setPosition(ticketList.getKanban().getTicketLists().size());
+        ticketListRepository.save(ticketList);
+
+        PersistentEntityResource responseResource = assembler.toResource(ticketList);
+        HttpHeaders headers = headersPreparer.prepareHeaders(responseResource);
+        addLocationHeader(headers, assembler, ticketList);
+
+        return ControllerUtils.toResponseEntity(HttpStatus.CREATED, headers, responseResource);
+    }
 
     @PreAuthorize("canEdit(#id, 'TicketList')")
     @PatchMapping(TICKET_LISTS_ENDPOINT + "/shift")

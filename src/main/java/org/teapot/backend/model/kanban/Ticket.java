@@ -8,9 +8,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import org.teapot.backend.model.BaseEntity;
 import org.teapot.backend.model.user.User;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,10 +26,11 @@ public class Ticket extends BaseEntity {
 
     @ManyToOne(optional = false)
     @Getter
-    @Setter(AccessLevel.PACKAGE)
+    @Setter
     @RestResource(path = "ticket-list")
     private TicketList ticketList;
 
+    @Setter
     private Integer position;
 
     @ManyToMany
