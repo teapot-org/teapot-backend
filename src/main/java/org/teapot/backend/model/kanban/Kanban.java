@@ -38,7 +38,7 @@ public class Kanban extends OwnerItem {
     @Setter
     private KanbanAccess access = KanbanAccess.PUBLIC;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @Getter
     private Set<User> contributors = new HashSet<>();
 
