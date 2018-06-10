@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.teapot.backend.config.CorsFilter;
 import org.teapot.backend.config.security.expression.CustomWebSecurityExpressionHandler;
 
 import javax.servlet.FilterChain;
@@ -37,6 +38,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     public static final String RESOURCE_ID = "resource";
 
     private final CustomWebSecurityExpressionHandler expressionHandler;
+    private final CorsFilter corsFilter;
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
@@ -46,7 +48,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.addFilterBefore(new PutMethodDisallower(), BasicAuthenticationFilter.class)
+        http.addFilterBefore(corsFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(new PutMethodDisallower(), BasicAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers(GET, SINGLE_KANBAN_ENDPOINT).access("canRead(#id, 'Kanban')")
                 .antMatchers(GET, SINGLE_TICKET_LIST_ENDPOINT).access("canRead(#id, 'TicketList')")
